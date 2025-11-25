@@ -30,9 +30,9 @@ classdef ResultsManager
             end
 
             fprintf('-------------------------------\n');
-            fprintf('Q_in (Heat flux): %.2e W\n', Q_in);
-            fprintf('Q_out calculated: %.2e W\n', Q_out);
-            fprintf('Energy Balance (Q_in - Q_out): %.2e W\n', Q_in - Q_out);
+            fprintf('Q_in (Heat flux): %.2f W\n', Q_in);
+            fprintf('Q_out calculated: %.2f W\n', Q_out);
+            fprintf('Energy Balance (Q_in - Q_out): %.2f W\n', Q_in - Q_out);
             fprintf('-------------------------------\n');
         end
 

@@ -60,15 +60,15 @@ classdef ThermalNetwork
             % Q_c = S*I*T_c + K*(T_h - T_c) - [Joule at cold]
             Q_c_N = S_N * I * T_cold + K_N * (T_water - T_cold) - (0.5 * I^2 * Re_N + I^2 * R_oc);
 
-            %n_wedges = 2*pi / obj.Geometry.WedgeAngle;
-            Q_out = Q_c_N ;%* n_wedges;
+            n_wedges = 2*pi / obj.Geometry.WedgeAngle;
+            Q_out = Q_c_N * n_wedges;
 
             % Calculate total input heat
             q_flux = obj.Params.boundary_conditions.q_flux_W_m2;
             theta = obj.Geometry.WedgeAngle;
             R_base = obj.Geometry.R_base;
             A_wedge = 0.5 * theta * R_base^2;
-            Q_in = q_flux * A_wedge; %* n_wedges
+            Q_in = q_flux * A_wedge * n_wedges;
         end
 
         function [M, B] = assemble_system(obj, T_current)

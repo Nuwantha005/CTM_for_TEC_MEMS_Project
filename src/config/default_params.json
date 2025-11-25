@@ -55,11 +55,11 @@
         }
     },
     "boundary_conditions": {
-        "q_flux_W_m2": 2000000,
+        "q_flux_W_m2": 1000000,
         "h_conv_W_m2K": 1000,
         "T_water_K": 300
     },
     "operating_conditions": {
-        "I_current_A": 0.5
+        "I_current_A": 0.15
     }
 }

@@ -59,7 +59,7 @@ classdef TECGeometry < handle
                 sum_L_prev = obj.L_1 * (1 - k_r^(i-1)) / (1 - k_r);
             end
 
-            r_in = obj.R_cyl + i * w_is + sum_L_prev;
+            r_in = obj.R_cyl + sum_L_prev; % + i * w_is becasue in the original formulation, w_is is inside the L
 
             w_ic = L * obj.Params.interconnect_ratio;
             w_oc = L * obj.Params.outerconnect_ratio;
@@ -82,14 +82,14 @@ classdef TECGeometry < handle
             w_az = obj.Params.azimuthal_gap_um * 1e-6;
         end
 
-        function G = calculate_G(obj, r1, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, ~)
+        function G = calculate_G(obj, r1, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is, ~)
             t = obj.Thickness;
             theta = obj.WedgeAngle;
 
             C1 = t*theta/2 - t_ic*beta_ic/2;
             D = t*w_az;
 
-            r_start = r1;
+            r_start = r1 + w_is/2;
             r_limit_1 = r1 + w_ic;
 
             term1 = (1/C1) * log( abs( ( C1*r_limit_1 - D ) / ( C1*r_start - D ) ) );
@@ -100,7 +100,7 @@ classdef TECGeometry < handle
             term2 = (1/C2) * log( abs( ( C2*r_limit_2 - D ) / ( C2*r_limit_1 - D ) ) );
 
             C3 = t*theta/2 - t_oc*beta_oc/2;
-            r_end = r1 + L;
+            r_end = r1 + L - w_is/2;
 
             term3 = (1/C3) * log( abs( ( C3*r_end - D ) / ( C3*r_limit_2 - D ) ) );
 
