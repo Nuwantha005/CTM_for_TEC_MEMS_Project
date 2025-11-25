@@ -1,0 +1,64 @@
+{
+    "simulation": {
+        "max_iterations": 100,
+        "tolerance": 1e-6,
+        "T_ambient": 300,
+        "T_initial_guess": 300
+    },
+    "geometry": {
+        "N_stages": 3,
+        "wedge_angle_deg": 30,
+        "L_element_um": 1000,
+        "thickness_um": 50,
+        "t_chip_um": 50,
+        "r_start_um": 1000,
+        "interconnect_ratio": 0.2,
+        "outerconnect_ratio": 0.2,
+        "interconnect_angle_deg": 5,
+        "outerconnect_angle_deg": 5,
+        "insulation_width_um": 40,
+        "azimuthal_gap_um": 20,
+        "radial_expansion_factor": 1.2,
+        "tsv": {
+            "R_TSV_um": 10,
+            "P_TSV_um": 20,
+            "g_rad_um": 10,
+            "t_SOI_um": 100
+        }
+    },
+    "materials": {
+        "Bi2Te3": {
+            "k": 1.2,
+            "rho": 1.0e-5,
+            "S": 200e-6
+        },
+        "Cu": {
+            "k": 400.0,
+            "rho": 1.7e-8
+        },
+        "Si": {
+            "k": 150.0,
+            "rho": 0.01
+        },
+        "AlN": {
+            "k": 170.0,
+            "rho": 1e10
+        },
+        "SiO2": {
+            "k": 1.4,
+            "rho": 1e14
+        },
+        "Al2O3": {
+            "k": 30.0,
+            "rho": 1e12
+        }
+    },
+    "boundary_conditions": {
+        "q_flux_W_m2": 100,
+        "h_conv_W_m2K": 1000,
+        "T_water_K": 300
+    },
+    "operating_conditions": {
+        "I_current_A": 1.0
+    }
+}
