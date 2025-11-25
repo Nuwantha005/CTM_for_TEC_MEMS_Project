@@ -17,28 +17,17 @@ classdef ThermalNetwork
 
         function [T_new, Q_out] = solve(obj, T_current)
             % SOLVE Assembles matrix and solves for new temperatures.
-            %   T_current: Vector of current temperatures [T0; T_Si; T_c]
-
-            % Assemble the system based on current temperatures (properties update internally)
-            [M, B] = obj.assemble_system(T_current)
-
-            % Solve the linear system
+            [M, B] = obj.assemble_system(T_current);
             T_new = M \ B;
-
-            % Calculate Q_out for verification (Heat leaving to water)
-            % The heat leaving the system is the heat rejected by the last stage TEC to T_water.
 
             N = obj.Geometry.N_stages;
             idx_c_N = 2*N + 1;
-
             T_water = obj.Params.boundary_conditions.T_water_K;
 
-            % Need to re-calc properties for stage N to get K_N
             T_cold = T_new(idx_c_N);
             T_hot = T_water;
             T_avg = (T_cold + T_hot) / 2;
 
-            % Quick fetch properties (should refactor this to avoid duplication)
             k_p = obj.Materials.get_k('Bi2Te3', T_avg);
             k_n = obj.Materials.get_k('Bi2Te3', T_avg);
             rho_p = obj.Materials.get_rho('Bi2Te3', T_avg);
@@ -51,11 +40,9 @@ classdef ThermalNetwork
 
             K_legs = (k_p + k_n) / G;
 
-            % Insulator and Azimuthal
-            k_is = obj.Materials.get_k('AlN', T_avg); % Radial Insulator (AlN per notes)
-            k_az = obj.Materials.get_k('SiO2', T_avg);  % Azimuthal Insulator
+            k_is = obj.Materials.get_k('AlN', T_avg);
+            k_az = obj.Materials.get_k('SiO2', T_avg);
 
-            % Radial Insulator Resistance
             r_end_leg = r_in + L - w_is;
             R_is = obj.Geometry.calculate_R_thermal_insulator(r_end_leg, w_is, obj.Geometry.Thickness, obj.Geometry.WedgeAngle, k_is);
 
@@ -69,12 +56,10 @@ classdef ThermalNetwork
             Re_N = (rho_p + rho_n) * G;
             rho_c = obj.Materials.get_rho('Cu', T_avg);
             [R_ic, R_oc] = obj.Geometry.calculate_R_electrical_interconnects(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, rho_c);
-            Re_total_N = Re_N + R_ic + 2 * R_oc;
 
             S_N = S_p - (-abs(S_n));
             I = obj.Params.operating_conditions.I_current_A;
 
-            % Q_out is the heat rejected to the boundary (Water)
             Q_out_TEC = S_N * I * T_cold + K_N * (T_cold - T_water) + (0.5 * I^2 * Re_N + I^2 * R_oc);
 
             n_wedges = 2*pi / obj.Geometry.WedgeAngle;
@@ -82,47 +67,38 @@ classdef ThermalNetwork
         end
 
         function [M, B] = assemble_system(obj, T_current)
-            % ASSEMBLE_SYSTEM Internal helper to build M and B.
-
             N = obj.Geometry.N_stages;
             dim = 2*N + 1;
             M = spalloc(dim, dim, 5*dim);
             B = zeros(dim, 1);
 
-            % Indices
             idx_0 = 1;
             idx_Si_start = 2;
             idx_c_start = N + 2;
 
-            % Extract Global Params
             I = obj.Params.operating_conditions.I_current_A;
             T_water = obj.Params.boundary_conditions.T_water_K;
             q_flux = obj.Params.boundary_conditions.q_flux_W_m2;
 
-            % Geometry Params
             theta = obj.Geometry.WedgeAngle;
             t_chip = obj.Params.geometry.t_chip_um * 1e-6;
             t_tec = obj.Geometry.Thickness;
             w_is = obj.Params.geometry.insulation_width_um * 1e-6;
-            r_start = obj.Params.geometry.r_start_um * 1e-6;
+            R_cyl = obj.Geometry.R_cyl;
 
-            % Pre-calculate resistances and properties for each stage
             K_stages = zeros(N, 1);
             S_stages = zeros(N, 1);
-            Re_stages_leg = zeros(N, 1); % Just leg resistance
+            Re_stages_leg = zeros(N, 1);
             R_ic_stages = zeros(N, 1);
             R_oc_stages = zeros(N, 1);
-
             R_lat_Si = zeros(N, 1);
             R_vert = zeros(N, 1);
-            Q_gen_nodes = zeros(N, 1); % Heat gen for each stage
+            Q_gen_nodes = zeros(N, 1);
 
             for i = 1:N
-                % 1. Geometry
                 [r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is_stage] = obj.Geometry.get_stage_geometry(i);
                 r_out = r_in + L;
 
-                % 2. Temperatures
                 T_cold = T_current(idx_c_start + i - 1);
                 if i < N
                     T_hot = T_current(idx_c_start + i);
@@ -131,7 +107,6 @@ classdef ThermalNetwork
                 end
                 T_avg = (T_cold + T_hot) / 2;
 
-                % 3. Material Properties
                 k_p = obj.Materials.get_k('Bi2Te3', T_avg);
                 k_n = obj.Materials.get_k('Bi2Te3', T_avg);
                 rho_p = obj.Materials.get_rho('Bi2Te3', T_avg);
@@ -140,42 +115,30 @@ classdef ThermalNetwork
                 S_n = obj.Materials.get_S('Bi2Te3', T_avg);
 
                 rho_c = obj.Materials.get_rho('Cu', T_avg);
-                k_is = obj.Materials.get_k('AlN', T_avg); % Radial Insulator (AlN)
-                k_az = obj.Materials.get_k('SiO2', T_avg);  % Azimuthal Insulator
+                k_is = obj.Materials.get_k('AlN', T_avg);
+                k_az = obj.Materials.get_k('SiO2', T_avg);
                 rho_TSV = obj.Materials.get_rho('Cu', T_avg);
 
-                % 4. TEC Calculation
-                % a. Geometric Factor G
                 G = obj.Geometry.calculate_G(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is_stage);
 
-                % b. Leg Properties
                 K_legs = (k_p + k_n) / G;
                 Re_stages_leg(i) = (rho_p + rho_n) * G;
 
-                % c. Interconnect Electrical Resistance
                 [R_ic, R_oc] = obj.Geometry.calculate_R_electrical_interconnects(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, rho_c);
                 R_ic_stages(i) = R_ic;
                 R_oc_stages(i) = R_oc;
 
-                % d. Thermal Resistances (Insulators)
-                % Radial Insulator Resistance (Eq 334)
                 r_end_leg = r_in + L - w_is_stage;
                 R_is = obj.Geometry.calculate_R_thermal_insulator(r_end_leg, w_is_stage, t_tec, theta, k_is);
 
-                % Effective Series Resistance (Eq 340)
                 R_eff_series = R_is + 1/K_legs;
                 K_eff_series = 1 / R_eff_series;
 
-                % Azimuthal Leakage (Eq 346)
                 K_az_val = obj.Geometry.calculate_K_azimuthal(r_in, L, w_az, t_tec, k_az, theta);
 
-                % Global Stage Conductance (Eq 351)
                 K_stages(i) = K_eff_series + K_az_val;
-
-                % Seebeck (Effective)
                 S_stages(i) = S_p - (-abs(S_n));
 
-                % 5. Silicon Lateral Resistance
                 k_Si = obj.Materials.get_k('Si', T_current(idx_Si_start + i - 1));
 
                 if i < N
@@ -184,31 +147,25 @@ classdef ThermalNetwork
                     r_mid_next = r_in_next + L_next/2;
                     R_lat_Si(i) = log(r_mid_next/r_mid_i) / (k_Si * theta * t_chip);
                 else
-                    % Boundary condition for last node: Adiabatic, so R -> inf
                     R_lat_Si(i) = inf;
                 end
 
-                % 6. Vertical Resistance (TSV)
-                [~, R_TSV_tot] = obj.Geometry.calculate_TSV_vertical_resistance(r_in, w_ic, beta_ic, rho_TSV);
+                [~, R_TSV_tot] = obj.Geometry.calculate_TSV_vertical_resistance(r_in, w_ic, beta_ic, rho_TSV, i);
                 R_vert(i) = R_TSV_tot;
 
-                % 7. Heat Generation for this Stage
                 A_top = 0.5 * theta * (r_out^2 - r_in^2);
                 Q_gen_nodes(i) = q_flux * A_top;
             end
 
-            % --- Assembly ---
-
-            % 1. Node 0 (Center)
-            A_cyl = 0.5 * theta * r_start^2;
+            A_cyl = 0.5 * theta * R_cyl^2;
             Q_gen_0 = q_flux * A_cyl;
 
             k_Si_0 = obj.Materials.get_k('Si', T_current(idx_0));
             R_Si_01 = 1 / (2 * theta * k_Si_0 * t_chip);
 
-            k_is_0 = obj.Materials.get_k('AlN', T_current(idx_0)); % Insulator
+            k_is_0 = obj.Materials.get_k('AlN', T_current(idx_0));
             term1 = 1 / (2 * theta * k_Si_0 * t_tec);
-            term2 = (1 / (k_is_0 * t_tec * theta)) * log((r_start + w_is) / r_start);
+            term2 = (1 / (k_is_0 * t_tec * theta)) * log((R_cyl + w_is) / R_cyl);
             R_TEC_01 = term1 + term2;
 
             M(idx_0, idx_0) = 1/R_Si_01 + 1/R_TEC_01;
@@ -216,15 +173,11 @@ classdef ThermalNetwork
             M(idx_0, idx_c_start) = -1/R_TEC_01;
             B(idx_0) = Q_gen_0;
 
-            % 2. Loop over Stages
             for i = 1:N
                 idx_Si = idx_Si_start + i - 1;
                 idx_c = idx_c_start + i - 1;
 
-                % --- Silicon Layer (Tridiagonal) ---
-                % Left neighbor
                 if i == 1
-                    % Connect to Node 0
                     M(idx_Si, idx_0) = -1/R_Si_01;
                     G_left = 1/R_Si_01;
                 else
@@ -233,9 +186,7 @@ classdef ThermalNetwork
                     G_left = 1/R_lat_Si(i-1);
                 end
 
-                % Right neighbor
                 if i == N
-                    % Adiabatic Boundary
                     G_right = 0;
                 else
                     idx_Si_next = idx_Si + 1;
@@ -243,57 +194,38 @@ classdef ThermalNetwork
                     G_right = 1/R_lat_Si(i);
                 end
 
-                % Vertical
                 G_vert = 1/R_vert(i);
                 M(idx_Si, idx_c) = -G_vert;
-
-                % Diagonal
                 M(idx_Si, idx_Si) = G_left + G_right + G_vert;
-
-                % Source
                 B(idx_Si) = B(idx_Si) - Q_gen_nodes(i);
 
-
-                % --- TEC Layer (Tridiagonal + Active) ---
-                % Current Node: T_c_i (Cold side of Stage i)
-
-                % Terms for Matrix Row idx_c:
-
-                % 1. Vertical Coupling
                 M(idx_c, idx_Si) = G_vert;
                 diag_term = G_vert;
                 rhs_term = 0;
 
-                % 2. From Center (Node 0) if i=1
                 if i == 1
                     M(idx_c, idx_0) = -1/R_TEC_01;
                     diag_term = diag_term + 1/R_TEC_01;
                 end
 
-                % 3. From Stage i-1 (if i > 1)
                 if i > 1
                     idx_c_prev = idx_c - 1;
-
                     M(idx_c, idx_c_prev) = (S_stages(i-1)*I + K_stages(i-1));
                     diag_term = diag_term + K_stages(i-1);
                     rhs_term = rhs_term - I^2 * (Re_stages_leg(i-1)/2 + R_oc_stages(i-1));
                 end
 
-                % 4. To Stage i
                 diag_term = diag_term + S_stages(i)*I + K_stages(i);
 
                 if i < N
                     idx_c_next = idx_c + 1;
                     M(idx_c, idx_c_next) = K_stages(i);
                 else
-                    % Boundary to Water T_w
                     rhs_term = rhs_term - K_stages(i) * T_water;
                 end
 
-                % RHS: - I_i^2 ( R_leg/2 + R_ic )
                 rhs_term = rhs_term - I^2 * (Re_stages_leg(i)/2 + R_ic_stages(i));
 
-                % Set Diagonal
                 sum_diag = G_vert + S_stages(i)*I + K_stages(i);
                 if i > 1
                     sum_diag = sum_diag + K_stages(i-1);
@@ -302,7 +234,6 @@ classdef ThermalNetwork
                 end
 
                 M(idx_c, idx_c) = -sum_diag;
-
                 B(idx_c) = rhs_term;
             end
         end
