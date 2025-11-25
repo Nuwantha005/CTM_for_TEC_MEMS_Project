@@ -272,23 +272,23 @@ The corresponding radial thermal resistance between $r_a$ and $r_b$ is obtained 
 	\label{eq:R_lat_chip}
 \end{equation}
 
-The chip layer also hosts volumetric power dissipation. We model this as a uniform heat flux $q''$ [W/m$^2$] applied over the top surface of each radial segment. For a segment spanning radii $r_{i-1}$ to $r_i$, the top area is the sector area
+The chip layer also hosts volumetric power dissipation. We model this as a uniform heat flux $q''_{\text{flux}}$ [W/m$^2$] applied over the top surface of each radial segment. For a segment spanning radii $r_{i-1}$ to $r_i$, the top area is the sector area
 \begin{equation}
 	A_{\text{top},i} = \frac{\theta}{2} (r_i^2 - r_{i-1}^2),
 	\label{eq:Atop_i}
 \end{equation}
 and the corresponding generated heat assigned to node $i$ is
 \begin{equation}
-	Q_{\text{gen},i} = q'' A_{\text{top},i}.
+	Q_{\text{gen},i} = q''_{\text{flux}} A_{\text{top},i}.
 	\label{eq:Qgen_i}
 \end{equation}
 
 At the very centre, $0 \le r \le R_{\text{cyl}}$, we approximate the hotspot as a cylinder with total generation obtained from a prescribed heat flux $q''_{\text{flux}}$ as
 \begin{equation}
-	 Q_{\text{gen},0} = q''_{\text{flux}} \, \pi R_{\text{cyl}}^2 \, \theta,
+	 Q_{\text{gen},0} = q''_{\text{flux}} \, \frac{\theta}{2} R_{\text{cyl}}^2,
 	\label{eq:Qgen0}
 \end{equation}
-where $q''_{\text{flux}}$ denotes the chip-side heat flux for the \emph{full} device and the factor $\theta$ accounts for the fact that a single wedge occupies only a fraction $\theta/(2\pi)$ of the total circumference. Equivalently, one may prescribe a total chip power $Q_{\text{tot}}$ and scale it to the representative wedge as $Q_{\text{gen},0} = Q_{\text{tot}}/N_\theta$.
+which corresponds to the top-surface area of the circular sector associated with the representative wedge. Equivalently, one may prescribe a total chip power $Q_{\text{tot}}$ and scale it to the representative wedge as $Q_{\text{gen},0} = Q_{\text{tot}}/N_\theta$.
 
 The effective thermal resistance from the peak temperature at the cylinder centre to its outer surface can be written as
 \begin{equation}
@@ -396,17 +396,27 @@ The vertical heat input from the chip is
 	Q_{\text{vert},i} = \frac{T_{\text{Si},i} - T_{c,i}}{R_{v,i}}.
 	\label{eq:Q_vert}
 \end{equation}
-Using the element-level expressions, the hot-side heat from stage $i-1$ and cold-side heat into stage $i$ are
-\begin{align}
-	Q_{h,i-1} &= S_{i-1} I_{i-1} T_{c,i-1}
-		+ \tfrac{1}{2} I_{i-1}^2 R_{e,i-1}
-		- K_{i-1} (T_{c,i} - T_{c,i-1}),
-		\label{eq:Qh_i_minus1} \\
-	Q_{c,i} &= S_i I_i T_{c,i}
-		- \tfrac{1}{2} I_i^2 R_{e,i}
-		+ K_i (T_{c,i+1} - T_{c,i}).
-		\label{eq:Qc_i}
-\end{align}
+To correctly account for Joule heating in the interconnects and legs, we decompose the stage electrical resistance into
+\begin{itemize}
+	\item $R_{\text{ic},i}$: inner (cold-side) copper interconnect resistance at node $T_{c,i}$,
+	\item $R_{\text{leg},i}$: resistance of the p and n thermoelectric legs,
+	\item $R_{\text{oc},i}$: outer (hot-side) copper interconnect resistance at the hot rim of stage $i$.
+\end{itemize}
+The hot-side heat leaving stage $i-1$ and entering node $T_{c,i}$ is then
+
+\begin{multline}
+	Q_{h,i-1} = S_{i-1} I_{i-1} T_{c,i-1} - K_{i-1}\bigl(T_{c,i} - T_{c,i-1}\bigr)\\
+	+ \left[ \tfrac{1}{2} I_{i-1}^2 R_{\text{leg},i-1} + I_{i-1}^2 R_{\text{oc},i-1} \right],	
+	\label{eq:Qh_i_minus1}
+\end{multline}
+
+while the net cooling absorbed into stage $i$ at its cold side is
+
+\begin{multline}
+	Q_{c,i} = S_i I_i T_{c,i} + K_i (T_{c,i+1} - T_{c,i}) - \\ \left[ \frac{1}{2} I_i^2 R_{\text{leg},i} 
+	+ I_i^2 R_{\text{ic},i} \right].
+	\label{eq:Qc_i}
+\end{multline}
 
 Imposing energy balance at node $i$,
 \begin{equation}
@@ -416,14 +426,14 @@ Imposing energy balance at node $i$,
 and collecting coefficients of $T_{c,i-1}$, $T_{c,i}$, $T_{c,i+1}$ and $T_{\text{Si},i}$ yields
 \begin{multline}
 	\left( S_{i-1} I_{i-1} + K_{i-1} \right) T_{c,i-1}
-	- \left( \frac{1}{R_{v,i}} + K_{i-1} + S_i I_i + K_i \right) T_{c,i} \\
+	- \left( \frac{1}{R_{v,i}} + K_{i-1} + S_i I_i - K_i \right) T_{c,i} \\
 	+ K_i T_{c,i+1}
-	+ \left( \frac{1}{R_{v,i}} \right) T_{\text{Si},i}
-	= - \frac{1}{2} I_{i-1}^2 R_{e,i-1} - \frac{1}{2} I_i^2 R_{e,i}.
+	+ \left( \frac{1}{R_{v,i}} \right) T_{\text{Si},i} \\
+	= - I_{i-1}^2 \left( \frac{R_{\text{leg},i-1}}{2} + R_{\text{oc},i-1} \right) - I_i^2 \left( \frac{R_{\text{leg},i}}{2} + R_{\text{ic},i} \right).
 	\label{eq:tec_coeff}
 \end{multline}
 
-At the outermost TEC node $i=N$, the final stage rejects heat to the water boundary, which is imposed by eliminating $T_{c,N+1}$ in favour of $T_{\text{w}}$ using $T_{c,N+1} = T_{\text{w}}$ in Eq.~\eqref{eq:Qc_i}, thereby modifying the diagonal of $A_{\text{TEC}}$ and the corresponding entry in $B_{\text{TEC}}$ by a term $-K_N T_{\text{w}}$.
+At the outermost TEC node $i=N$, the final stage rejects heat to the water boundary. For a fixed outer temperature $T_{\text{w}}$ we impose $T_{c,N+1} = T_{\text{w}}$ in Eq.~\eqref{eq:Qc_i}, which modifies the diagonal of $\mathbf{A}_{\text{TEC}}$ and the corresponding entry in $\mathbf{b}_{\text{TEC}}$ by a term $-K_N T_{\text{w}}$ while preserving the coefficient structure in Eq.~\eqref{eq:tec_coeff}.
 
 \subsection{Central Node $T_0$ with Volumetric Generation}
 
@@ -444,7 +454,7 @@ or equivalently,
 For the silicon side, $R_{\text{Si},0\to1}$ is identified with the internal resistance of a wedge with volumetric generation, Eq.~\eqref{eq:R_int_chip}. For the TEC side, adding the central radial insulator layer of width $w_{\text{is}}$ and conductivity $k_{\text{is}}$ to the internal cylinder resistance gives
 \begin{equation}
 	R_{\text{TEC},0\to1} = \frac{1}{t \theta} \left[ \frac{1}{2 k_{\text{Si}}} + \frac{1}{k_{\text{is}}}
-		\ln\!\left( \frac{R_{\text{cyl}}}{R_{\text{cyl}} + w_{\text{is}}} \right) \right].
+		\ln\!\left( \frac{R_{\text{cyl}} + w_{\text{is}}}{R_{\text{cyl}}} \right) \right],
 	\label{eq:R_TEC_0_1}
 \end{equation}
 
@@ -518,7 +528,7 @@ The right-hand side vector collects heat sources and boundary contributions as
 \end{equation}
 where
 \begin{equation}
-	b_{\text{TEC},i} = -\tfrac{1}{2} I_{i-1}^2 R_{e,i-1} - \tfrac{1}{2} I_i^2 R_{e,i} + b_{\text{bc},i},
+	b_{\text{TEC},i} = - I_{i-1}^2 \left( \frac{R_{\text{leg},i-1}}{2} + R_{\text{oc},i-1} \right) - I_i^2 \left( \frac{R_{\text{leg},i}}{2} + R_{\text{ic},i} \right) + b_{\text{bc},i},
 	\label{eq:b_tec_i}
 \end{equation}
 and $b_{\text{bc},i}$ collects contributions from fixed-temperature boundaries (e.g., $-K_N T_{\text{w}}$ at $i=N$).
@@ -546,7 +556,7 @@ The assembled matrix is sparse, tridiagonal within each block, and slightly asym
 
 	\textbf{Outer radius ($r = r_N$):} At the chip outer radius, heat is rejected to a coolant at temperature $T_{\text{w}}$ through $R_{\text{conv}}$, implemented via Eq.~\eqref{eq:bc_chip_outer}. On the TEC side, the last stage rejects heat directly to $T_{\text{w}}$ by substituting $T_{c,N+1} = T_{\text{w}}$ into Eq.~\eqref{eq:Qc_i}, which modifies the last row of $\mathbf{A}_{\text{TEC}}$ and $\mathbf{b}$.
 
-	\textbf{Representative wedge:} Rather than solving the full $2\pi$ annulus, we model a single wedge of angle $\theta = 2\pi/N_\theta$. All radial resistances and cross-sectional areas are derived for this wedge, and chip-side heat generation is scaled either from a global flux $q''_{\text{flux}}$ (Eqs.~\eqref{eq:Qgen_i}--\eqref{eq:Qgen0}) or from a total power $Q_{\text{tot}}$ divided by the wedge count $N_\theta$. Electrical currents $I_i$ are likewise interpreted as the current per wedge or per leg pair.
+		extbf{Representative wedge:} Rather than solving the full $2\pi$ annulus, we model a single wedge of angle $\theta = 2\pi/N_\theta$. All radial resistances and cross-sectional areas are derived for this wedge, and chip-side heat generation is scaled either from a global flux $q''_{\text{flux}}$ (Eqs.~\eqref{eq:Qgen_i}--\eqref{eq:Qgen0}) or from a total power $Q_{\text{tot}}$ divided by the wedge count $N_\theta$. Electrical currents $I_i$ are likewise interpreted as the current per wedge or per leg pair.
 
 	\textbf{TSV zones:} Regions without TSVs are enforced by assigning a very large vertical resistance $R_{v,i}$ (e.g., $R_{v,i} \rightarrow 10^9$~\si{K/W}), which effectively decouples $T_{\text{Si},i}$ from $T_{c,i}$ and leaves heat to flow purely laterally in the silicon layer in those rings.
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.8.13)  23 NOV 2025 15:39
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.8.13)  25 NOV 2025 12:17
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -331,37 +331,37 @@ Overfull \hbox (19.75731pt too wide) detected at line 218
  []
 
 [3] [4]
-Overfull \hbox (14.31255pt too wide) detected at line 409
-[]
- []
-
-
-Overfull \hbox (13.37871pt too wide) detected at line 424
+Overfull \hbox (13.37871pt too wide) detected at line 434
  []$[]   [] \OML/cmm/m/it/10 T[] \OMS/cmsy/m/n/10 ^^@ [] \OML/cmm/m/it/10 T[]$ 
  []
 
-
-Overfull \hbox (2.35573pt too wide) detected at line 442
+[5]
+Overfull \hbox (2.35573pt too wide) detected at line 452
  []$[]   [] \OML/cmm/m/it/10 T[] \OMS/cmsy/m/n/10 ^^@ []\OML/cmm/m/it/10 T[] \OMS/cmsy/m/n/10 ^^@ []\OML/cmm/m/it/10 T[]$ 
  []
 
-[5]
-Overfull \hbox (13.17554pt too wide) detected at line 518
+
+Overfull \hbox (13.17554pt too wide) detected at line 528
 []\OT1/cmr/bx/n/10 b \OT1/cmr/m/n/10 = [][] \OML/cmm/m/it/10 ;
  []
 
 
-Overfull \hbox (8.71921pt too wide) detected at line 532
+Overfull \hbox (19.13795pt too wide) detected at line 533
+[]\OML/cmm/m/it/10 b[] \OT1/cmr/m/n/10 = \OMS/cmsy/m/n/10 ^^@\OML/cmm/m/it/10 I[] [] \OMS/cmsy/m/n/10 ^^@ \OML/cmm/m/it/10 I[] [] \OT1/cmr/m/n/10 + \OML/cmm/m/it/10 b[];
+ []
+
+
+Overfull \hbox (8.71921pt too wide) detected at line 542
 []\OT1/cmr/bx/n/10 x \OT1/cmr/m/n/10 = [][] \OML/cmm/m/it/10 ;
  []
 
 
-Overfull \hbox (90.20372pt too wide) detected at line 539
+Overfull \hbox (90.20372pt too wide) detected at line 549
 []\OT1/cmr/bx/n/10 b \OT1/cmr/m/n/10 = [][] \OML/cmm/m/it/10 :
  []
 
-
-Underfull \hbox (badness 4779) in paragraph at lines 557--558
+[6]
+Underfull \hbox (badness 4779) in paragraph at lines 567--568
 []\OT1/ptm/m/n/10 This for-mu-la-tion is di-rectly com-pat-i-ble with finite-
  []
 
@@ -376,7 +376,9 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[6] [7] (mathematical_modelling.aux)
+[7
+
+] (mathematical_modelling.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
@@ -389,13 +391,13 @@ LaTeX Warning: There were undefined references.
 Here is how much of TeX's memory you used:
  7464 strings out of 474486
  182132 string characters out of 5743755
- 1957542 words of memory out of 5000000
+ 1962542 words of memory out of 5000000
  29703 multiletter control sequences out of 15000+600000
  598722 words of font info for 109 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  73i,17n,88p,1090b,758s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmss8.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
-Output written on mathematical_modelling.pdf (7 pages, 320625 bytes).
+Output written on mathematical_modelling.pdf (7 pages, 321308 bytes).
 PDF statistics:
  115 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
