@@ -14,12 +14,12 @@
         "R_cyl_um": 1000,
         "interconnect_ratio": 0.2,
         "outerconnect_ratio": 0.2,
-        "interconnect_angle_deg": 5,
-        "outerconnect_angle_deg": 5,
+        "interconnect_angle_deg": 25,
+        "outerconnect_angle_deg": 25,
         "insulation_width_um": 40,
         "azimuthal_gap_um": 20,
         "radial_expansion_factor": 1.2,
-        "N_tsv_limit": 2,
+        "N_tsv_limit": 1,
         "tsv": {
             "R_TSV_um": 10,
             "P_TSV_um": 20,
@@ -55,11 +55,11 @@
         }
     },
     "boundary_conditions": {
-        "q_flux_W_m2": 50,
+        "q_flux_W_m2": 2000000,
         "h_conv_W_m2K": 1000,
         "T_water_K": 300
     },
     "operating_conditions": {
-        "I_current_A": 1.0
+        "I_current_A": 0.5
     }
 }

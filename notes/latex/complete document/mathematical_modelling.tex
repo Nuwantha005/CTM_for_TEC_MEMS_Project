@@ -25,7 +25,6 @@ This work considers an alternative architecture in which heat from a central hot
 We focus on the mathematical formulation of a single representative wedge, whose solution can be scaled to the full $2\pi$ device. All derivations are carried out for a steady-state operating point with prescribed stage currents.
 
 \section{Nomenclature}
-\label{sec:nomenclature}
 
 For clarity, the main symbols and subscripts used throughout this paper are summarized in the boxed, two-column list below.
 
@@ -43,7 +42,7 @@ For clarity, the main symbols and subscripts used throughout this paper are summ
     $N$ & Count of repeated elements (e.g., wedges, TSVs) & $P$ & Pitch (TSV spacing) [\si{m}] \\
     $S$ & Seebeck coefficient term [\si{V/K}] & $x$ & Generic state vector entry \\
     $\alpha$ & Seebeck coefficient per leg [\si{V/K}] & $\rho$ & Electrical resistivity [\si{\ohm\,m}] \\
-    $\theta$ & Wedge angle [rad] & & \\
+    $\theta$ & Wedge angle [rad] & $\kappa$ & Thermal conductivity [\si{W/(m\,K)}] \\
 	$q''$ & Heat flux [\si{W/m^2}] & \\
   \end{tabular}
 
@@ -97,7 +96,7 @@ giving stage boundaries
 	r_{\text{start},2} &= r_{\text{end},1}, & r_{\text{end},2} &= r_{\text{end},1} + k_r L_1, \;\text{etc.}
 \end{align}
 
-The central region $0 \le r \le R_{\text{cyl}}$ is modelled as node $T_0$, with internal thermal resistance $R_{\text{int,chip}}$ and volumetric heat generation $Q_{\text{gen},0}$ as described in Section~\ref{sec:radial_wedge_geometry}.
+The central region $0 \le r \le R_{\text{cyl}}$ is modelled as node $T_0$, with internal thermal resistance $R_{\text{int,chip}}$ and volumetric heat generation $Q_{\text{gen},0}$ as described in Section~\textbf{II}.
 
 \subsection{Ceramic Interconnect (Radial Support)}
 
@@ -121,14 +120,14 @@ The leg geometry determines the stage conductance $K_{\text{total,TE}}$, Seebeck
 and electrical resistance $R_{TE,i}$ used in the nodal equations:
 \begin{itemize}
 	\item $L_i$: radial length of legs in stage $i$,
-	\item $\theta$: Azimuthal span of both TE legs
+	\item $\theta$: Azimuthal span of the both TE legs
 	\item $t$: out-of-plane thickness.
 \end{itemize}
 Stage-to-stage length variation is governed by the expansion factor $k_r$ as above.
 
 \subsection{Copper Interconnect and Outerconnect}
 
-The copper p--n interconnect (yellow, black arrow) links the p and n legs in the same TEC element. Its radial length and thickness are denoted $w_{\text{ic},i}$ and $t_{\text{ic},i}$, and its azimuthal span by $\beta_{\text{ic},i}$. These parameters control both the vertical resistance to TSVs (through the contact area and TSV count) and the in-plane electrical resistance $R_{e,\text{ic}}$.
+The copper p--n interconnect (yellow, black arrow) links the p and n legs in the same TEC element. Its radial length and thickness are denoted $w_{\text{ic},i}$ and $t_{\text{ic},i}$, and its azimuthal span by $\beta_{\text{ic},i}$. These parameters control both the vertical resistance to TSVs (through the contact area and TSV count) and the in-plane electrical resistance $R_{e,\text{ic}}$ and thermal resistance $R_{\text{ic}}$ (Eq.~\eqref{eq:R_ic}).
 
 An outer copper connection (``outerconnect") of radial width $w_{\text{oc},i}$, thickness $t_{\text{oc},i}$, and azimuthal span $\beta_{\text{oc},i}$ completes the current loop at the hot side of stage $i$ and interfaces with either the next stage or with the cooling manifold.
 
@@ -139,7 +138,7 @@ The green arrow in Fig.~\ref{fig:tec_geometry} indicates azimuthal insulators th
 \subsection{Radial Insulators}
 \label{sec:radial_insulator}
 
-Radial insulators of width $w_{\text{is}}$ separate successive TEC stages to suppress direct conduction while still allowing radial conduction. Their radial resistance $R_{\text{is}}$ is given by Eq.~\eqref{eq:R_is}. This resistance is added in series to the TEC-leg resistance $1/K_{\text{total,TE}}$ to form $R_{\text{eff,series}}$.
+Radial insulators of width $w_{\text{is}}$ separate successive TEC stages to suppress direct conduction while still radial conduction. Their radial resistance $R_{\text{is}}$ is given by Eq.~\eqref{eq:R_is}. This resistance is added in series to the TEC-leg resistance $1/K_{\text{total,TE}}$ to form $R_{\text{eff,series}}$.
 
 \subsection{Thermal TSVs and Vertical Path}
 
@@ -221,18 +220,18 @@ lead to logarithmic contributions from each region. Summing the three pieces and
 For a single p-type leg in stage $i$ the electrical and thermal resistances then reduce to
 \begin{equation}
 	R_{e,p,i} = \rho_p \, G_i, \qquad
-	R_{k,p,i} = \frac{G_i}{k_p},
+	R_{k,p,i} = \frac{G_i}{\kappa_p},
 \end{equation}
 and similarly for the n-type leg,
 \begin{equation}
 	R_{e,n,i} = \rho_n \, G_i, \qquad
-	R_{k,n,i} = \frac{G_i}{k_n}.
+	R_{k,n,i} = \frac{G_i}{\kappa_n}.
 \end{equation}
 Because the p and n legs are in series electrically and in parallel thermally, the stage-level electrical resistance and TEC-leg thermal conductance become
 \begin{align}
 	R_{\text{TE},i} &= R_{e,p,i} + R_{e,n,i} = (\rho_p + \rho_n) G_i,
 	\label{eq:R_TE_i}\\
-	K_{\text{total,TE},i} &= \frac{1}{R_{k,p,i}} + \frac{1}{R_{k,n,i}} = \frac{k_p + k_n}{G_i},
+	K_{\text{total,TE},i} &= \frac{1}{R_{k,p,i}} + \frac{1}{R_{k,n,i}} = \frac{\kappa_p + \kappa_n}{G_i},
 	\label{eq:K_total_TE_i}
 \end{align}
 
@@ -257,7 +256,6 @@ In the nodal TEC balance, Eqs.~\eqref{eq:Qh_i_minus1}--\eqref{eq:Qc_i}, the half
 where $K_{\text{eff,series},i}$ is constructed from $K_{\text{total,TE},i}$ via Eqs.~\eqref{eq:R_eff_series}--\eqref{eq:K_global}.
 
 \section{Radial Wedge Geometry and Resistances}
-\label{sec:radial_wedge_geometry}
 
 We now restrict attention to a single wedge of azimuthal span $\theta$ (rad), representing an angle $\theta = 2\pi/N_\theta$ of the full circular device.
 
@@ -287,7 +285,7 @@ and the corresponding generated heat assigned to node $i$ is
 
 At the very centre, $0 \le r \le R_{\text{cyl}}$, we approximate the hotspot as a cylinder with total generation obtained from a prescribed heat flux $q''_{\text{flux}}$ as
 \begin{equation}
-	 Q_{\text{gen},0} = q''_{\text{flux}} \, \frac{1}{2} R_{\text{cyl}}^2 \, \theta,
+	 Q_{\text{gen},0} = q''_{\text{flux}} \, \pi R_{\text{cyl}}^2 \, \theta,
 	\label{eq:Qgen0}
 \end{equation}
 where $q''_{\text{flux}}$ denotes the chip-side heat flux for the \emph{full} device and the factor $\theta$ accounts for the fact that a single wedge occupies only a fraction $\theta/(2\pi)$ of the total circumference. Equivalently, one may prescribe a total chip power $Q_{\text{tot}}$ and scale it to the representative wedge as $Q_{\text{gen},0} = Q_{\text{tot}}/N_\theta$.
@@ -322,7 +320,7 @@ The via count is determined geometrically from available interconnect width $w_{
 We consider the middle of the copper interconnect as the cold junction. Between it and the TSV endpoint there is the dielectric electrical insulation layer and half of the thickness of the copper interconnect layer. Then the total vertical resistance is given by,
 
 \begin{equation}
-	R_v=R_{TSV}
+	R_v=R_{TSV}+R_{\mathrm{dielectric}}+R_{k,ic}
 	\label{eq:R_v_def}
 \end{equation}
 For now we can assume that the thermal resistance of dielectric layer and the copper interconnect is zero. This can be attributed very thin (~500nm) dielectric layer and the higher conductivity of copper.
@@ -400,7 +398,7 @@ The vertical heat input from the chip is
 \end{equation}
 Using the element-level expressions, the hot-side heat from stage $i-1$ and cold-side heat into stage $i$ are
 \begin{align}
-	Q_{h,i-1} &= S_{i-1} I_{i-1} T_{c,i}
+	Q_{h,i-1} &= S_{i-1} I_{i-1} T_{c,i-1}
 		+ \tfrac{1}{2} I_{i-1}^2 R_{e,i-1}
 		- K_{i-1} (T_{c,i} - T_{c,i-1}),
 		\label{eq:Qh_i_minus1} \\
@@ -418,7 +416,7 @@ Imposing energy balance at node $i$,
 and collecting coefficients of $T_{c,i-1}$, $T_{c,i}$, $T_{c,i+1}$ and $T_{\text{Si},i}$ yields
 \begin{multline}
 	\left( S_{i-1} I_{i-1} + K_{i-1} \right) T_{c,i-1}
-	- \left( \frac{1}{R_{v,i}} + K_{i-1} - S_{i-1} I_{i-1} + S_i I_i + K_i \right) T_{c,i} \\
+	- \left( \frac{1}{R_{v,i}} + K_{i-1} + S_i I_i + K_i \right) T_{c,i} \\
 	+ K_i T_{c,i+1}
 	+ \left( \frac{1}{R_{v,i}} \right) T_{\text{Si},i}
 	= - \frac{1}{2} I_{i-1}^2 R_{e,i-1} - \frac{1}{2} I_i^2 R_{e,i}.
@@ -435,11 +433,11 @@ The central node $T_0$ represents the common temperature of the merged chip and 
 	+ \frac{T_0 - T_{c,1}}{R_{\text{TEC},0\to1}},
 	\label{eq:T0_balance}
 \end{equation}
-or equivalently (multiplying by $-1$ to match the negative-diagonal convention of the other blocks),
+or equivalently,
 \begin{multline}
-	-\left( \frac{1}{R_{\text{Si},0\to1}} + \frac{1}{R_{\text{TEC},0\to1}} \right) T_0
-	+ \frac{1}{R_{\text{Si},0\to1}} T_{\text{Si},1}
-	+ \frac{1}{R_{\text{TEC},0\to1}} T_{c,1} \\ = -Q_{\text{gen},0}.
+	\left( \frac{1}{R_{\text{Si},0\to1}} + \frac{1}{R_{\text{TEC},0\to1}} \right) T_0
+	- \frac{1}{R_{\text{Si},0\to1}} T_{\text{Si},1}
+	- \frac{1}{R_{\text{TEC},0\to1}} T_{c,1} \\ = Q_{\text{gen},0}.
 	\label{eq:T0_coeff}
 \end{multline}
 
@@ -479,9 +477,9 @@ The matrix $\mathbf{M}$ has the block structure
 \end{equation}
 where
 \begin{itemize}
-	\item $M_{00} = -\left( \frac{1}{R_{\text{Si},0\to1}} + \frac{1}{R_{\text{TEC},0\to1}} \right)$,
-	\item $\mathbf{m}_{0,\text{Si}}$ has a single non-zero entry $+1/R_{\text{Si},0\to1}$ in position corresponding to $T_{\text{Si},1}$,
-	\item $\mathbf{m}_{0,\text{TEC}}$ has a single non-zero entry $+1/R_{\text{TEC},0\to1}$ in position corresponding to $T_{c,1}$,
+	\item $M_{00} = \frac{1}{R_{\text{Si},0\to1}} + \frac{1}{R_{\text{TEC},0\to1}}$,
+	\item $\mathbf{m}_{0,\text{Si}}$ has a single non-zero entry $-1/R_{\text{Si},0\to1}$ in position corresponding to $T_{\text{Si},1}$,
+	\item $\mathbf{m}_{0,\text{TEC}}$ has a single non-zero entry $-1/R_{\text{TEC},0\to1}$ in position corresponding to $T_{c,1}$,
 	\item $\mathbf{A}_{\text{Si}}$ is tridiagonal with entries given by Eq.~\eqref{eq:chip_coeff} plus boundary modifications in Eq.~\eqref{eq:bc_chip_outer},
 	\item $\mathbf{A}_{\text{TEC}}$ is tridiagonal with entries given by Eq.~\eqref{eq:tec_coeff} and the outer boundary correction described below Eq.~\eqref{eq:tec_coeff},
 	\item $\mathbf{A}_{\text{Coup}}$ is diagonal with entries $1/R_{v,i}$.
@@ -495,12 +493,12 @@ For clarity, the structure in Eq.~\eqref{eq:M_block} can be written in expanded 
 	\[
 	\mathbf{M} =
 	\begin{bmatrix}
-		M_{00} & \dfrac{1}{R_{\text{Si},0\to1}} & 0 & \cdots & 0 & \dfrac{1}{R_{\text{TEC},0\to1}} & 0 & \cdots & 0 \\
-		\dfrac{1}{R_{\text{Si},0\to1}} & (\mathbf{A}_{\text{Si}})_{11} & (\mathbf{A}_{\text{Si}})_{12} & \cdots & 0 & (\mathbf{A}_{\text{Coup}})_{11} & 0 & \cdots & 0 \\
+		M_{00} & -\dfrac{1}{R_{\text{Si},0\to1}} & 0 & \cdots & 0 & -\dfrac{1}{R_{\text{TEC},0\to1}} & 0 & \cdots & 0 \\
+		-\dfrac{1}{R_{\text{Si},0\to1}} & (\mathbf{A}_{\text{Si}})_{11} & (\mathbf{A}_{\text{Si}})_{12} & \cdots & 0 & (\mathbf{A}_{\text{Coup}})_{11} & 0 & \cdots & 0 \\
 		0 & (\mathbf{A}_{\text{Si}})_{21} & (\mathbf{A}_{\text{Si}})_{22} & \cdots & 0 & 0 & (\mathbf{A}_{\text{Coup}})_{22} & \cdots & 0 \\
 		\vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \ddots & \vdots \\
 		0 & 0 & 0 & \cdots & (\mathbf{A}_{\text{Si}})_{NN} & 0 & 0 & \cdots & (\mathbf{A}_{\text{Coup}})_{NN} \\
-		\dfrac{1}{R_{\text{TEC},0\to1}} & (\mathbf{A}_{\text{Coup}})_{11} & 0 & \cdots & 0 & (\mathbf{A}_{\text{TEC}})_{11} & (\mathbf{A}_{\text{TEC}})_{12} & \cdots & 0 \\
+		-\dfrac{1}{R_{\text{TEC},0\to1}} & (\mathbf{A}_{\text{Coup}})_{11} & 0 & \cdots & 0 & (\mathbf{A}_{\text{TEC}})_{11} & (\mathbf{A}_{\text{TEC}})_{12} & \cdots & 0 \\
 		0 & 0 & (\mathbf{A}_{\text{Coup}})_{22} & \cdots & 0 & (\mathbf{A}_{\text{TEC}})_{21} & (\mathbf{A}_{\text{TEC}})_{22} & \cdots & 0 \\
 		\vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \ddots & \vdots \\
 		0 & 0 & 0 & \cdots & (\mathbf{A}_{\text{Coup}})_{NN} & 0 & 0 & \cdots & (\mathbf{A}_{\text{TEC}})_{NN}
@@ -514,7 +512,7 @@ where the non-zero entries of $\mathbf{A}_{\text{Si}}$, $\mathbf{A}_{\text{TEC}}
 The right-hand side vector collects heat sources and boundary contributions as
 \begin{equation}
 	\mathbf{b} = \begin{bmatrix}
-		-Q_{\text{gen},0} & -Q_{\text{gen},1} & \cdots & -Q_{\text{gen},N} & b_{\text{TEC},1} & \cdots & b_{\text{TEC},N}
+		Q_{\text{gen},0} & -Q_{\text{gen},1} & \cdots & -Q_{\text{gen},N} & b_{\text{TEC},1} & \cdots & b_{\text{TEC},N}
 	\end{bmatrix}^{\!\mathsf{T}},
 	\label{eq:b_vector}
 \end{equation}
@@ -536,7 +534,7 @@ and
 \begin{equation}
 	\mathbf{b} =
 	\begin{bmatrix}
-		-Q_{\text{gen},0} & -Q_{\text{gen},1} & -Q_{\text{gen},2} & \dots & -Q_{\text{gen},N} & b_{\text{TEC},1} & b_{\text{TEC},2} & \dots & b_{\text{TEC},N}
+		Q_{\text{gen},0} & -Q_{\text{gen},1} & -Q_{\text{gen},2} & \dots & -Q_{\text{gen},N} & b_{\text{TEC},1} & b_{\text{TEC},2} & \dots & b_{\text{TEC},N}
 	\end{bmatrix}^{\!\mathsf{T}}.
 \end{equation}
 

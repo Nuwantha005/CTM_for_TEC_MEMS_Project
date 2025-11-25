@@ -228,7 +228,7 @@ classdef ThermalNetwork
                     B(idx_c) = B(idx_c) - I^2 * (Re_stages_leg(i-1)/2 + R_oc_stages(i-1));
                 end
 
-                sum_diag = G_vert + S_stages(i)*I + K_stages(i);
+                sum_diag = G_vert + S_stages(i)*I - K_stages(i);
                 if i > 1
                     sum_diag = sum_diag + K_stages(i-1);
                 end
@@ -242,6 +242,7 @@ classdef ThermalNetwork
             % DEBUG: Display full matrix for N=3
             if N == 3
                 fprintf('\n=== DEBUG: Full Matrix M (7x7) ===\n');
+                format longG;
                 disp(full(M));
                 fprintf('\n=== DEBUG: RHS Vector B ===\n');
                 disp(B);

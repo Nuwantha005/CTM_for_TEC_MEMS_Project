@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.8.13)  23 NOV 2025 15:51
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.8.13)  23 NOV 2025 15:39
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -298,63 +298,70 @@ File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 <image-1.png, id=1, 626.34pt x 455.301pt>
 File: image-1.png Graphic file (type png)
 <use image-1.png>
-Package pdftex.def Info: image-1.png  used on input line 79.
+Package pdftex.def Info: image-1.png  used on input line 78.
 (pdftex.def)             Requested size: 226.79846pt x 164.86696pt.
- [1{C:/Users/nuwan/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
+
+
+LaTeX Warning: Reference `sec:nomenclature' on page 1 undefined on input line 83.
+
+[1{C:/Users/nuwan/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-Underfull \hbox (badness 3333) in paragraph at lines 120--123
+Underfull \hbox (badness 3333) in paragraph at lines 119--122
 []\OT1/ptm/m/n/10 The leg ge-om-e-try de-ter-mines the stage con-duc-tance
  []
 
+
+LaTeX Warning: Reference `eq:R_ic' on page 2 undefined on input line 130.
+
 [2 <./image-1.png>]
-Underfull \hbox (badness 1496) in paragraph at lines 148--149
+Underfull \hbox (badness 1496) in paragraph at lines 147--148
 \OT1/ptm/m/n/10 re-sis-tance $\OML/cmm/m/it/10 R[]$ \OT1/ptm/m/n/10 com-bine into the ver-ti-cal re-sis-tance $\OML/cmm/m/it/10 R[]$
  []
 
 
-Overfull \hbox (2.82074pt too wide) detected at line 219
+Overfull \hbox (2.82074pt too wide) detected at line 218
  []$[]  \OML/cmm/m/it/10 G[] \OT1/cmr/m/n/10 = [] []  []$ 
  []
 
 
-Overfull \hbox (19.75731pt too wide) detected at line 219
+Overfull \hbox (19.75731pt too wide) detected at line 218
  []$[] \OT1/cmr/m/n/10 + [] []  [] \OML/cmm/m/it/10 :$ []  
  []
 
 [3] [4]
-Overfull \hbox (4.0764pt too wide) detected at line 411
+Overfull \hbox (14.31255pt too wide) detected at line 409
 []
  []
 
 
-Overfull \hbox (63.25949pt too wide) detected at line 426
+Overfull \hbox (13.37871pt too wide) detected at line 424
  []$[]   [] \OML/cmm/m/it/10 T[] \OMS/cmsy/m/n/10 ^^@ [] \OML/cmm/m/it/10 T[]$ 
  []
 
 
-Overfull \hbox (8.4669pt too wide) detected at line 444
- []$[]   \OMS/cmsy/m/n/10 ^^@ [] \OML/cmm/m/it/10 T[] \OT1/cmr/m/n/10 + []\OML/cmm/m/it/10 T[] \OT1/cmr/m/n/10 + []\OML/cmm/m/it/10 T[]$ 
+Overfull \hbox (2.35573pt too wide) detected at line 442
+ []$[]   [] \OML/cmm/m/it/10 T[] \OMS/cmsy/m/n/10 ^^@ []\OML/cmm/m/it/10 T[] \OMS/cmsy/m/n/10 ^^@ []\OML/cmm/m/it/10 T[]$ 
  []
 
 [5]
-Overfull \hbox (20.95334pt too wide) detected at line 520
+Overfull \hbox (13.17554pt too wide) detected at line 518
 []\OT1/cmr/bx/n/10 b \OT1/cmr/m/n/10 = [][] \OML/cmm/m/it/10 ;
  []
 
 
-Overfull \hbox (8.71921pt too wide) detected at line 534
+Overfull \hbox (8.71921pt too wide) detected at line 532
 []\OT1/cmr/bx/n/10 x \OT1/cmr/m/n/10 = [][] \OML/cmm/m/it/10 ;
  []
 
 
-Overfull \hbox (97.98152pt too wide) detected at line 541
+Overfull \hbox (90.20372pt too wide) detected at line 539
 []\OT1/cmr/bx/n/10 b \OT1/cmr/m/n/10 = [][] \OML/cmm/m/it/10 :
  []
 
 
-Underfull \hbox (badness 4779) in paragraph at lines 559--560
+Underfull \hbox (badness 4779) in paragraph at lines 557--558
 []\OT1/ptm/m/n/10 This for-mu-la-tion is di-rectly com-pat-i-ble with finite-
  []
 
@@ -374,17 +381,21 @@ Before submitting the final camera ready copy, remember to:
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
  ***********
+
+
+LaTeX Warning: There were undefined references.
+
  ) 
 Here is how much of TeX's memory you used:
  7464 strings out of 474486
- 182150 string characters out of 5743755
+ 182132 string characters out of 5743755
  1957542 words of memory out of 5000000
  29703 multiletter control sequences out of 15000+600000
  598722 words of font info for 109 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  73i,17n,88p,1090b,758s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmss8.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
-Output written on mathematical_modelling.pdf (7 pages, 319075 bytes).
+Output written on mathematical_modelling.pdf (7 pages, 320625 bytes).
 PDF statistics:
  115 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
