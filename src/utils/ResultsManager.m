@@ -1,13 +1,10 @@
 classdef ResultsManager
-    % RESULTSMANAGER Handles I/O, saving results, and plotting.
-
     properties
         OutputDir
     end
 
     methods
         function obj = ResultsManager(config)
-            % Constructor: Creates output directory with timestamp
             timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
             base_dir = 'output';
             obj.OutputDir = fullfile(base_dir, timestamp);
@@ -16,21 +13,36 @@ classdef ResultsManager
                 mkdir(obj.OutputDir);
             end
 
-            % Save config snapshot
             fid = fopen(fullfile(obj.OutputDir, 'config_snapshot.json'), 'w');
             fprintf(fid, '%s', jsonencode(config));
             fclose(fid);
         end
 
+        function log_results(obj, T, Q_out, Q_in, config)
+            fprintf('--- Temperature Results (K) ---\n');
+            fprintf('Node 0 (Center): %.2f\n', T(1));
+
+            N = config.geometry.N_stages;
+            for i = 1:N
+                idx_Si = i + 1;
+                idx_c = N + 1 + i;
+                fprintf('Stage %d: T_Si = %.2f, T_c = %.2f\n', i, T(idx_Si), T(idx_c));
+            end
+
+            fprintf('-------------------------------\n');
+            fprintf('Q_in (Heat flux): %.2e W\n', Q_in);
+            fprintf('Q_out calculated: %.2e W\n', Q_out);
+            fprintf('Energy Balance (Q_in - Q_out): %.2e W\n', Q_in - Q_out);
+            fprintf('-------------------------------\n');
+        end
+
         function save_results(obj, T, Q_out, config)
-            % SAVE_RESULTS Saves simulation data to .mat file
             filename = fullfile(obj.OutputDir, 'results.mat');
             save(filename, 'T', 'Q_out', 'config');
             fprintf('Results saved to %s\n', filename);
         end
 
-        function save_results_text(obj, T, Q_out, config)
-            % SAVE_RESULTS_TEXT Saves results to a readable text file.
+        function save_results_text(obj, T, Q_out, Q_in, config)
             filename = fullfile(obj.OutputDir, 'results.txt');
             fid = fopen(filename, 'w');
 
@@ -39,7 +51,9 @@ classdef ResultsManager
             fprintf(fid, '--------------------------------\n');
             fprintf(fid, 'q_flux: %.2f W/m2\n', config.boundary_conditions.q_flux_W_m2);
             fprintf(fid, 'I_current: %.2f A\n', config.operating_conditions.I_current_A);
+            fprintf(fid, 'Q_in (Heat flux input): %.2e W\n', Q_in);
             fprintf(fid, 'Q_out (Calculated): %.2e W\n', Q_out);
+            fprintf(fid, 'Energy Balance: %.2e W\n', Q_in - Q_out);
             fprintf(fid, '--------------------------------\n');
             fprintf(fid, 'Node 0 (Center) Temp: %.2f K\n', T(1));
             fprintf(fid, '--------------------------------\n');
@@ -57,16 +71,11 @@ classdef ResultsManager
         end
 
         function plot_temperature_profile(obj, T, geometry)
-            % PLOT_TEMPERATURE_PROFILE Generates and saves a plot
-
             N = geometry.N_stages;
-            % Extract vectors (Node 0 is index 1)
             T_0 = T(1);
             T_Si = T(2:N+1);
             T_c = T(N+2:end);
 
-            % Create radial coordinate vector (simplified)
-            % In reality, get actual radii from geometry
             r = 1:N;
 
             h = figure('Visible', 'off');

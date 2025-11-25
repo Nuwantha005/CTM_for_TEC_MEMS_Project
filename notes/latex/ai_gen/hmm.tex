@@ -1,0 +1,561 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath}
+\usepackage{siunitx}
+\usepackage{graphicx}
+
+\begin{document}
+
+	\title{Radial Multistage Thermoelectric Cooling for 3D Integrated Circuits:\newline Mathematical Modelling and Thermal Network Formulation}
+
+\author{Anonymous}
+
+\maketitle
+
+\begin{abstract}
+This paper presents a mathematical model for a radial, multi-stage thermoelectric cooler (TEC) integrated with a stacked microelectronic chip. Heat is extracted laterally from a central hotspot through a coupled two-layer thermal network consisting of a silicon ``chip layer'' and an active TEC layer, and rejected at the package perimeter to a micro-channel heat sink. We derive: (i) element-level TEC relations including Peltier, Joule and conductive terms; (ii) equivalent radial and vertical thermal resistances for wedge-shaped sectors and through-silicon via (TSV) bundles; and (iii) a global block-matrix formulation for the coupled silicon--TEC network. The formulation is extended with an additional central node that aggregates volumetric heat generation in the innermost cylinder. The resulting sparse, asymmetric linear system is suitable for optimization of TEC geometry and operating currents.
+\end{abstract}
+
+
+\section{Introduction}
+
+Modern high-power 3D integrated circuits (3D-ICs) can reach power densities on the order of \SI{100}{\watt\per\centi\meter\squared} and total powers of \SI{400}{W} or more. Conventional cooling solutions relying on vertical heat extraction and top-side heatsinks are challenged by strong vertical temperature gradients and limited heat removal from deeply buried dies.
+
+This work considers an alternative architecture in which heat from a central hotspot is transported \emph{radially} towards the chip perimeter using a multistage radial TEC, where the rejected heat is removed by a micro-channel heat sink. Each radial wedge behaves as a one-dimensional multistage TEC in the radial direction; the full device consists of $N_\theta$ identical wedges arranged azimuthally.
+
+We focus on the mathematical formulation of a single representative wedge, whose solution can be scaled to the full $2\pi$ device. All derivations are carried out for a steady-state operating point with prescribed stage currents.
+
+\section{Nomenclature}
+\label{sec:nomenclature}
+
+For clarity, the main symbols and subscripts used throughout this paper are summarized in the boxed, two-column list below.
+
+\begin{figure*}[!t]
+  \centering
+  \fbox{%%
+  \parbox{0.95\textwidth}{
+  	\textbf{Symbols}\\[4pt]
+  \begin{tabular}{p{0.06\textwidth}p{0.4\textwidth}p{0.06\textwidth}p{0.32\textwidth}}
+    $Q$ & Heat flow rate [\si{W}] & $R$ & Thermal / electrical resistance [\si{K/W}, \si{\ohm}] \\
+    $K$ & Thermal conductance [\si{W/K}] & $k$ & Thermal conductivity [\si{W/(m\,K)}] \\
+    $T$ & Temperature [\si{K}] & $I$ & Electrical current [\si{A}] \\
+    $A$ & Area [\si{m^2}] & $L$ & Length (radial leg length) [\si{m}] \\
+    $t$ & Thickness (out-of-plane) [\si{m}] & $w$ & In-plane width (radial or azimuthal) [\si{m}] \\
+    $N$ & Count of repeated elements (e.g., wedges, TSVs) & $P$ & Pitch (TSV spacing) [\si{m}] \\
+    $S$ & Seebeck coefficient term [\si{V/K}] & $x$ & Generic state vector entry \\
+    $\alpha$ & Seebeck coefficient per leg [\si{V/K}] & $\rho$ & Electrical resistivity [\si{\ohm\,m}] \\
+    $\theta$ & Wedge angle [rad] & & \\
+	$q''$ & Heat flux [\si{W/m^2}] & \\
+  \end{tabular}
+
+  \vspace{4pt}
+  	\textbf{Subscripts and Superscripts}\\[4pt]
+  \begin{tabular}{p{0.06\textwidth}p{0.4\textwidth}p{0.06\textwidth}p{0.32\textwidth}}
+    $i$ & Radial ring / TEC stage index & $0$ & Central cylinder node \\
+    $\text{Si}$ & Silicon chip layer & $c$ & Cold side of TEC element \\
+    $h$ & Hot side of TEC element & $\text{TE}$ & Thermoelectric leg quantity \\
+    $\text{TSV}$ & Through-silicon via quantity & $\text{ic}$ & Copper interconnect or wiring \\
+    $\text{oc}$ & Outer copper connection & $\text{is}$ & Radial ceramic/insulator quantity \\
+    $\text{az}$ & Azimuthal insulator quantity & $\text{w}$ & Coolant (water) boundary \\
+    $\text{lat}$ & Lateral (in-plane) conduction path & $\text{vert}$ & Vertical (chip-to-TEC) path \\
+    $\text{tot}$ & Parallel aggregate of identical elements & $\text{global}$ & Effective (combined) quantity \\
+    $\text{gen}$ & Generated heat source & $\text{conv}$ & Convection-related quantity \\
+  \end{tabular}
+  }}
+  \label{fig:nomenclature_box}
+\end{figure*}
+
+\section{Geometry of the Radial TEC Wedge}
+
+Figure~\ref{fig:tec_geometry} illustrates the cross-sectional layout of a single radial TEC element (one wedge segment) used in this work. The main components are:
+\begin{itemize}
+	\item\textbf{(Red arrow)} ceramic interconnect / substrate (dark grey),
+	\item\textbf{(Blue arrows)} thermoelectric legs: blue = p-type, red = n-type,
+	\item\textbf{(Green arrow)} azimuthal copper wiring (pink) connecting this TEC element to the next element on the same stage,
+	\item\textbf{(Black arrow)} copper interconnect (yellow) between the p and n legs of the same TEC couple.
+\end{itemize}
+
+\begin{figure}[!t]
+	\centering
+	\includegraphics[width=0.9\columnwidth]{image-1.png}% top view of single TEC element
+	\caption{Top-view schematic of a single radial TEC element showing ceramic interconnect, p/n thermoelectric legs, azimuthal copper wiring to neighbouring elements, and local p--n interconnect.}
+	\label{fig:tec_geometry}
+\end{figure}
+
+The geometry of each wedge is parameterised to support optimisation (see the parameter list in Section~\ref{sec:nomenclature}). Below we summarise the role and dimensional parameters of each sub-component.
+
+\subsection{Central Cylinder and Wedge Angle}
+
+The radial TEC surrounds a central cylindrical heat spreader of radius $R_{\text{cyl}}$ (silicon), which collects heat from the stacked dies and feeds it into the radial stages. The representative wedge spans an angle $\theta = 2\pi/N_\theta$ and all radial dimensions are measured from $r = R_{\text{cyl}}$ outwards.
+
+The first TEC stage has radial length $L_1$ so that its outer radius is $R_{\text{cyl}} + L_1$. Subsequent stages expand radially according to the geometric ratio $k_r$ (``radial expansion factor"),
+\begin{equation}
+	\frac{L_{i+1}}{L_i} = k_r,
+\end{equation}
+giving stage boundaries
+\begin{align}
+	r_{\text{start},1} &= R_{\text{cyl}}, & r_{\text{end},1} &= R_{\text{cyl}} + L_1, \\
+	r_{\text{start},2} &= r_{\text{end},1}, & r_{\text{end},2} &= r_{\text{end},1} + k_r L_1, \;\text{etc.}
+\end{align}
+
+The central region $0 \le r \le R_{\text{cyl}}$ is modelled as node $T_0$, with internal thermal resistance $R_{\text{int,chip}}$ and volumetric heat generation $Q_{\text{gen},0}$ as described in Section~\ref{sec:radial_wedge_geometry}.
+
+\subsection{Ceramic Interconnect (Radial Support)}
+
+The ceramic interconnect (dark grey in Fig.~\ref{fig:tec_geometry}) provides a mechanically robust and electrically insulating base between neighbouring p and n legs, while also acting as a controlled thermal ``dam" between stages. Its key roles are:
+\begin{itemize}
+	\item maintaining electrical isolation between legs and TSVs,
+	\item providing a high-conductivity radial path where desired (e.g., AlN),
+	\item shaping the effective series resistance $R_{\text{is}}$ between stages (Sec.~\ref{sec:radial_insulator}).
+\end{itemize}
+
+We characterise the radial ceramic by its thermal conductivity $k_{\text{is}}$ and effective radial width $w_{\text{is}}$. For a stage of radial length $L_i$ the radial-insulator contribution to the total series resistance is given by Eq.~\eqref{eq:R_is} and contributes to $R_{\text{eff,series}}$ and ultimately to $K_i$.
+
+\subsection{Thermoelectric Legs}
+
+Each TEC element consists of a p-type and an n-type leg (red-blue pair in Fig.~\ref{fig:tec_geometry}) connected in 
+series electrically and in parallel thermally. Their material is typically Bi$_2$Te$_3$ with properties given 
+in the parameter table. The legs are arranged azimuthally over an angle $\theta$ per element and 
+radially over the stage length $L_i$.
+
+The leg geometry determines the stage conductance $K_{\text{total,TE}}$, Seebeck term $S_i$, 
+and electrical resistance $R_{TE,i}$ used in the nodal equations:
+\begin{itemize}
+	\item $L_i$: radial length of legs in stage $i$,
+	\item $\theta$: Azimuthal span of both TE legs
+	\item $t$: out-of-plane thickness.
+\end{itemize}
+Stage-to-stage length variation is governed by the expansion factor $k_r$ as above.
+
+\subsection{Copper Interconnect and Outerconnect}
+
+The copper p--n interconnect (yellow, black arrow) links the p and n legs in the same TEC element. Its radial length and thickness are denoted $w_{\text{ic},i}$ and $t_{\text{ic},i}$, and its azimuthal span by $\beta_{\text{ic},i}$. These parameters control both the vertical resistance to TSVs (through the contact area and TSV count) and the in-plane electrical resistance $R_{e,\text{ic}}$.
+
+An outer copper connection (``outerconnect") of radial width $w_{\text{oc},i}$, thickness $t_{\text{oc},i}$, and azimuthal span $\beta_{\text{oc},i}$ completes the current loop at the hot side of stage $i$ and interfaces with either the next stage or with the cooling manifold.
+
+\subsection{Azimuthal Insulators}
+
+The green arrow in Fig.~\ref{fig:tec_geometry} indicates azimuthal insulators that electrically insulate a given TEC element from the next element along the stage. These traces are dimensioned by their arc length $w_{az}$, thickness (layer thickness $t$) and length which is equal to TEC length $L_i$. Their thermal conductance contributes to the back conduction and is implicitly included in $K_{\text{global}}$ where appropriate.
+
+\subsection{Radial Insulators}
+\label{sec:radial_insulator}
+
+Radial insulators of width $w_{\text{is}}$ separate successive TEC stages to suppress direct conduction while still allowing radial conduction. Their radial resistance $R_{\text{is}}$ is given by Eq.~\eqref{eq:R_is}. This resistance is added in series to the TEC-leg resistance $1/K_{\text{total,TE}}$ to form $R_{\text{eff,series}}$.
+
+\subsection{Thermal TSVs and Vertical Path}
+
+Thermal TSVs (copper cylinders of radius $R_{\text{TSV},i}$ and pitch $P_{\text{TSV},i}$) establish the vertical thermal path between selected chip rings and the TEC cold junctions in the evaporator zone. Their count per ring is controlled by the interconnect width $w_{\text{ic},i}$ and the radial clearance $g_{\text{rad}}$, using the relations in Eq.~\eqref{eq:N_tsv}.
+
+The equivalent TSV resistance $R_{\text{TSV,tot}}$ and interconnect resistance $R_{\text{ic}}$ combine into the vertical resistance $R_{v,i}$ (Eq.~\eqref{eq:R_v_def}), which appears as the coupling element in the block matrices. In the pumping zone, we set $R_{v,i}$ to a very large value to emulate the absence of TSVs.
+
+\section{TEC Element-Level Model}
+
+Consider a single thermoelectric stage with cold-side temperature $T_c$ and hot-side temperature $T_h$ operated at current $I$. Using standard lumped-parameter notation,
+\begin{itemize}
+	\item $K$ [W/K]: thermal conductance of the leg pair (including effective series/parallel contributions of ceramic and azimuthal insulator),
+	\item $S$ [V/K]: Seebeck coefficient multiplied by the number of couples in the stage,
+	\item $R_e$ [\si{\ohm}]: total electrical resistance of the stage, including interconnects as appropriate.
+\end{itemize}
+
+The steady-state heat balance at the cold side can be written as
+\begin{equation}
+	Q_c = S I T_c - K (T_h - T_c) - Q_{\text{J,c}},
+	\label{eq:Qc_def}
+\end{equation}
+where $Q_c$ is the net heat absorbed at the cold junction (positive when cooling) and $Q_{\text{J,c}}$ is the fraction of Joule heat deposited at the cold side. For a symmetric leg pair with interconnects concentrated at the cold junction, the Joule contribution can be expressed as
+\begin{equation}
+	Q_{\text{J,c}} = \frac{1}{2} I^2 R_{\text{TE}} + I^2 R_{e,\text{ic}} + \frac{1}{2} I^2 R_{e,\text{w}},
+	\label{eq:Qjoule_cold}
+\end{equation}
+where $R_{\text{TE}}$ is the electrical resistance of the TE legs, $R_{e,\text{ic}}$ is the cold-side interconnect resistance, and $R_{e,\text{w}}$ accounts for any series wiring between isothermal nodes.
+
+The corresponding hot-side heat is
+\begin{equation}
+	Q_h = S I T_h - K (T_h - T_c) + (I^2 R_e - Q_{\text{J,c}}),
+	\label{eq:Qh_def}
+\end{equation}
+so that energy conservation ($Q_h - Q_c = I^2 R_e$) is satisfied.
+
+For a multistage one-dimensional TEC stack indexed by $i=1,\dots,M$ (increasing temperature from cold to hot), we will later make use of the interface relation $Q_{h,i} = Q_{c,i+1}$ at each internal stage boundary.
+
+\subsection{Variable Cross-Section TEC Legs and Geometric Factor}
+
+In the radial TEC, each leg pair occupies a wedge of constant angle $\theta$ and out-of-plane thickness $t$, but the available cross-section for heat and current flow varies with radius $r$ due to: (i) trapezoidal leg shape, (ii) embedded copper interconnect and outerconnect, (iii) radial ceramic gaps $w_{\text{is}}$, and (iv) azimuthal insulation width $w_{\text{az}}$. Instead of carrying all of these details explicitly in the network, we encapsulate them into a single geometric factor $G_i$ for stage $i$.
+
+We subdivide a single leg in stage $i$ into three radial regions between inner radius $r_1$ and outer radius $r_1 + L_i$:
+\begin{itemize}
+	\item inner copper interconnect region: $r \in [r_{\text{start}},\, r_1 + w_{\text{ic},i}]$,
+	\item full TE material region: $r \in [r_1 + w_{\text{ic},i},\, r_1 + L_i - w_{\text{oc},i}]$,
+	\item outer copper connect region: $r \in [r_1 + L_i - w_{\text{oc},i},\, r_{\text{end}}]$,
+\end{itemize}
+with effective start and end radii corrected for the radial ceramic gap,
+\begin{align}
+	r_{\text{start}} &= r_1 + \frac{w_{\text{is}}}{2}, &
+	r_{\text{end}} &= r_1 + L_i - \frac{w_{\text{is}}}{2},
+\end{align}
+for interior stages ($i=2,\dots,N-1$). For the first and last stages, the full width $w_{\text{is}}$ is attributed to the single adjacent TEC, so $w_{\text{is}}/2$ is replaced by $w_{\text{is}}$.
+
+The baseline area available to a single leg accounting for a constant azimuthal insulation width $w_{\text{az}}$ is
+\begin{equation}
+	A_{\text{base}}(r) = t \left( r\,\tfrac{\theta}{2} - w_{\text{az}} \right),
+\end{equation}
+which reduces to $t (\theta r/2)$ when $w_{\text{az}} = 0$. In the wire regions, the copper footprint further subtracts area so that the local cross-section can be written generically as
+\begin{equation}
+	A_j(r) = C_j r - D, \qquad j=1,2,3,
+\end{equation}
+with region-dependent slopes $C_j$ and a common offset $D = t w_{\text{az}}$. Integrals of the form
+\begin{equation}
+	\int \frac{\mathrm{d}r}{A_j(r)} = \int \frac{\mathrm{d}r}{C_j r - D}
+	= \frac{1}{C_j} \ln\!\left( \frac{C_j r - D}{\,\cdot\,} \right)
+\end{equation}
+lead to logarithmic contributions from each region. Summing the three pieces and collecting geometry-only terms yields a stage-dependent geometric factor $G_i$:
+\begin{multline}
+	G_i = \frac{1}{t\tfrac{\theta}{2} - t_{\text{ic},i}\tfrac{\beta_{\text{ic},i}}{2}}
+	\ln\!\left( \frac{(r_1 + w_{\text{ic},i})(t\tfrac{\theta}{2} - t_{\text{ic},i}\tfrac{\beta_{\text{ic},i}}{2}) - t w_{\text{az}}}{r_{\text{start}}(t\tfrac{\theta}{2} - t_{\text{ic},i}\tfrac{\beta_{\text{ic},i}}{2}) - t w_{\text{az}}} \right) \\
+	+ \frac{1}{t \tfrac{\theta}{2}}
+	\ln\!\left( \frac{(r_1 + L_i - w_{\text{oc},i})(t \tfrac{\theta}{2}) - t w_{\text{az}}}{(r_1 + w_{\text{ic},i})(t \tfrac{\theta}{2}) - t w_{\text{az}}} \right) \\
+	+ \frac{1}{t\tfrac{\theta}{2} - t_{\text{oc},i}\tfrac{\beta_{\text{oc},i}}{2}}
+	\ln\!\left( \frac{r_{\text{end}}(t\tfrac{\theta}{2} - t_{\text{oc},i}\tfrac{\beta_{\text{oc},i}}{2}) - t w_{\text{az}}}{(r_1 + L_i - w_{\text{oc},i})(t\tfrac{\theta}{2} - t_{\text{oc},i}\tfrac{\beta_{\text{oc},i}}{2}) - t w_{\text{az}}} \right).
+	\label{eq:G_i_def}
+\end{multline}
+
+For a single p-type leg in stage $i$ the electrical and thermal resistances then reduce to
+\begin{equation}
+	R_{e,p,i} = \rho_p \, G_i, \qquad
+	R_{k,p,i} = \frac{G_i}{k_p},
+\end{equation}
+and similarly for the n-type leg,
+\begin{equation}
+	R_{e,n,i} = \rho_n \, G_i, \qquad
+	R_{k,n,i} = \frac{G_i}{k_n}.
+\end{equation}
+Because the p and n legs are in series electrically and in parallel thermally, the stage-level electrical resistance and TEC-leg thermal conductance become
+\begin{align}
+	R_{\text{TE},i} &= R_{e,p,i} + R_{e,n,i} = (\rho_p + \rho_n) G_i,
+	\label{eq:R_TE_i}\\
+	K_{\text{total,TE},i} &= \frac{1}{R_{k,p,i}} + \frac{1}{R_{k,n,i}} = \frac{k_p + k_n}{G_i},
+	\label{eq:K_total_TE_i}
+\end{align}
+
+The copper interconnect and outerconnect themselves add azimuthal series resistance to the current loop. Approximating each as a conductive sheet of thickness $t_{\text{ic},i}$ or $t_{\text{oc},i}$ and azimuthal spans $\beta_{\text{ic},i}$ and $\beta_{\text{oc},i}$, their resistances along the azimuth are
+\begin{align}
+	R_{e,\text{ic},i} &= \frac{\rho_c \, \beta_{\text{ic},i}}{t_{\text{ic},i} \, \ln\!\left( \dfrac{r_1 + w_{\text{ic},i}}{r_1} \right)},
+	\label{eq:R_e_ic_stage}\\
+	R_{e,\text{oc},i} &= \frac{\rho_c \, \beta_{\text{oc},i}}{2 t_{\text{oc},i} \, \ln\!\left( \dfrac{r_1 + L_i}{r_1 + L_i - w_{\text{oc},i}} \right)},
+	\label{eq:R_e_oc_stage}
+\end{align}
+so that the total electrical resistance for stage $i$ used in the Joule terms is
+\begin{equation}
+	R_{e,i} = R_{\text{TE},i} + R_{e,\text{ic},i} + 2 R_{e,\text{oc},i}.
+	\label{eq:R_e_stage_i}
+\end{equation}
+
+In the nodal TEC balance, Eqs.~\eqref{eq:Qh_i_minus1}--\eqref{eq:Qc_i}, the half-split Joule term $\tfrac{1}{2} I_i^2 R_{e,i}$ therefore includes the full contribution of both legs and all azimuthal wiring in stage $i$, while the stage conductance $K_i$ appearing in the conductive terms is identified with the global conductance
+\begin{equation}
+	K_i = K_{\text{global},i}
+	= K_{\text{eff,series},i} + K_{\text{az},i},
+\end{equation}
+where $K_{\text{eff,series},i}$ is constructed from $K_{\text{total,TE},i}$ via Eqs.~\eqref{eq:R_eff_series}--\eqref{eq:K_global}.
+
+\section{Radial Wedge Geometry and Resistances}
+\label{sec:radial_wedge_geometry}
+
+We now restrict attention to a single wedge of azimuthal span $\theta$ (rad), representing an angle $\theta = 2\pi/N_\theta$ of the full circular device.
+
+\subsection{Chip Layer: Radial Conduction and Heat Generation}
+
+The bottom silicon die is modelled as a solid cylindrical wedge of thickness $t_{\text{chip}}$ and thermal conductivity $k_{\text{Si}}$. Radial heat transport occurs between concentric radii $r_a$ and $r_b$ within the wedge. The cross-sectional area normal to the radial heat flow at radius $r$ is
+\begin{equation}
+	A_{\text{Si}}(r) = r \, \theta \, t_{\text{chip}}.
+\end{equation}
+The corresponding radial thermal resistance between $r_a$ and $r_b$ is obtained by integration,
+\begin{equation}
+	R_{\text{lat}}(r_a,r_b) = \int_{r_a}^{r_b} \frac{\mathrm{d}r}{k_{\text{Si}} A_{\text{Si}}(r)}
+	= \frac{1}{k_{\text{Si}} t_{\text{chip}} \theta} \ln\!\left( \frac{r_b}{r_a} \right).
+	\label{eq:R_lat_chip}
+\end{equation}
+
+The chip layer also hosts volumetric power dissipation. We model this as a uniform heat flux $q''$ [W/m$^2$] applied over the top surface of each radial segment. For a segment spanning radii $r_{i-1}$ to $r_i$, the top area is the sector area
+\begin{equation}
+	A_{\text{top},i} = \frac{\theta}{2} (r_i^2 - r_{i-1}^2),
+	\label{eq:Atop_i}
+\end{equation}
+and the corresponding generated heat assigned to node $i$ is
+\begin{equation}
+	Q_{\text{gen},i} = q'' A_{\text{top},i}.
+	\label{eq:Qgen_i}
+\end{equation}
+
+At the very centre, $0 \le r \le R_{\text{cyl}}$, we approximate the hotspot as a cylinder with total generation obtained from a prescribed heat flux $q''_{\text{flux}}$ as
+\begin{equation}
+	 Q_{\text{gen},0} = q''_{\text{flux}} \, \frac{1}{2} R_{\text{cyl}}^2 \, \theta,
+	\label{eq:Qgen0}
+\end{equation}
+where $q''_{\text{flux}}$ denotes the chip-side heat flux for the \emph{full} device and the factor $\theta$ accounts for the fact that a single wedge occupies only a fraction $\theta/(2\pi)$ of the total circumference. Equivalently, one may prescribe a total chip power $Q_{\text{tot}}$ and scale it to the representative wedge as $Q_{\text{gen},0} = Q_{\text{tot}}/N_\theta$.
+
+The effective thermal resistance from the peak temperature at the cylinder centre to its outer surface can be written as
+\begin{equation}
+	R_{\text{int,chip}} = \frac{1}{2 \, \theta \, k_{\text{Si}} \, t_{\text{chip}}},
+	\label{eq:R_int_chip}
+\end{equation}
+which we identify with $R_{\text{Si},0\to 1}$ in the network.
+
+\subsection{Vertical Resistance: TSV Bundle and Interconnect}
+
+Vertical coupling between the chip and the TEC cold junction is provided by a bundle of TSVs in parallel, plus metal interconnect in series. The resistance of a single TSV of radius $R_{\text{TSV}}$ and length $t_{\text{SOI}}$ is
+\begin{equation}
+	R_{\text{TSV}} = \rho_{\text{TSV}} \frac{t_{\text{SOI}}}{\pi R_{\text{TSV}}^2},
+	\label{eq:R_tsv_single}
+\end{equation}
+and with $N_{\text{TSV}}$ identical vias in parallel the equivalent becomes
+\begin{equation}
+	R_{\text{TSV,tot}} = \frac{R_{\text{TSV}}}{N_{\text{TSV}}}.
+	\label{eq:R_tsv_tot}
+\end{equation}
+The via count is determined geometrically from available interconnect width $w_{\text{ic}}$, TSV pitch $P_{\text{TSV}}$, radial clearance $g_{\text{rad}}$, and local radius $r$, e.g.,
+\begin{align}
+	N_{\text{row}} &= \left\lfloor \frac{w_{\text{ic}}}{2 R_{\text{TSV}} + g_{\text{rad}}} \right\rfloor, \\
+	N_{\text{per-row}} &= \left\lfloor \frac{r \, \beta_{\text{ic}}}{P_{\text{TSV}}} \right\rfloor, \\
+	N_{\text{TSV}} &= N_{\text{row}} N_{\text{per-row}}.
+	\label{eq:N_tsv}
+\end{align}
+
+We consider the middle of the copper interconnect as the cold junction. Between it and the TSV endpoint there is the dielectric electrical insulation layer and half of the thickness of the copper interconnect layer. Then the total vertical resistance is given by,
+
+\begin{equation}
+	R_v=R_{TSV}
+	\label{eq:R_v_def}
+\end{equation}
+For now we can assume that the thermal resistance of dielectric layer and the copper interconnect is zero. This can be attributed very thin (~500nm) dielectric layer and the higher conductivity of copper.
+
+\subsection{TEC Leg Effective Conductance with Insulator}
+
+Between neighbouring TEC stages there exists a radial ceramic or dielectric insulator. Its radial thermal resistance from $r_1 + L - w_{\text{is}}$ to $r_1 + L$ is
+\begin{equation}
+	R_{\text{is}} = \frac{1}{k_{\text{is}} t \theta} \ln \left( \frac{r_1 + L}{r_1 + L - w_{\text{is}}} \right).
+	\label{eq:R_is}
+\end{equation}
+Combining this series resistance with the intrinsic leg conductance $K_{\text{total,TE}}$ yields an effective series resistance
+\begin{equation}
+	R_{\text{eff,series}} = R_{\text{is}} + \frac{1}{K_{\text{total,TE}}},
+	\label{eq:R_eff_series}
+\end{equation}
+with corresponding conductance $K_{\text{eff,series}} = 1 / R_{\text{eff,series}}$.
+
+In addition, azimuthal leakage through an insulator strip of width $w_{\text{az}}$ and thickness $t$ gives a parallel conductance
+\begin{equation}
+	K_{\text{az}} = k_{\text{az}} \frac{w_{\text{az}} t}{L},
+	\label{eq:K_az}
+\end{equation}
+so that the net conductance of a TEC unit becomes
+\begin{equation}
+	K_{\text{global}} = K_{\text{eff,series}} + K_{\text{az}}.
+	\label{eq:K_global}
+\end{equation}
+
+This $K_{\text{global}}$ is used as the stage conductance $K_i$ in the network equations.
+
+\section{Two-Layer Radial Network and Nodal Equations}
+
+We discretize the radial direction into $N$ active rings. For $i=1,\dots,N$ we define:
+\begin{itemize}
+	\item $T_{\text{Si},i}$: chip temperature at ring $i$,
+	\item $T_{c,i}$: TEC cold-side node temperature at interface between TEC stages $i-1$ and $i$.
+\end{itemize}
+An additional central node $T_0$ represents the lumped central cylinder where the chip and TEC are thermally merged.
+
+\subsection{Chip-Layer Nodes $T_{\text{Si},i}$}
+
+For a generic chip node $i$ ($1 \le i \le N$), applying steady-state energy conservation with lateral conduction to neighbours, vertical coupling to TEC, and local generation $Q_{\text{gen},i}$ gives
+\begin{equation}
+	\frac{T_{\text{Si},i-1} - T_{\text{Si},i}}{R_{\text{lat},i-1}}
+	+ \frac{T_{\text{Si},i+1} - T_{\text{Si},i}}{R_{\text{lat},i}}
+	- \frac{T_{\text{Si},i} - T_{c,i}}{R_{v,i}}
+	+ Q_{\text{gen},i} = 0.
+	\label{eq:chip_balance}
+\end{equation}
+Rearranging Eq.~\eqref{eq:chip_balance} into the standard linear form yields
+\begin{multline}
+	\left( \frac{1}{R_{\text{lat},i-1}} \right) T_{\text{Si},i-1}
+	- \left( \frac{1}{R_{\text{lat},i-1}} + \frac{1}{R_{\text{lat},i}} + \frac{1}{R_{v,i}} \right) T_{\text{Si},i} \\
+	+ \left( \frac{1}{R_{\text{lat},i}} \right) T_{\text{Si},i+1}
+	+ \left( \frac{1}{R_{v,i}} \right) T_{c,i} = - Q_{\text{gen},i}.
+	\label{eq:chip_coeff}
+\end{multline}
+
+At the outermost chip ring $i=N$, an additional convective term couples the silicon to cooling water at temperature $T_{\text{w}}$ through resistance $R_{\text{conv}}$, modifying the diagonal coefficient and right-hand side accordingly:
+\begin{align}
+	A_{\text{Si}}(N,N) &\leftarrow A_{\text{Si}}(N,N) - \frac{1}{R_{\text{conv}}}, \\
+	B_{\text{Si}}(N) &\leftarrow B_{\text{Si}}(N) - \frac{T_{\text{w}}}{R_{\text{conv}}}.
+	\label{eq:bc_chip_outer}
+\end{align}
+
+\subsection{TEC-Layer Nodes $T_{c,i}$}
+
+The TEC node $T_{c,i}$ represents the thermal mass at the junction between radial stages $i-1$ and $i$. It receives vertical heat from the chip, stage-to-stage pumped heat from $i-1$, and rejects heat to stage $i$.
+
+The vertical heat input from the chip is
+\begin{equation}
+	Q_{\text{vert},i} = \frac{T_{\text{Si},i} - T_{c,i}}{R_{v,i}}.
+	\label{eq:Q_vert}
+\end{equation}
+Using the element-level expressions, the hot-side heat from stage $i-1$ and cold-side heat into stage $i$ are
+\begin{align}
+	Q_{h,i-1} &= S_{i-1} I_{i-1} T_{c,i}
+		+ \tfrac{1}{2} I_{i-1}^2 R_{e,i-1}
+		- K_{i-1} (T_{c,i} - T_{c,i-1}),
+		\label{eq:Qh_i_minus1} \\
+	Q_{c,i} &= S_i I_i T_{c,i}
+		- \tfrac{1}{2} I_i^2 R_{e,i}
+		+ K_i (T_{c,i+1} - T_{c,i}).
+		\label{eq:Qc_i}
+\end{align}
+
+Imposing energy balance at node $i$,
+\begin{equation}
+	Q_{\text{vert},i} + Q_{h,i-1} - Q_{c,i} = 0,
+	\label{eq:tec_balance}
+\end{equation}
+and collecting coefficients of $T_{c,i-1}$, $T_{c,i}$, $T_{c,i+1}$ and $T_{\text{Si},i}$ yields
+\begin{multline}
+	\left( S_{i-1} I_{i-1} + K_{i-1} \right) T_{c,i-1}
+	- \left( \frac{1}{R_{v,i}} + K_{i-1} - S_{i-1} I_{i-1} + S_i I_i + K_i \right) T_{c,i} \\
+	+ K_i T_{c,i+1}
+	+ \left( \frac{1}{R_{v,i}} \right) T_{\text{Si},i}
+	= - \frac{1}{2} I_{i-1}^2 R_{e,i-1} - \frac{1}{2} I_i^2 R_{e,i}.
+	\label{eq:tec_coeff}
+\end{multline}
+
+At the outermost TEC node $i=N$, the final stage rejects heat to the water boundary, which is imposed by eliminating $T_{c,N+1}$ in favour of $T_{\text{w}}$ using $T_{c,N+1} = T_{\text{w}}$ in Eq.~\eqref{eq:Qc_i}, thereby modifying the diagonal of $A_{\text{TEC}}$ and the corresponding entry in $B_{\text{TEC}}$ by a term $-K_N T_{\text{w}}$.
+
+\subsection{Central Node $T_0$ with Volumetric Generation}
+
+The central node $T_0$ represents the common temperature of the merged chip and TEC region within radius $R_{\text{cyl}}$. Heat generated in this cylinder flows radially to the first silicon ring and to the first TEC node through effective resistances $R_{\text{Si},0\to1}$ and $R_{\text{TEC},0\to1}$, respectively. The nodal equation is
+\begin{equation}
+	Q_{\text{gen},0} = \frac{T_0 - T_{\text{Si},1}}{R_{\text{Si},0\to1}}
+	+ \frac{T_0 - T_{c,1}}{R_{\text{TEC},0\to1}},
+	\label{eq:T0_balance}
+\end{equation}
+or equivalently (multiplying by $-1$ to match the negative-diagonal convention of the other blocks),
+\begin{multline}
+	-\left( \frac{1}{R_{\text{Si},0\to1}} + \frac{1}{R_{\text{TEC},0\to1}} \right) T_0
+	+ \frac{1}{R_{\text{Si},0\to1}} T_{\text{Si},1}
+	+ \frac{1}{R_{\text{TEC},0\to1}} T_{c,1} \\ = -Q_{\text{gen},0}.
+	\label{eq:T0_coeff}
+\end{multline}
+
+For the silicon side, $R_{\text{Si},0\to1}$ is identified with the internal resistance of a wedge with volumetric generation, Eq.~\eqref{eq:R_int_chip}. For the TEC side, adding the central radial insulator layer of width $w_{\text{is}}$ and conductivity $k_{\text{is}}$ to the internal cylinder resistance gives
+\begin{equation}
+	R_{\text{TEC},0\to1} = \frac{1}{t \theta} \left[ \frac{1}{2 k_{\text{Si}}} + \frac{1}{k_{\text{is}}}
+		\ln\!\left( \frac{R_{\text{cyl}}}{R_{\text{cyl}} + w_{\text{is}}} \right) \right].
+	\label{eq:R_TEC_0_1}
+\end{equation}
+
+Including $T_0$ increases the dimension of the global system by one, but preserves sparsity since it connects only to $T_{\text{Si},1}$ and $T_{c,1}$.
+
+\section{Global Block-Matrix Formulation}
+
+\subsection*{Block Notation}
+
+Collecting all unknowns into a single vector
+\begin{equation}
+	\mathbf{x} = \begin{bmatrix} T_0 & T_{\text{Si},1} & \cdots & T_{\text{Si},N} & T_{c,1} & \cdots & T_{c,N} \end{bmatrix}^{\!\mathsf{T}},
+	\label{eq:x_vector}
+\end{equation}
+the linear system can be expressed compactly as
+\begin{equation}
+	\mathbf{M} \, \mathbf{x} = \mathbf{b}.
+	\label{eq:Mx_b}
+\end{equation}
+
+The matrix $\mathbf{M}$ has the block structure
+\begin{equation}
+	\mathbf{M} =
+	\begin{bmatrix}
+		M_{00} & \mathbf{m}_{0,\text{Si}}^{\mathsf{T}} & \mathbf{m}_{0,\text{TEC}}^{\mathsf{T}} \\
+		\mathbf{m}_{0,\text{Si}} & \mathbf{A}_{\text{Si}} & \mathbf{A}_{\text{Coup}} \\
+		\mathbf{m}_{0,\text{TEC}} & \mathbf{A}_{\text{Coup}} & \mathbf{A}_{\text{TEC}}
+	\end{bmatrix},
+	\label{eq:M_block}
+\end{equation}
+where
+\begin{itemize}
+	\item $M_{00} = -\left( \frac{1}{R_{\text{Si},0\to1}} + \frac{1}{R_{\text{TEC},0\to1}} \right)$,
+	\item $\mathbf{m}_{0,\text{Si}}$ has a single non-zero entry $+1/R_{\text{Si},0\to1}$ in position corresponding to $T_{\text{Si},1}$,
+	\item $\mathbf{m}_{0,\text{TEC}}$ has a single non-zero entry $+1/R_{\text{TEC},0\to1}$ in position corresponding to $T_{c,1}$,
+	\item $\mathbf{A}_{\text{Si}}$ is tridiagonal with entries given by Eq.~\eqref{eq:chip_coeff} plus boundary modifications in Eq.~\eqref{eq:bc_chip_outer},
+	\item $\mathbf{A}_{\text{TEC}}$ is tridiagonal with entries given by Eq.~\eqref{eq:tec_coeff} and the outer boundary correction described below Eq.~\eqref{eq:tec_coeff},
+	\item $\mathbf{A}_{\text{Coup}}$ is diagonal with entries $1/R_{v,i}$.
+\end{itemize}
+
+\subsection*{Expanded Block Form}
+
+For clarity, the structure in Eq.~\eqref{eq:M_block} can be written in expanded form. Because this matrix is wide, we render it in single-column mode:
+\begin{figure*}[!t]
+	\centering
+	\[
+	\mathbf{M} =
+	\begin{bmatrix}
+		M_{00} & \dfrac{1}{R_{\text{Si},0\to1}} & 0 & \cdots & 0 & \dfrac{1}{R_{\text{TEC},0\to1}} & 0 & \cdots & 0 \\
+		\dfrac{1}{R_{\text{Si},0\to1}} & (\mathbf{A}_{\text{Si}})_{11} & (\mathbf{A}_{\text{Si}})_{12} & \cdots & 0 & (\mathbf{A}_{\text{Coup}})_{11} & 0 & \cdots & 0 \\
+		0 & (\mathbf{A}_{\text{Si}})_{21} & (\mathbf{A}_{\text{Si}})_{22} & \cdots & 0 & 0 & (\mathbf{A}_{\text{Coup}})_{22} & \cdots & 0 \\
+		\vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \ddots & \vdots \\
+		0 & 0 & 0 & \cdots & (\mathbf{A}_{\text{Si}})_{NN} & 0 & 0 & \cdots & (\mathbf{A}_{\text{Coup}})_{NN} \\
+		\dfrac{1}{R_{\text{TEC},0\to1}} & (\mathbf{A}_{\text{Coup}})_{11} & 0 & \cdots & 0 & (\mathbf{A}_{\text{TEC}})_{11} & (\mathbf{A}_{\text{TEC}})_{12} & \cdots & 0 \\
+		0 & 0 & (\mathbf{A}_{\text{Coup}})_{22} & \cdots & 0 & (\mathbf{A}_{\text{TEC}})_{21} & (\mathbf{A}_{\text{TEC}})_{22} & \cdots & 0 \\
+		\vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots & \ddots & \vdots \\
+		0 & 0 & 0 & \cdots & (\mathbf{A}_{\text{Coup}})_{NN} & 0 & 0 & \cdots & (\mathbf{A}_{\text{TEC}})_{NN}
+	\end{bmatrix}
+	\]
+	\caption{Expanded block structure of the coupled silicon--TEC system matrix $\mathbf{M}$.}
+	\label{fig:M_expanded}
+\end{figure*}
+where the non-zero entries of $\mathbf{A}_{\text{Si}}$, $\mathbf{A}_{\text{TEC}}$ and $\mathbf{A}_{\text{Coup}}$ are given explicitly by Eqs.~\eqref{eq:chip_coeff}, \eqref{eq:tec_coeff} and the definition of $R_{v,i}$, respectively.
+
+The right-hand side vector collects heat sources and boundary contributions as
+\begin{equation}
+	\mathbf{b} = \begin{bmatrix}
+		-Q_{\text{gen},0} & -Q_{\text{gen},1} & \cdots & -Q_{\text{gen},N} & b_{\text{TEC},1} & \cdots & b_{\text{TEC},N}
+	\end{bmatrix}^{\!\mathsf{T}},
+	\label{eq:b_vector}
+\end{equation}
+where
+\begin{equation}
+	b_{\text{TEC},i} = -\tfrac{1}{2} I_{i-1}^2 R_{e,i-1} - \tfrac{1}{2} I_i^2 R_{e,i} + b_{\text{bc},i},
+	\label{eq:b_tec_i}
+\end{equation}
+and $b_{\text{bc},i}$ collects contributions from fixed-temperature boundaries (e.g., $-K_N T_{\text{w}}$ at $i=N$).
+
+For completeness, the expanded forms of $\mathbf{x}$ and $\mathbf{b}$ are
+\begin{equation}
+	\mathbf{x} =
+	\begin{bmatrix}
+		T_0 & T_{\text{Si},1} & T_{\text{Si},2} & \dots & T_{\text{Si},N} & T_{c,1} & T_{c,2} & \dots & T_{c,N}
+	\end{bmatrix}^{\!\mathsf{T}},
+\end{equation}
+and
+\begin{equation}
+	\mathbf{b} =
+	\begin{bmatrix}
+		-Q_{\text{gen},0} & -Q_{\text{gen},1} & -Q_{\text{gen},2} & \dots & -Q_{\text{gen},N} & b_{\text{TEC},1} & b_{\text{TEC},2} & \dots & b_{\text{TEC},N}
+	\end{bmatrix}^{\!\mathsf{T}}.
+\end{equation}
+
+The assembled matrix is sparse, tridiagonal within each block, and slightly asymmetric due to the convective Peltier terms $S_i I_i$. It can be solved efficiently using standard sparse linear solvers, and differentiable with respect to geometric and operating parameters for gradient-based optimization.
+
+\subsection*{Boundary Conditions and Wedge Scaling}
+
+	\textbf{Centre ($r=0$ to $R_{\text{cyl}}$):} The internal cylinder is represented by node $T_0$ and Eq.~\eqref{eq:T0_coeff}. All chip-layer and TEC-layer temperatures within this radius are assumed equal to $T_0$, so no additional degrees of freedom are introduced in this region.
+
+	\textbf{Outer radius ($r = r_N$):} At the chip outer radius, heat is rejected to a coolant at temperature $T_{\text{w}}$ through $R_{\text{conv}}$, implemented via Eq.~\eqref{eq:bc_chip_outer}. On the TEC side, the last stage rejects heat directly to $T_{\text{w}}$ by substituting $T_{c,N+1} = T_{\text{w}}$ into Eq.~\eqref{eq:Qc_i}, which modifies the last row of $\mathbf{A}_{\text{TEC}}$ and $\mathbf{b}$.
+
+	\textbf{Representative wedge:} Rather than solving the full $2\pi$ annulus, we model a single wedge of angle $\theta = 2\pi/N_\theta$. All radial resistances and cross-sectional areas are derived for this wedge, and chip-side heat generation is scaled either from a global flux $q''_{\text{flux}}$ (Eqs.~\eqref{eq:Qgen_i}--\eqref{eq:Qgen0}) or from a total power $Q_{\text{tot}}$ divided by the wedge count $N_\theta$. Electrical currents $I_i$ are likewise interpreted as the current per wedge or per leg pair.
+
+	\textbf{TSV zones:} Regions without TSVs are enforced by assigning a very large vertical resistance $R_{v,i}$ (e.g., $R_{v,i} \rightarrow 10^9$~\si{K/W}), which effectively decouples $T_{\text{Si},i}$ from $T_{c,i}$ and leaves heat to flow purely laterally in the silicon layer in those rings.
+
+\section{Conclusion}
+
+We have developed a consistent mathematical model for a radial multistage TEC coupled to a 3D-IC hotspot through a two-layer thermal network. Starting from element-level TEC physics, we derived equivalent resistances for radial conduction in the silicon die, TSV bundles and interconnects, and TEC legs including ceramic and azimuthal leakage paths. These ingredients were assembled into a block-structured linear system augmented with a central node that explicitly represents volumetric heat generation in the innermost cylinder.
+
+This formulation is directly compatible with finite-difference style discretization and can be implemented in MATLAB or Python using sparse matrices. Future work will integrate electrical constraints, current-sharing strategies among stages, and geometric optimization of TEC leg dimensions and TSV layouts to minimise hotspot temperature under power and footprint constraints.
+
+\end{document}

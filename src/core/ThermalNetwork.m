@@ -1,11 +1,8 @@
 classdef ThermalNetwork
-    % THERMALNETWORK Assembles and solves the system of equations.
-    %   Handles the (2N+1)x(2N+1) matrix construction including Node 0.
-
     properties
-        Geometry      % TECGeometry instance
-        Materials     % MaterialProperties instance
-        Params        % Config struct
+        Geometry
+        Materials
+        Params
     end
 
     methods
@@ -15,8 +12,7 @@ classdef ThermalNetwork
             obj.Params = config;
         end
 
-        function [T_new, Q_out] = solve(obj, T_current)
-            % SOLVE Assembles matrix and solves for new temperatures.
+        function [T_new, Q_out, Q_in] = solve(obj, T_current)
             [M, B] = obj.assemble_system(T_current);
             T_new = M \ B;
 
@@ -25,8 +21,7 @@ classdef ThermalNetwork
             T_water = obj.Params.boundary_conditions.T_water_K;
 
             T_cold = T_new(idx_c_N);
-            T_hot = T_water;
-            T_avg = (T_cold + T_hot) / 2;
+            T_avg = (T_cold + T_water) / 2;
 
             k_p = obj.Materials.get_k('Bi2Te3', T_avg);
             k_n = obj.Materials.get_k('Bi2Te3', T_avg);
@@ -60,10 +55,19 @@ classdef ThermalNetwork
             S_N = S_p - (-abs(S_n));
             I = obj.Params.operating_conditions.I_current_A;
 
-            Q_out_TEC = S_N * I * T_cold + K_N * (T_cold - T_water) + (0.5 * I^2 * Re_N + I^2 * R_oc);
+            % Q_c equation: Heat INTO cold side of stage N
+            % Q_c = S*I*T_c + K*(T_h - T_c) - [Joule at cold]
+            Q_c_N = S_N * I * T_cold + K_N * (T_water - T_cold) - (0.5 * I^2 * Re_N + I^2 * R_oc);
 
             n_wedges = 2*pi / obj.Geometry.WedgeAngle;
-            Q_out = Q_out_TEC * n_wedges;
+            Q_out = Q_c_N * n_wedges;
+
+            % Calculate total input heat
+            q_flux = obj.Params.boundary_conditions.q_flux_W_m2;
+            theta = obj.Geometry.WedgeAngle;
+            R_base = obj.Geometry.R_base;
+            A_wedge = 0.5 * theta * R_base^2;
+            Q_in = q_flux * A_wedge * n_wedges;
         end
 
         function [M, B] = assemble_system(obj, T_current)
@@ -144,7 +148,7 @@ classdef ThermalNetwork
                 if i < N
                     [r_in_next, L_next] = obj.Geometry.get_stage_geometry(i+1);
                     r_mid_i = r_in + L/2;
-                    r_mid_next = r_in_next + L_next/2;
+                    r_mid_next =  r_in_next + L_next/2;
                     R_lat_Si(i) = log(r_mid_next/r_mid_i) / (k_Si * theta * t_chip);
                 else
                     R_lat_Si(i) = inf;
@@ -195,46 +199,52 @@ classdef ThermalNetwork
                 end
 
                 G_vert = 1/R_vert(i);
-                M(idx_Si, idx_c) = -G_vert;
-                M(idx_Si, idx_Si) = G_left + G_right + G_vert;
+                % FIXED: Was -G_vert, should be +G_vert
+                M(idx_Si, idx_c) = G_vert;
+                % FIXED: Added negative sign
+                M(idx_Si, idx_Si) = -(G_left + G_right + G_vert);
                 B(idx_Si) = B(idx_Si) - Q_gen_nodes(i);
 
                 M(idx_c, idx_Si) = G_vert;
-                diag_term = G_vert;
-                rhs_term = 0;
 
                 if i == 1
                     M(idx_c, idx_0) = -1/R_TEC_01;
-                    diag_term = diag_term + 1/R_TEC_01;
                 end
 
                 if i > 1
                     idx_c_prev = idx_c - 1;
                     M(idx_c, idx_c_prev) = (S_stages(i-1)*I + K_stages(i-1));
-                    diag_term = diag_term + K_stages(i-1);
-                    rhs_term = rhs_term - I^2 * (Re_stages_leg(i-1)/2 + R_oc_stages(i-1));
                 end
-
-                diag_term = diag_term + S_stages(i)*I + K_stages(i);
 
                 if i < N
                     idx_c_next = idx_c + 1;
                     M(idx_c, idx_c_next) = K_stages(i);
                 else
-                    rhs_term = rhs_term - K_stages(i) * T_water;
+                    B(idx_c) = B(idx_c) - K_stages(i) * T_water;
                 end
 
-                rhs_term = rhs_term - I^2 * (Re_stages_leg(i)/2 + R_ic_stages(i));
+                B(idx_c) = B(idx_c) - I^2 * (Re_stages_leg(i)/2 + R_ic_stages(i));
+                if i > 1
+                    B(idx_c) = B(idx_c) - I^2 * (Re_stages_leg(i-1)/2 + R_oc_stages(i-1));
+                end
 
                 sum_diag = G_vert + S_stages(i)*I + K_stages(i);
                 if i > 1
                     sum_diag = sum_diag + K_stages(i-1);
-                elseif i == 1
+                end
+                if i == 1
                     sum_diag = sum_diag + 1/R_TEC_01;
                 end
 
                 M(idx_c, idx_c) = -sum_diag;
-                B(idx_c) = rhs_term;
+            end
+
+            % DEBUG: Display full matrix for N=3
+            if N == 3
+                fprintf('\n=== DEBUG: Full Matrix M (7x7) ===\n');
+                disp(full(M));
+                fprintf('\n=== DEBUG: RHS Vector B ===\n');
+                disp(B);
             end
         end
     end

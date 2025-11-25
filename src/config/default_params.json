@@ -19,7 +19,7 @@
         "insulation_width_um": 40,
         "azimuthal_gap_um": 20,
         "radial_expansion_factor": 1.2,
-        "N_tsv_limit": 1,
+        "N_tsv_limit": 2,
         "tsv": {
             "R_TSV_um": 10,
             "P_TSV_um": 20,
