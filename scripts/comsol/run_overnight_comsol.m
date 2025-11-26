@@ -129,13 +129,12 @@ fprintf('Expected completion: %s\n\n', datestr(now + totalMinutes/1440, 'HH:MM o
 
 fprintf('Checking COMSOL LiveLink...\n');
 
-if ~exist('mphstart', 'file')
+if ~exist('mphstart', 'file') && ~exist('mphload', 'file')
     fprintf('\nERROR: COMSOL LiveLink not found in MATLAB path.\n');
     fprintf('Either:\n');
     fprintf('  1. Add LiveLink to path:\n');
-    fprintf('     addpath(''C:\\Program Files\\COMSOL\\COMSOL63\\Multiphysics\\mli'')\n\n');
-    fprintf('  2. Or start MATLAB through COMSOL:\n');
-    fprintf('     comsol mphserver matlab\n');
+    fprintf('     addpath(''F:\\EngineeringSoftware\\COMSOL\\COMSOL63\\Multiphysics\\mli'')\n\n');
+    fprintf('  2. Or use "COMSOL with MATLAB" shortcut\n');
     return;
 end
 
@@ -143,19 +142,32 @@ fprintf('✓ LiveLink found.\n\n');
 
 %% ==================== CONNECT TO COMSOL ====================
 
-fprintf('Connecting to COMSOL server...\n');
+fprintf('Connecting to COMSOL...\n');
 
+% Check if already connected (e.g., when launched from "COMSOL with MATLAB")
+already_connected = false;
 try
-    mphstart(2036);
     import com.comsol.model.*
     import com.comsol.model.util.*
-    fprintf('✓ Connected to COMSOL server.\n\n');
-catch ME
-    fprintf('\nERROR: Could not connect to COMSOL server.\n');
-    fprintf('  %s\n\n', ME.message);
-    fprintf('Start COMSOL server first:\n');
-    fprintf('  comsolmphserver -port 2036\n');
-    return;
+    ModelUtil.tags();  % This will throw if not connected
+    already_connected = true;
+    fprintf('✓ Already connected to COMSOL (COMSOL with MATLAB mode)\n\n');
+catch
+    % Not connected yet, try to connect
+    try
+        fprintf('  Connecting to COMSOL server on port 2036...\n');
+        mphstart(2036);
+        import com.comsol.model.*
+        import com.comsol.model.util.*
+        fprintf('✓ Connected to COMSOL server.\n\n');
+    catch ME
+        fprintf('\nERROR: Could not connect to COMSOL server.\n');
+        fprintf('  %s\n\n', ME.message);
+        fprintf('Options:\n');
+        fprintf('  1. Start COMSOL server: comsolmphserver -port 2036\n');
+        fprintf('  2. Use "COMSOL with MATLAB" shortcut\n');
+        return;
+    end
 end
 
 %% ==================== LOAD MODEL ====================
