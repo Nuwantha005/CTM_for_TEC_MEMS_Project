@@ -3,12 +3,17 @@ classdef TECOptimizer < handle
         Solver
         BaseConfig
         OutputDir
+        % Live plot handles
+        TempProfileFig
+        TempProfileAxes
+        LastT  % Store last temperature distribution
     end
     
     methods
         function obj = TECOptimizer(config_path, output_dir_override)
             obj.Solver = RadialTECSolver(config_path);
             obj.BaseConfig = obj.Solver.Config;
+            obj.LastT = [];
             if nargin > 1 && ~isempty(output_dir_override)
                 obj.OutputDir = output_dir_override;
             else
@@ -22,18 +27,23 @@ classdef TECOptimizer < handle
         
         function [x_opt, fval, T_final] = run_optimization(obj)
             fprintf('Starting Optimization...\n');
+            
+            % Show current heat flux setting
+            q_flux = obj.Solver.Config.boundary_conditions.q_flux_W_m2;
+            fprintf('Heat flux: %.0f W/m² (%.2f W total chip)\n', q_flux, q_flux * 100e-6);
+            
             vars = {
                 % name, lower_bound, upper_bound, initial_value
-                'current', 0.01, 1.0, 0.15;
-                'k_r', 0.5, 2.0, 1.2;
-                'interconnect_ratio', 0.05, 0.45, 0.2;
-                'outerconnect_ratio', 0.05, 0.45, 0.2;
-                'interconnect_angle_ratio', 0.05, 0.5, 0.16;
-                'outerconnect_angle_ratio', 0.05, 0.5, 0.16;
-                'fill_factor', 0.5, 0.99, 0.9;
-                'thickness_um', 20, 150, 50;
-                'wedge_angle_deg', 10, 60, 30;
-                'insulation_width_ratio', 0.02, 0.15, 0.05;
+                'current', 0.005, 0.5, 0.025;  % Lower current often better
+                'k_r', 0.8, 1.5, 1.15;
+                'interconnect_ratio', 0.1, 0.35, 0.15;
+                'outerconnect_ratio', 0.1, 0.35, 0.15;
+                'interconnect_angle_ratio', 0.1, 0.4, 0.16;
+                'outerconnect_angle_ratio', 0.1, 0.4, 0.16;
+                'fill_factor', 0.8, 0.99, 0.95;
+                'thickness_um', 50, 500, 200;  % Thicker TEC helps
+                'wedge_angle_deg', 15, 60, 30;
+                'insulation_width_ratio', 0.02, 0.1, 0.04;
                 'interconnect_thickness_ratio', 0.5, 2.0, 1.0;
                 'outerconnect_thickness_ratio', 0.5, 2.0, 1.0
             };
@@ -41,29 +51,88 @@ classdef TECOptimizer < handle
             lb = [vars{:, 2}];
             ub = [vars{:, 3}];
             x0 = [vars{:, 4}];
-            options = optimset('Display', 'iter', 'PlotFcns', @optimplotfval);
+            
+            % Initialize live plots
+            obj.init_live_plots();
+            
+            % Use optimoptions with live plot callback
+            options = optimoptions('fmincon', 'Display', 'iter', ...
+                'MaxFunctionEvaluations', 500, ...
+                'OptimalityTolerance', 1e-4, ...
+                'StepTolerance', 1e-6, ...
+                'PlotFcn', {@optimplotfval, @optimplotx}, ...
+                'OutputFcn', @(x,optimValues,state) obj.update_live_plots(x, optimValues, state, var_names));
+            
             if exist('fmincon', 'file')
                 fprintf('Using fmincon...\n');
                 [x_opt, fval] = fmincon(@(x) obj.evaluate_cost(x, var_names), x0, [], [], [], [], lb, ub, [], options);
             else
                 fprintf('Using fminsearch (bounds handled by penalty)...\n');
-                [x_opt, fval] = fminsearch(@(x) obj.evaluate_cost_penalty(x, var_names, lb, ub), x0, options);
+                opts = optimset('Display', 'iter', 'MaxFunEvals', 500, 'PlotFcns', @optimplotfval);
+                [x_opt, fval] = fminsearch(@(x) obj.evaluate_cost_penalty(x, var_names, lb, ub), x0, opts);
             end
             fprintf('Optimization Complete.\n');
-            fprintf('Optimal Cost (T_cold): %.4f K\n', fval);
+            fprintf('Optimal T_max: %.4f K (%.1f °C)\n', fval, fval - 273.15);
             obj.update_config(x_opt, var_names);
             [T_final, ~, ~] = obj.Solver.run();
             obj.log_optimization_results(x_opt, var_names, fval, T_final);
+            
+            % Close live plot figure
+            if ~isempty(obj.TempProfileFig) && isvalid(obj.TempProfileFig)
+                close(obj.TempProfileFig);
+            end
         end
         
         function cost = evaluate_cost(obj, x, var_names)
             obj.update_config(x, var_names);
-            T_current = ones(2*obj.Solver.Geometry.N_stages+1, 1) * 300;
-            for i = 1:30
-                [T_new, ~, ~] = obj.Solver.Network.solve(T_current);
+            T_water = obj.Solver.Config.boundary_conditions.T_water_K;
+            T_target = 373.15;  % 100°C target
+            T_current = ones(2*obj.Solver.Geometry.N_stages+1, 1) * (T_water + 50);
+            
+            for i = 1:50
+                try
+                    [T_new, ~, ~] = obj.Solver.Network.solve(T_current);
+                catch
+                    cost = 1e8;  % Solver failed
+                    obj.log_step(x, var_names, cost);
+                    return;
+                end
+                
+                % Check for invalid values
+                if any(isnan(T_new)) || any(isinf(T_new)) || any(T_new < 0)
+                    cost = 1e8;
+                    obj.log_step(x, var_names, cost);
+                    return;
+                end
+                
                 T_current = 0.5 * T_new + 0.5 * T_current;
+                
+                % Early termination if converged
+                if max(abs(T_new - T_current)) < 1e-4
+                    break;
+                end
             end
-            cost = T_current(1);
+            
+            % Store for live plotting
+            obj.LastT = T_current;
+            
+            % Get temperatures
+            T_max = max(T_current);
+            T_min = min(T_current);
+            
+            % Primary objective: minimize max temperature
+            cost = T_max;
+            
+            % Soft penalty for temperatures below water (shouldn't happen but don't reject)
+            if T_min < T_water
+                cost = cost + 100 * abs(T_min - T_water);
+            end
+            
+            % Add penalty for exceeding target temperature (soft constraint)
+            if T_max > T_target
+                cost = cost + 10 * (T_max - T_target);
+            end
+            
             obj.log_step(x, var_names, cost);
         end
         
@@ -129,13 +198,20 @@ classdef TECOptimizer < handle
         
         function log_optimization_results(obj, x, var_names, cost, T_final)
             fid = fopen(fullfile(obj.OutputDir, 'optimal_params.txt'), 'w');
-            fprintf(fid, 'Optimal Cost (T_cold): %.4f K\n', cost);
+            fprintf(fid, 'Optimal Cost (T_max): %.4f K (%.1f °C)\n', cost, cost - 273.15);
             fprintf(fid, 'Parameters:\n');
             for i = 1:length(x)
                 fprintf(fid, '%s: %.4f\n', var_names{i}, x(i));
             end
             fclose(fid);
-            data = readtable(fullfile(obj.OutputDir, 'optimization_log.csv'));
+            
+            % Check if log file exists before trying to read it
+            log_file = fullfile(obj.OutputDir, 'optimization_log.csv');
+            if ~exist(log_file, 'file')
+                fprintf('Warning: No optimization log file found. Skipping convergence plot.\n');
+                return;
+            end
+            data = readtable(log_file);
             h = figure('Visible', 'off');
             plot(data.Cost, '-o');
             xlabel('Evaluation Index');
@@ -191,6 +267,86 @@ classdef TECOptimizer < handle
             saveas(h, fullfile(obj.OutputDir, 'optimal_temperature_profile.png'));
             close(h);
             fprintf('Temperature profile saved to %s\n', fullfile(obj.OutputDir, 'optimal_temperature_profile.png'));
+        end
+        
+        function init_live_plots(obj)
+            % Initialize live temperature profile plot
+            obj.TempProfileFig = figure('Name', 'Live Temperature Profile', ...
+                'Position', [100, 100, 600, 400]);
+            obj.TempProfileAxes = axes(obj.TempProfileFig);
+            title(obj.TempProfileAxes, 'Current Best Temperature Distribution');
+            xlabel(obj.TempProfileAxes, 'Radial Position (Stage Index)');
+            ylabel(obj.TempProfileAxes, 'Temperature (K)');
+            grid(obj.TempProfileAxes, 'on');
+            hold(obj.TempProfileAxes, 'on');
+            
+            % Add target temperature line
+            yline(obj.TempProfileAxes, 373.15, 'r--', 'T_{target} = 100°C', 'LineWidth', 1.5);
+            yline(obj.TempProfileAxes, 300, 'b--', 'T_{water} = 27°C', 'LineWidth', 1.5);
+            
+            drawnow;
+        end
+        
+        function stop = update_live_plots(obj, x, optimValues, state, var_names)
+            stop = false;
+            
+            if strcmp(state, 'done')
+                return;
+            end
+            
+            % Only update every few iterations to avoid slowdown
+            if mod(optimValues.iteration, 2) ~= 0 && ~strcmp(state, 'init')
+                return;
+            end
+            
+            % Get current temperature distribution
+            if ~isempty(obj.LastT)
+                T = obj.LastT;
+                N = obj.Solver.Geometry.N_stages;
+                T_water = obj.Solver.Config.boundary_conditions.T_water_K;
+                
+                % Extract temperatures
+                T_0 = T(1);
+                T_Si = T(2:N+1);
+                T_c = T(N+2:end);
+                
+                % Radial positions
+                r_chip = 0:N;
+                T_chip = [T_0; T_Si];
+                r_tec = 1:(N+1);
+                T_tec = [T_c; T_water];
+                
+                % Clear and replot
+                if isvalid(obj.TempProfileAxes)
+                    cla(obj.TempProfileAxes);
+                    hold(obj.TempProfileAxes, 'on');
+                    
+                    % Plot temperature profiles
+                    plot(obj.TempProfileAxes, r_chip, T_chip - 273.15, '-ob', 'LineWidth', 2, ...
+                        'MarkerFaceColor', 'b', 'DisplayName', 'Silicon Layer');
+                    plot(obj.TempProfileAxes, r_tec, T_tec - 273.15, '-sr', 'LineWidth', 2, ...
+                        'MarkerFaceColor', 'r', 'DisplayName', 'TEC Cold Side');
+                    plot(obj.TempProfileAxes, N+1, T_water - 273.15, 'g^', 'MarkerSize', 12, ...
+                        'MarkerFaceColor', 'g', 'DisplayName', 'Coolant');
+                    
+                    % Reference lines
+                    yline(obj.TempProfileAxes, 100, 'r--', 'LineWidth', 1.5);
+                    yline(obj.TempProfileAxes, 27, 'b--', 'LineWidth', 1.5);
+                    
+                    % Labels
+                    title(obj.TempProfileAxes, sprintf('Iter %d: T_{max} = %.1f°C (Target: 100°C)', ...
+                        optimValues.iteration, max(T) - 273.15));
+                    xlabel(obj.TempProfileAxes, 'Radial Position (Stage Index)');
+                    ylabel(obj.TempProfileAxes, 'Temperature (°C)');
+                    legend(obj.TempProfileAxes, 'Location', 'best');
+                    grid(obj.TempProfileAxes, 'on');
+                    
+                    % Set axis limits
+                    ylim(obj.TempProfileAxes, [20, max(150, max(T) - 273.15 + 10)]);
+                    
+                    drawnow;
+                end
+            end
         end
     end
 end

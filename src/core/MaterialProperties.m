@@ -52,7 +52,8 @@ classdef MaterialProperties
                                 obj.Tables.(mat_name) = struct();
                             end
                             obj.Tables.(mat_name).(prop_key) = data;
-                            fprintf('Loaded %s for %s\n', prop_key, mat_name);
+                            % Suppress verbose output for faster optimization
+                            % fprintf('Loaded %s for %s\n', prop_key, mat_name);
                         catch ME
                             fprintf('Failed to load %s: %s\n', fname, ME.message);
                         end

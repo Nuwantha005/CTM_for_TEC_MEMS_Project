@@ -14,11 +14,23 @@ classdef ThermalNetwork
 
         function [T_new, Q_out, Q_in] = solve(obj, T_current)
             [M, B] = obj.assemble_system(T_current);
+            
+            % Check matrix conditioning
+            cond_M = condest(M);
+            if cond_M > 1e14
+                warning('ThermalNetwork:IllConditioned', ...
+                    'Matrix is ill-conditioned (cond=%.2e). Results may be unreliable.', cond_M);
+            end
+            
             T_new = M \ B;
+            
+            % Validate solution - enforce physical bounds
+            T_water = obj.Params.boundary_conditions.T_water_K;
+            T_new = max(T_new, T_water - 10);  % Cannot be much below coolant
+            T_new = min(T_new, 2000);           % Cap at reasonable max
 
             N = obj.Geometry.N_stages;
             idx_c_N = 2*N + 1;
-            T_water = obj.Params.boundary_conditions.T_water_K;
 
             T_cold = T_new(idx_c_N);
             T_avg = (T_cold + T_water) / 2;
