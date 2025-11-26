@@ -44,7 +44,6 @@ classdef TECGeometry < handle
                 obj.L_1 = L_total_active * (1 - k_r) / (1 - k_r^N);
             end
 
-            fprintf('L_1 calculated = %e m\n', obj.L_1);
         end
 
         function [r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is] = get_stage_geometry(obj, i)
@@ -61,25 +60,50 @@ classdef TECGeometry < handle
 
             r_in = obj.R_cyl + sum_L_prev; % + i * w_is becasue in the original formulation, w_is is inside the L
 
+            % Length Ratios
             w_ic = L * obj.Params.interconnect_ratio;
             w_oc = L * obj.Params.outerconnect_ratio;
 
-            t_ic = obj.Thickness;
-            t_oc = obj.Thickness;
+            % Thickness Ratios
+            if isfield(obj.Params, 'interconnect_thickness_ratio')
+                t_ic = obj.Thickness * obj.Params.interconnect_thickness_ratio;
+            else
+                t_ic = obj.Thickness;
+            end
+            
+            if isfield(obj.Params, 'outerconnect_thickness_ratio')
+                t_oc = obj.Thickness * obj.Params.outerconnect_thickness_ratio;
+            else
+                t_oc = obj.Thickness;
+            end
 
-            if isfield(obj.Params, 'interconnect_angle_deg')
+            % Angle Ratios
+            if isfield(obj.Params, 'interconnect_angle_ratio')
+                beta_ic = obj.WedgeAngle * obj.Params.interconnect_angle_ratio;
+            elseif isfield(obj.Params, 'interconnect_angle_deg')
                 beta_ic = deg2rad(obj.Params.interconnect_angle_deg);
             else
                 beta_ic = deg2rad(5);
             end
 
-            if isfield(obj.Params, 'outerconnect_angle_deg')
+            if isfield(obj.Params, 'outerconnect_angle_ratio')
+                beta_oc = obj.WedgeAngle * obj.Params.outerconnect_angle_ratio;
+            elseif isfield(obj.Params, 'outerconnect_angle_deg')
                 beta_oc = deg2rad(obj.Params.outerconnect_angle_deg);
             else
                 beta_oc = deg2rad(5);
             end
 
-            w_az = obj.Params.azimuthal_gap_um * 1e-6;
+            % Azimuthal Gap (Fill Factor)
+            if isfield(obj.Params, 'fill_factor')
+                r_mid = r_in + L/2;
+                arc_length = r_mid * obj.WedgeAngle;
+                w_az = (1 - obj.Params.fill_factor) * arc_length;
+            elseif isfield(obj.Params, 'azimuthal_gap_um')
+                w_az = obj.Params.azimuthal_gap_um * 1e-6;
+            else
+                w_az = 20e-6;
+            end
         end
 
         function G = calculate_G(obj, r1, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is, ~)
@@ -134,7 +158,9 @@ classdef TECGeometry < handle
             K_az = k_az * (w_az * t) / L;
         end
 
-        function [N_TSV, R_TSV_tot] = calculate_TSV_vertical_resistance(obj, r, w_ic, beta_ic, rho_TSV, stage_idx)
+        function [N_TSV, R_TSV_tot] = calculate_TSV_vertical_resistance(obj, r, w_ic, beta_ic, k_TSV, stage_idx)
+            % Calculates THERMAL resistance of TSV array
+            % k_TSV: thermal conductivity of TSV material (W/m·K)
             if ~isfield(obj.Params, 'tsv')
                 N_TSV = 1;
                 R_TSV_tot = 1e-4;
@@ -166,8 +192,10 @@ classdef TECGeometry < handle
                 N_TSV = 0;
                 R_TSV_tot = 1e9;
             else
-                R_single = rho_TSV * t_SOI / (pi * R_TSV_rad^2);
-                R_TSV_tot = R_single / N_TSV;
+                % Thermal resistance: R = L / (k * A)
+                A_single = pi * R_TSV_rad^2;
+                R_single = t_SOI / (k_TSV * A_single);
+                R_TSV_tot = R_single / N_TSV;  % Parallel TSVs
             end
         end
 
