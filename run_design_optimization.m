@@ -21,7 +21,7 @@ config_path = 'src/config/default_params.json';
 
 % Modify config for your heat flux
 config = jsondecode(fileread(config_path));
-config.boundary_conditions.q_flux_W_m2 = 500;  % W/m² - adjust this!
+config.boundary_conditions.q_flux_W_m2 = 400000;  % W/m² - adjust this!
 fid = fopen(config_path, 'w');
 fprintf(fid, '%s', jsonencode(config));
 fclose(fid);
@@ -69,6 +69,7 @@ fprintf('  - optimization_results.mat (MATLAB data)\n');
 fprintf('  - optimization_summary.txt (Human-readable summary)\n');
 fprintf('  - best_design_config.json (For COMSOL import)\n');
 fprintf('  - feasible_designs.csv (All feasible designs)\n');
+fprintf('  - top_candidates/ (Top 10 candidate design folders)\n');
 fprintf('  - *.png, *.fig (Plots)\n');
 
 %% Quick visualization of results
@@ -87,6 +88,17 @@ if isfield(results, 'best_feasible')
     fprintf('  COP = %.3f\n', best.COP);
 end
 
-%% Open results folder
-fprintf('\nOpening results folder...\n');
-winopen(optimizer.OutputDir);
+%% Open results folder (only in interactive mode)
+if usejava('desktop')
+    fprintf('\nOpening results folder...\n');
+    winopen(optimizer.OutputDir);
+end
+
+%% Keep figures open - wait for user input if running in batch mode
+% This prevents MATLAB from closing immediately when run via terminal
+if ~usejava('desktop')
+    fprintf('\nPress Ctrl+C to exit when done viewing results.\n');
+    fprintf('Figures will remain open for viewing.\n');
+    % Note: In batch mode (-batch), figures aren't displayed interactively
+    % The plots are saved to files in the output directory
+end

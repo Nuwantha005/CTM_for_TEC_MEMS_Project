@@ -16,10 +16,10 @@
         "outerconnect_ratio": 0.2,
         "interconnect_angle_ratio": 0.16,
         "outerconnect_angle_ratio": 0.16,
-        "interconnect_thickness_ratio": 1,
-        "outerconnect_thickness_ratio": 1,
+        "interconnect_thickness_ratio": 1.0,
+        "outerconnect_thickness_ratio": 1.0,
         "fill_factor": 0.9,
-        "insulation_width_um": 40,
+        "insulation_width_ratio": 0.05,
         "radial_expansion_factor": 1.2,
         "N_tsv_limit": 5,
         "tsv": {

@@ -88,7 +88,10 @@ classdef ThermalNetwork
             theta = obj.Geometry.WedgeAngle;
             t_chip = obj.Params.geometry.t_chip_um * 1e-6;
             t_tec = obj.Geometry.Thickness;
-            w_is = obj.Params.geometry.insulation_width_um * 1e-6;
+            
+            % Get insulation width from geometry - support both ratio and absolute
+            [~, L1, ~, ~, ~, ~, ~, ~, ~, w_is] = obj.Geometry.get_stage_geometry(1);
+            
             R_cyl = obj.Geometry.R_cyl;
 
             K_stages = zeros(N, 1);

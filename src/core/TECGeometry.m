@@ -28,7 +28,18 @@ classdef TECGeometry < handle
         end
 
         function calculate_L1(obj)
-            w_is = obj.Params.insulation_width_um * 1e-6;
+            % Get insulation width - support both ratio and absolute value
+            if isfield(obj.Params, 'insulation_width_ratio')
+                % Will be computed per-stage, use estimate for L1 calculation
+                % Use an initial estimate assuming average stage length
+                L_avg_estimate = (obj.R_base - obj.R_cyl) / obj.N_stages;
+                w_is = obj.Params.insulation_width_ratio * L_avg_estimate;
+            elseif isfield(obj.Params, 'insulation_width_um')
+                w_is = obj.Params.insulation_width_um * 1e-6;
+            else
+                w_is = 40e-6;  % Default 40 um
+            end
+            
             k_r = obj.Params.radial_expansion_factor;
             N = obj.N_stages;
 
@@ -50,7 +61,14 @@ classdef TECGeometry < handle
             k_r = obj.Params.radial_expansion_factor;
             L = obj.L_1 * k_r^(i-1);
 
-            w_is = obj.Params.insulation_width_um * 1e-6;
+            % Insulation width: support both ratio and absolute value
+            if isfield(obj.Params, 'insulation_width_ratio')
+                w_is = obj.Params.insulation_width_ratio * L;
+            elseif isfield(obj.Params, 'insulation_width_um')
+                w_is = obj.Params.insulation_width_um * 1e-6;
+            else
+                w_is = 40e-6;  % Default 40 um
+            end
 
             if k_r == 1
                 sum_L_prev = (i-1) * obj.L_1;
@@ -64,7 +82,7 @@ classdef TECGeometry < handle
             w_ic = L * obj.Params.interconnect_ratio;
             w_oc = L * obj.Params.outerconnect_ratio;
 
-            % Thickness Ratios
+            % Thickness Ratios (ratios of TEC layer thickness)
             if isfield(obj.Params, 'interconnect_thickness_ratio')
                 t_ic = obj.Thickness * obj.Params.interconnect_thickness_ratio;
             else

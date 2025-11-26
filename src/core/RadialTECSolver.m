@@ -63,7 +63,10 @@ classdef RadialTECSolver < handle
             obj.Results.log_results(T_current, Q_out, Q_in, obj.Config);
             obj.Results.save_results_text(T_current, Q_out, Q_in, obj.Config);
             obj.Results.save_results(T_current, Q_out, obj.Config);
-            obj.Results.plot_temperature_profile(T_current, obj.Geometry, 'best_temperature_profile.png', 'Final Solution');
+            
+            % Get water temperature for plotting
+            T_water = obj.Config.boundary_conditions.T_water_K;
+            obj.Results.plot_temperature_profile(T_current, obj.Geometry, 'best_temperature_profile.png', 'Final Solution', [], T_water);
             
             % Save convergence plot
             obj.plot_convergence(convergence_history);

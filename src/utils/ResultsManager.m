@@ -70,7 +70,7 @@ classdef ResultsManager
             fprintf('Text results saved to %s\n', filename);
         end
 
-        function plot_temperature_profile(obj, T, geometry, filename_override, title_suffix, subfolder)
+        function plot_temperature_profile(obj, T, geometry, filename_override, title_suffix, subfolder, T_water)
             if nargin < 4 || isempty(filename_override)
                 filename = 'temp_profile.png';
             else
@@ -92,6 +92,11 @@ classdef ResultsManager
                 end
             end
 
+            % Default T_water if not provided
+            if nargin < 7 || isempty(T_water)
+                T_water = 300;  % Default coolant temperature (K)
+            end
+
             N = geometry.N_stages;
             T_0 = T(1);
             T_Si = T(2:N+1);
@@ -99,11 +104,18 @@ classdef ResultsManager
 
             r_chip = 0:N;
             T_chip = [T_0; T_Si];
-            r_tec = 1:N;
+            
+            % TEC layer: stages 1 to N, plus water at "stage N+1"
+            r_tec = 1:(N+1);
+            T_tec = [T_c; T_water];
 
             h = figure('Visible', 'off');
             plot(r_chip, T_chip, '-ob', 'LineWidth', 1.8, 'MarkerFaceColor', 'b', 'DisplayName', 'Silicon Layer'); hold on;
-            plot(r_tec, T_c, '-sr', 'LineWidth', 1.8, 'MarkerFaceColor', 'r', 'DisplayName', 'TEC Layer');
+            plot(r_tec, T_tec, '-sr', 'LineWidth', 1.8, 'MarkerFaceColor', 'r', 'DisplayName', 'TEC Layer');
+            
+            % Mark the water temperature point distinctly
+            plot(N+1, T_water, 'g^', 'MarkerSize', 10, 'MarkerFaceColor', 'g', 'DisplayName', 'Coolant (T_{water})');
+            
             xlabel('Stage Index');
             ylabel('Temperature (K)');
             title(['Radial Temperature Profile' title_suffix]);

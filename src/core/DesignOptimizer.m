@@ -49,9 +49,9 @@ classdef DesignOptimizer < handle
             obj.MinThermalConductance = 1e-9;  % W/K
             obj.MaxTempRise = 50000;           % K above ambient (very relaxed, let solver decide)
             
-            % Create output directory
+            % Create output directory (use design_optimizations folder)
             timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
-            obj.OutputDir = fullfile('output', 'optimizations', timestamp);
+            obj.OutputDir = fullfile('output', 'design_optimizations', timestamp);
             if ~exist(obj.OutputDir, 'dir')
                 mkdir(obj.OutputDir);
             end
@@ -99,6 +99,41 @@ classdef DesignOptimizer < handle
             feasible_count = 0;
             failed_count = 0;
             
+            % Create live progress figure
+            live_fig = figure('Name', 'Design Optimization Progress', 'NumberTitle', 'off', ...
+                'Position', [100, 100, 1200, 500]);
+            
+            % Subplot 1: Temperature progress
+            ax1 = subplot(1, 3, 1);
+            hold(ax1, 'on');
+            title(ax1, 'Temperature vs Configuration');
+            xlabel(ax1, 'Configuration Index');
+            ylabel(ax1, 'T_{max} (°C)');
+            yline(ax1, obj.T_target_C, 'r--', 'LineWidth', 2);
+            grid(ax1, 'on');
+            
+            % Subplot 2: Feasible vs Infeasible count
+            ax2 = subplot(1, 3, 2);
+            bar_data = [0; 0; 0];
+            bar_h = bar(ax2, bar_data);
+            set(ax2, 'XTickLabel', {'Feasible', 'High T', 'Failed'});
+            title(ax2, 'Design Classification');
+            ylabel(ax2, 'Count');
+            grid(ax2, 'on');
+            
+            % Subplot 3: Best designs table
+            ax3 = subplot(1, 3, 3);
+            axis(ax3, 'off');
+            title(ax3, 'Top 5 Designs (by T_{max})');
+            top_text = text(ax3, 0.1, 0.9, 'Waiting for results...', 'FontSize', 10, 'VerticalAlignment', 'top');
+            
+            drawnow;
+            
+            % Tracking for live plot
+            T_history = [];
+            feasible_history = [];
+            high_T_count = 0;
+            
             % Progress tracking
             start_time = tic;
             
@@ -135,6 +170,11 @@ classdef DesignOptimizer < handle
                                         N, theta_deg, t_TEC, k_r, reason);
                                 end
                                 failed_count = failed_count + 1;
+                                
+                                % Update live plot
+                                bar_data = [feasible_count; high_T_count; failed_count];
+                                set(bar_h, 'YData', bar_data);
+                                drawnow limitrate;
                                 continue;
                             end
                             
@@ -152,8 +192,41 @@ classdef DesignOptimizer < handle
                                     
                                     all_results = [all_results; opt_result];
                                     
+                                    % Update live temperature plot
+                                    T_history = [T_history; opt_result.T_max_C];
+                                    feasible_history = [feasible_history; opt_result.meets_target];
+                                    
+                                    % Plot with color based on feasibility
                                     if opt_result.meets_target
+                                        plot(ax1, length(T_history), opt_result.T_max_C, 'go', 'MarkerSize', 6, 'MarkerFaceColor', 'g');
                                         feasible_count = feasible_count + 1;
+                                    else
+                                        plot(ax1, length(T_history), opt_result.T_max_C, 'rx', 'MarkerSize', 6);
+                                        high_T_count = high_T_count + 1;
+                                    end
+                                    
+                                    % Update bar chart
+                                    bar_data = [feasible_count; high_T_count; failed_count];
+                                    set(bar_h, 'YData', bar_data);
+                                    
+                                    % Update top 5 designs text
+                                    if ~isempty(all_results)
+                                        T_all = [all_results.T_max_C];
+                                        [~, sort_idx] = sort(T_all);
+                                        top_n = min(5, length(all_results));
+                                        top_lines = {'Rank | N | θ | t(μm) | k_r | T(°C)', ...
+                                                     '----------------------------------------'};
+                                        for ti = 1:top_n
+                                            r = all_results(sort_idx(ti));
+                                            top_lines{end+1} = sprintf('%4d | %d | %2.0f | %4.0f | %.2f | %.1f', ...
+                                                ti, r.N_stages, r.theta_deg, r.t_TEC_um, r.k_r, r.T_max_C);
+                                        end
+                                        set(top_text, 'String', top_lines);
+                                    end
+                                    
+                                    drawnow limitrate;
+                                    
+                                    if opt_result.meets_target
                                         if verbose
                                             fprintf('  [OK] N=%d, θ=%.0f°, t=%.0fμm, k_r=%.2f: T=%.1f°C, I=%.3fA, COP=%.3f\n', ...
                                                 N, theta_deg, t_TEC, k_r, opt_result.T_max_C, opt_result.I_opt, opt_result.COP);
@@ -166,6 +239,9 @@ classdef DesignOptimizer < handle
                                     end
                                 else
                                     failed_count = failed_count + 1;
+                                    bar_data = [feasible_count; high_T_count; failed_count];
+                                    set(bar_h, 'YData', bar_data);
+                                    drawnow limitrate;
                                 end
                             catch ME
                                 if verbose
@@ -173,11 +249,18 @@ classdef DesignOptimizer < handle
                                         N, theta_deg, t_TEC, k_r, ME.message);
                                 end
                                 failed_count = failed_count + 1;
+                                bar_data = [feasible_count; high_T_count; failed_count];
+                                set(bar_h, 'YData', bar_data);
+                                drawnow limitrate;
                             end
                         end
                     end
                 end
             end
+            
+            % Save live progress figure
+            saveas(live_fig, fullfile(obj.OutputDir, 'optimization_progress.png'));
+            saveas(live_fig, fullfile(obj.OutputDir, 'optimization_progress.fig'));
             
             % Store results
             obj.Results.all_results = all_results;
@@ -211,9 +294,10 @@ classdef DesignOptimizer < handle
         function config = createConfig(obj, N_stages, theta_deg, t_TEC_um, k_r)
             % Create configuration struct with specified parameters
             config = obj.BaseConfig;
+            config.geometry.N_stages = N_stages;
             config.geometry.N_tsv_limit = N_stages;
             config.geometry.wedge_angle_deg = theta_deg;
-            config.geometry.t_TEC_um = t_TEC_um;
+            config.geometry.thickness_um = t_TEC_um;
             config.geometry.radial_expansion_factor = k_r;
         end
         
@@ -253,7 +337,7 @@ classdef DesignOptimizer < handle
                 % If R_th is too high, temperatures will be unrealistic
                 theta = geo.WedgeAngle;
                 R_base = geo.R_base;
-                t_TEC = config.geometry.t_TEC_um * 1e-6;
+                t_TEC = config.geometry.thickness_um * 1e-6;
                 k_bi2te3 = 1.2;  % Approximate
                 
                 % Very rough estimate of total thermal conductance
@@ -691,7 +775,8 @@ classdef DesignOptimizer < handle
             
             fprintf('\nPlots saved to: %s\n', obj.OutputDir);
             
-            close all;
+            % Don't close figures - keep them open for viewing
+            % close all;
         end
         
         function saveResults(obj)
@@ -790,7 +875,164 @@ classdef DesignOptimizer < handle
                 end
             end
             
+            % Save top 10 candidate design folders with detailed outputs
+            obj.saveTopCandidates(10);
+            
             fprintf('Results saved to: %s\n', obj.OutputDir);
+        end
+        
+        function saveTopCandidates(obj, num_candidates)
+            % Save detailed outputs for top N candidate designs
+            
+            if isempty(obj.Results.all_results)
+                return;
+            end
+            
+            all_r = obj.Results.all_results;
+            
+            % Sort by T_max (best = lowest temperature)
+            T_all = [all_r.T_max_C];
+            [~, sort_idx] = sort(T_all);
+            
+            % Limit to available results
+            num_to_save = min(num_candidates, length(all_r));
+            
+            fprintf('\nSaving top %d candidate designs...\n', num_to_save);
+            
+            % Create candidates folder
+            candidates_dir = fullfile(obj.OutputDir, 'top_candidates');
+            if ~exist(candidates_dir, 'dir')
+                mkdir(candidates_dir);
+            end
+            
+            for rank = 1:num_to_save
+                r = all_r(sort_idx(rank));
+                
+                % Create folder for this candidate
+                folder_name = sprintf('rank_%02d_N%d_theta%.0f_t%.0f_kr%.2f', ...
+                    rank, r.N_stages, r.theta_deg, r.t_TEC_um, r.k_r);
+                candidate_dir = fullfile(candidates_dir, folder_name);
+                if ~exist(candidate_dir, 'dir')
+                    mkdir(candidate_dir);
+                end
+                
+                % 1. Save configuration JSON
+                config_to_save = r.config;
+                config_to_save.optimization_results.rank = rank;
+                config_to_save.optimization_results.T_max_C = r.T_max_C;
+                config_to_save.optimization_results.T_max_K = r.T_max_K;
+                config_to_save.optimization_results.I_opt_A = r.I_opt;
+                config_to_save.optimization_results.COP = r.COP;
+                config_to_save.optimization_results.Q_in_W = r.Q_in;
+                config_to_save.optimization_results.Q_out_W = r.Q_out;
+                config_to_save.optimization_results.meets_target = r.meets_target;
+                
+                json_str = jsonencode(config_to_save);
+                json_str = strrep(json_str, ',', sprintf(',\n'));
+                json_str = strrep(json_str, '{', sprintf('{\n'));
+                json_str = strrep(json_str, '}', sprintf('\n}'));
+                
+                fid = fopen(fullfile(candidate_dir, 'config.json'), 'w');
+                fprintf(fid, '%s', json_str);
+                fclose(fid);
+                
+                % 2. Save summary text file
+                fid = fopen(fullfile(candidate_dir, 'summary.txt'), 'w');
+                fprintf(fid, 'CANDIDATE DESIGN #%d\n', rank);
+                fprintf(fid, '=====================\n\n');
+                fprintf(fid, 'DESIGN PARAMETERS\n');
+                fprintf(fid, '-----------------\n');
+                fprintf(fid, 'Number of stages (N): %d\n', r.N_stages);
+                fprintf(fid, 'Wedge angle (θ): %.1f°\n', r.theta_deg);
+                fprintf(fid, 'TEC thickness: %.0f μm\n', r.t_TEC_um);
+                fprintf(fid, 'Radial expansion factor (k_r): %.2f\n', r.k_r);
+                fprintf(fid, 'Optimal current: %.4f A (%.2f mA)\n\n', r.I_opt, r.I_opt*1000);
+                
+                fprintf(fid, 'PERFORMANCE RESULTS\n');
+                fprintf(fid, '-------------------\n');
+                fprintf(fid, 'Maximum temperature: %.2f°C (%.2f K)\n', r.T_max_C, r.T_max_K);
+                fprintf(fid, 'Minimum temperature: %.2f K\n', r.T_min_K);
+                fprintf(fid, 'Meets target (<%d°C): %s\n', obj.T_target_C, mat2str(r.meets_target));
+                fprintf(fid, 'COP: %.4f\n', r.COP);
+                fprintf(fid, 'Heat absorbed (Q_in): %.6f W\n', r.Q_in);
+                fprintf(fid, 'Heat rejected (Q_out): %.6f W\n\n', abs(r.Q_out));
+                
+                fprintf(fid, 'TEMPERATURE DISTRIBUTION\n');
+                fprintf(fid, '------------------------\n');
+                T = r.T_distribution;
+                N = r.N_stages;
+                fprintf(fid, 'Node 0 (Center): %.2f K (%.2f°C)\n', T(1), T(1)-273.15);
+                for i = 1:N
+                    fprintf(fid, 'Stage %d - Si: %.2f K (%.2f°C), TEC: %.2f K (%.2f°C)\n', ...
+                        i, T(i+1), T(i+1)-273.15, T(N+i+1), T(N+i+1)-273.15);
+                end
+                fprintf(fid, 'Coolant (T_water): %.2f K (%.2f°C)\n', obj.T_water_K, obj.T_water_K-273.15);
+                fclose(fid);
+                
+                % 3. Generate and save temperature profile plot
+                obj.saveTemperatureProfilePlot(r, candidate_dir);
+                
+                % 4. Save MATLAB data
+                candidate_data = r;
+                save(fullfile(candidate_dir, 'candidate_data.mat'), 'candidate_data');
+                
+                fprintf('  Saved candidate #%d: T=%.1f°C, N=%d, θ=%.0f°, t=%.0fμm\n', ...
+                    rank, r.T_max_C, r.N_stages, r.theta_deg, r.t_TEC_um);
+            end
+            
+            fprintf('Top %d candidates saved to: %s\n', num_to_save, candidates_dir);
+        end
+        
+        function saveTemperatureProfilePlot(obj, result, save_dir)
+            % Generate and save temperature profile plot for a candidate design
+            
+            T_dist = result.T_distribution;
+            N = result.N_stages;
+            
+            fig = figure('Visible', 'off', 'Position', [100, 100, 900, 500]);
+            
+            % Subplot 1: Bar chart of all node temperatures
+            subplot(1, 2, 1);
+            bar(T_dist - 273.15);
+            ylabel('Temperature (°C)', 'FontSize', 12);
+            xlabel('Node Index', 'FontSize', 12);
+            title(sprintf('Temperature Distribution\n(N=%d, θ=%.0f°, t=%.0fμm, I=%.1fmA)', ...
+                result.N_stages, result.theta_deg, result.t_TEC_um, result.I_opt*1000), 'FontSize', 11);
+            yline(obj.T_target_C, 'r--', 'LineWidth', 2, 'Label', 'Target');
+            grid on;
+            
+            % Subplot 2: Radial profile with coolant
+            subplot(1, 2, 2);
+            
+            % Silicon layer: stages 0 to N
+            T_0 = T_dist(1) - 273.15;
+            T_Si = T_dist(2:N+1) - 273.15;
+            r_chip = 0:N;
+            T_chip = [T_0; T_Si];
+            
+            % TEC layer: stages 1 to N, plus coolant at N+1
+            T_TEC = T_dist(N+2:end) - 273.15;
+            T_water_C = obj.T_water_K - 273.15;
+            r_tec = 1:(N+1);
+            T_tec_full = [T_TEC; T_water_C];
+            
+            plot(r_chip, T_chip, '-ob', 'LineWidth', 2, 'MarkerSize', 8, 'MarkerFaceColor', 'b', 'DisplayName', 'Silicon Layer');
+            hold on;
+            plot(r_tec, T_tec_full, '-sr', 'LineWidth', 2, 'MarkerSize', 8, 'MarkerFaceColor', 'r', 'DisplayName', 'TEC Layer');
+            plot(N+1, T_water_C, 'g^', 'MarkerSize', 10, 'MarkerFaceColor', 'g', 'DisplayName', 'Coolant (T_{water})');
+            yline(obj.T_target_C, 'k--', 'LineWidth', 1.5, 'DisplayName', 'Target');
+            
+            xlabel('Stage Number', 'FontSize', 12);
+            ylabel('Temperature (°C)', 'FontSize', 12);
+            title('Radial Temperature Profile', 'FontSize', 12);
+            legend('Location', 'best');
+            grid on;
+            xlim([-0.5, N+1.5]);
+            
+            % Save the figure
+            saveas(fig, fullfile(save_dir, 'temperature_profile.png'));
+            saveas(fig, fullfile(save_dir, 'temperature_profile.fig'));
+            close(fig);
         end
     end
 end
