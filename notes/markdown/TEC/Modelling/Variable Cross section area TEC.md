@@ -2,7 +2,7 @@ We need to find expressions for the overall conductance and overall thermal resi
 
 # 1 TEC Legs
  $K$ is the _overall thermal conductance_ and $R$ is the _overall electrical resistance_ and they can be represented as,
-$$K=\kappa_{\mathrm{p}}{\frac{L_{\mathrm{p}}}{A_{\mathrm{p}}}}+\kappa_{\mathrm{n}}{\frac{L_{\mathrm{n}}}{A_{\mathrm{n}}}}$$
+$$K=\kappa_{\mathrm{p}}{\frac{A_{\mathrm{p}}}{L_{\mathrm{p}}}}+\kappa_{\mathrm{n}}{\frac{A_{\mathrm{n}}}{L_{\mathrm{n}}}}$$
 $$R=\rho_{\mathrm{p}}{\frac{L_{\mathrm{p}}}{A_{\mathrm{p}}}}+\rho_{\mathrm{n}}{\frac{L_{\mathrm{n}}}{A_{\mathrm{n}}}}$$
 where $\kappa,\ \rho,\ L\ \mathrm{and}\ A$ are thermal conductivity, electrical resistivity, thickness, and cross-section area.
 
@@ -37,8 +37,8 @@ $$R_e =\frac{2\rho}{t\theta}ln\left(\frac{r_2}{r_1}\right)\tag{3}$$
 ### 1.2.3 Combined for Both TE Legs
 Now we do parallel resistance summation for thermals,
 $$\frac{1}{R_{total,t}}=\frac{1}{R_{N,t}}+\frac{1}{R_{P,t}}$$
-$$\frac{1}{R_{total,t}}=\frac{2t\kappa_N\theta}{ln\left(r_2/r_1\right)}+\frac{2t\kappa_P\theta}{ln\left(r_2/r_1\right)}$$
-$$K_{total}=\frac{1}{R_{total,t}}=\frac{2t\theta\left[\kappa_N+\kappa_P\right]}{ln\left(r_2/r_1\right)}$$
+$$\frac{1}{R_{total,t}}=\frac{t\kappa_N\theta}{2ln\left(r_2/r_1\right)}+\frac{t\kappa_P\theta}{2ln\left(r_2/r_1\right)}$$
+$$K_{total}=\frac{1}{R_{total,t}}=\frac{t\theta\left[\kappa_N+\kappa_P\right]}{2ln\left(r_2/r_1\right)}$$
 Electrical resistance is positioned in series Connections,
 $$R_{total,e}={R_{N,e}}+{R_{P,e}}$$
 $$R_{total,e}=\frac{2\rho_N}{t\theta}ln\left(\frac{r_2}{r_1}\right)+\frac{2\rho_P}{t\theta}ln\left(\frac{r_2}{r_1}\right)$$

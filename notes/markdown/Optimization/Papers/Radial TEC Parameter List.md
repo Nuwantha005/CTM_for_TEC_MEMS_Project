@@ -77,7 +77,7 @@ In your code, let the optimizer pick $k_r$â€‹. Then immediately calculate $L_1$â
 $$ L_1 = L_{total\;active} \cdot \left( \frac{1 - k_r}{1 - k_r^{N_s}} \right) $$  
 _Note: Handle the case where $k_r=1$ separately, where $L_1 = L_{total\;active} / N_s$)_
 
-### 3. Parametrizing Sub-Geometries (The "Ratio" Method)
+### 4.1.1 Parametrizing Sub-Geometries (The "Ratio" Method)
 Parameters like $w_{ic}$ (interconnect length) that are constrained by $L_i$ (e.g., $w_{ic} < L_i/2$). If the optimizer shrinks $L_i$, a fixed $w_{ic}$ might become invalid (negative leg length). 
 
 **Solution:** Optimize **Ratios**, not absolute lengths. Define a new set of design variables \alpha: 

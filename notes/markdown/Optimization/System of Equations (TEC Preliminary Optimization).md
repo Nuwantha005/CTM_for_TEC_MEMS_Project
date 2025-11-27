@@ -78,7 +78,7 @@ $$\begin{align}\left(S_{i-1}I_{i-1}+K_{i-1}\right)T_{c,i-1}-\left(\frac{1}{R_{v,
 ## 3.1 Node 0
 
 As discussed in [[TEC Thermal Network#3 Node 0 treatment|this section]] , the $T_0$ for both layers are the same., and therefore a separate equation is required to add that coupling and the associated heat generation term. Therefore, following equation will become the entries for the first row,
-$$\left(\frac{1}{R_{Si,0\to 1}}+\frac{1}{R_{TEC,0\to 1}}\right)T_0-\frac{1}{R_{Si,0\to 1}}T_{Si,1}-\frac{1}{R_{c,0\to 1}}T_{c,1}=Q_{gen,0}$$
+$$-\left(\frac{1}{R_{Si,0\to 1}}+\frac{1}{R_{TEC,0\to 1}}\right)T_0+\frac{1}{R_{Si,0\to 1}}T_{Si,1}+\frac{1}{R_{c,0\to 1}}T_{c,1}=-Q_{gen,0}$$
 ## 3.2 Last Node - Boundary Condition
 
 A detailed description on the reasoning behind these equations are shown in [[Basic Radial TEC Design#4 Boundary Condition|this]] section. Here the equations get separated into the standard linear form.
@@ -116,15 +116,17 @@ Where:
 ## 4.2 Detailed Coefficients 
 
 ### 4.2.1 Region 1: $\mathbf{M_{00}}$ (Center Scalar) 
-$$ \mathbf{M_{00}} = \left[ \frac{1}{R_{Si, 0\to 1}} + \frac{1}{R_{c, 0\to 1}} \right] $$ **Description:** This scalar represents the sum of all thermal conductances leaving the center node ($T_0$). It connects to the first Silicon ring and the first TEC node. 
+$$ \mathbf{M_{00}} = \left[ -\left(\frac{1}{R_{Si, 0\to 1}} + \frac{1}{R_{c, 0\to 1}}\right) \right] $$ **Description:** This scalar represents the sum of all thermal conductances leaving the center node ($T_0$). It connects to the first Silicon ring and the first TEC node. 
 ### 4.2.2 Region 2: $\mathbf{Link_{0 \to Si}}$ (Center to Silicon) 
-$$ \mathbf{Link_{0 \to Si}} = \begin{bmatrix} -\frac{1}{R_{Si, 0\to 1}} & 0 & \dots & 0 \end{bmatrix}_{1 \times N} $$
-**Description:** A row vector of size $1 \times N$. Only the first element is non-zero, representing the connection to $T_{Si,1}$. * **Loop Logic:** Set index `[0, 0]` to $-\frac{1}{R_{Si, 0\to 1}}$. 
+$$ \mathbf{Link_{0 \to Si}} = \begin{bmatrix} \frac{1}{R_{Si, 0\to 1}} & 0 & \dots & 0 \end{bmatrix}_{1 \times N} $$
+**Description:** A row vector of size $1 \times N$. Only the first element is non-zero, representing the connection to $T_{Si,1}$. 
+* **Loop Logic:** Set index `[0, 0]` to $\frac{1}{R_{Si, 0\to 1}}$. 
 ### 4.2.3 Region 3: $\mathbf{Link_{0 \to TEC}}$ (Center to TEC) 
-$$ \mathbf{Link_{0 \to TEC}} = \begin{bmatrix} -\frac{1}{R_{c, 0\to 1}} & 0 & \dots & 0 \end{bmatrix}_{1 \times N} $$**Description:** A row vector of size $1 \times N$. Only the first element is non-zero, representing the connection to $T_{c,1}$. * **Loop Logic:** Set index `[0, 0]` to $-\frac{1}{R_{c, 0\to 1}}$.
+$$ \mathbf{Link_{0 \to TEC}} = \begin{bmatrix} \frac{1}{R_{c, 0\to 1}} & 0 & \dots & 0 \end{bmatrix}_{1 \times N} $$**Description:** A row vector of size $1 \times N$. Only the first element is non-zero, representing the connection to $T_{c,1}$. 
+* **Loop Logic:** Set index `[0, 0]` to $\frac{1}{R_{c, 0\to 1}}$.
 
 ### 4.2.4 Region 4: $\mathbf{Link_{Si \to 0}}$ (Silicon to Center) 
-$$ \mathbf{Link_{Si \to 0}} = \begin{bmatrix} -\frac{1}{R_{Si, 0\to 1}} \\ 0 \\ \vdots \\ 0 \end{bmatrix}_{N \times 1} $$ **Description:** A column vector of size $N \times 1$. This is the transpose of Region 2. * **Loop Logic:** Set index `[0, 0]` to $-\frac{1}{R_{Si, 0\to 1}}$. 
+$$ \mathbf{Link_{Si \to 0}} = \begin{bmatrix} \frac{1}{R_{Si, 0\to 1}} \\ 0 \\ \vdots \\ 0 \end{bmatrix}_{N \times 1} $$ **Description:** A column vector of size $N \times 1$. This is the transpose of Region 2. * **Loop Logic:** Set index `[0, 0]` to $-\frac{1}{R_{Si, 0\to 1}}$. 
 ### 4.2.5 Region 5: $\mathbf{A_{Silicon}}$ (Lateral Conduction Matrix) 
 $$ \mathbf{A_{Si}} = \begin{bmatrix} -\left( \frac{1}{R_{Si,0\to 1}} + \frac{1}{R_{lat,1}} + \frac{1}{R_{v,1}} \right) & \frac{1}{R_{lat,1}} & 0 & \dots \\ \frac{1}{R_{lat,1}} & -\left( \frac{1}{R_{lat,1}} + \frac{1}{R_{lat,2}} + \frac{1}{R_{v,2}} \right) & \frac{1}{R_{lat,2}} & \dots \\ \vdots & \ddots & \ddots & \vdots \\ 0 & \dots & \frac{1}{R_{lat,N-1}} & -\left( \frac{1}{R_{lat,N-1}} + \frac{1}{R_{v,N}} \right) \end{bmatrix}_{N \times N} $$ **Description:** A symmetric **Tridiagonal** matrix representing passive heat spreading. 
 * **Diagonal $(i,i)$:** The negative sum of all conductances leaving the node. 
@@ -135,14 +137,14 @@ $$ \mathbf{A_{Vert}} = \begin{bmatrix} \frac{1}{R_{v,1}} & 0 & \dots & 0 \\ 0 & 
 * This matrix appears twice in the global system: once connecting Silicon to TEC (Region 6), and once connecting TEC to Silicon (Region 8). 
 * **Loop Logic:** For each $i$, set `[i, i]` to $\frac{1}{R_{v,i}}$. This is the "Switch" variable—if a zone has no TSVs, $R_{v,i}$ is set to a very large number (approx $\infty$), making this term effectively 0. 
 ### 4.2.7 Region 7: $\mathbf{Link_{TEC \to 0}}$ (TEC to Center) 
-$$ \mathbf{Link_{TEC \to 0}} = \begin{bmatrix} -\frac{1}{R_{c, 0\to 1}} \\ 0 \\ \vdots \\ 0 \end{bmatrix}_{N \times 1} $$ **Description:** A column vector of size $N \times 1$. This is the transpose of Region 3. * **Loop Logic:** Set index `[0, 0]` to $-\frac{1}{R_{c, 0\to 1}}$. 
+$$ \mathbf{Link_{TEC \to 0}} = \begin{bmatrix} \frac{1}{R_{c, 0\to 1}} \\ 0 \\ \vdots \\ 0 \end{bmatrix}_{N \times 1} $$ **Description:** A column vector of size $N \times 1$. This is the transpose of Region 3. * **Loop Logic:** Set index `[0, 0]` to $-\frac{1}{R_{c, 0\to 1}}$. 
 ### 4.2.8 Region 9: $\mathbf{A_{TEC}}$ (Active Pumping Matrix) 
 $$ \tiny \mathbf{A_{TEC}} = \begin{bmatrix} -\left(\frac{1}{R_{v,1}} + \frac{1}{R_{c,0\to 1}} + S_1 I_1 - K_1 \right) & K_1 & 0 & \dots \\ (S_1 I_1 + K_1) & -\left(\frac{1}{R_{v,2}} + K_1 + S_2 I_2 - K_2 \right) & K_2 & \dots \\ \vdots & \ddots & \ddots & \vdots \\ 0 & \dots & (S_{N-1} I_{N-1} + K_{N-1}) & -\left(\frac{1}{R_{v,N}} + K_{N-1} + S_N I_N - K_N \right) \end{bmatrix}_{N \times N} $$**Description:** An **Asymmetric Tridiagonal** matrix. 
 * **Diagonal $(i,i)$:** Negative sum of Vertical Loss + Back conduction IN + Peltier OUT + Back conduction OUT. 
 * **Lower Off-Diagonal $(i, i-1)$:** Heat arriving from the previous stage. This contains the Peltier term $S_{i-1}I_{i-1}$ and the back conduction $K_{i-1}$. 
 * **Upper Off-Diagonal $(i, i+1)$:** Only back conduction $K_i$ comes from the hotter stage. The Peltier term does not flow "backwards". 
 ### 4.2.9 Vector $\mathbf{B}$ (Source Vector) 
-$$ \mathbf{B} = \begin{bmatrix} Q_{gen,0} \\ \hline -Q_{gen,1} \\ \vdots \\ -Q_{gen,N} \\ \hline -I_{1}^2 \left( \frac{R_{leg,1}}{2} + R_{ic,1} \right) \\ \vdots \\ -K_N T_{w} - I_{N-1}^2 \left( \frac{R_{leg,N-1}}{2} + R_{oc,N-1} \right) - I_{N}^2 \left( \frac{R_{leg,N}}{2} + R_{ic,N} \right) \end{bmatrix}_{(2N+1) \times 1} $$**Description:** 
+$$ \mathbf{B} = \begin{bmatrix} -Q_{gen,0} \\ \hline -Q_{gen,1} \\ \vdots \\ -Q_{gen,N} \\ \hline -I_{1}^2 \left( \frac{R_{leg,1}}{2} + R_{ic,1} \right) \\ \vdots \\ -K_N T_{w} - I_{N-1}^2 \left( \frac{R_{leg,N-1}}{2} + R_{oc,N-1} \right) - I_{N}^2 \left( \frac{R_{leg,N}}{2} + R_{ic,N} \right) \end{bmatrix}_{(2N+1) \times 1} $$**Description:** 
 * **$\mathbf{B_{0}}$:** Heat generation at the center. 
 * **$\mathbf{B_{Si}}$:** Heat generation in the Silicon rings (inverted sign). 
 * **$\mathbf{B_{TEC}}$:** Contains the Joule heating terms. 
@@ -156,13 +158,13 @@ $$ \mathbf{B} = \begin{bmatrix} Q_{gen,0} \\ \hline -Q_{gen,1} \\ \vdots \\ -Q_{
 The LHS Matrix ($\mathbf{M}$) Expanded Form:
 $$\tiny \mathbf{M} = \left[ \begin{array}{c|ccccc|ccccc} 
 % REGION 1: Node 0 Self 
-\left(\frac{1}{R_{Si,0\to 1}}+\frac{1}{R_{TEC,0\to 1}}\right) & 
+-\left(\frac{1}{R_{Si,0\to 1}}+\frac{1}{R_{TEC,0\to 1}}\right) & 
 % REGION 2: Node 0 -> Si 
--\frac{1}{R_{Si,0\to 1}} & \dots & 0 & \dots & 0 & 
+\frac{1}{R_{Si,0\to 1}} & \dots & 0 & \dots & 0 & 
 % REGION 3: Node 0 -> TEC 
--\frac{1}{R_{c,0\to 1}} & \dots & 0 & \dots & 0 \\ \hline 
+\frac{1}{R_{c,0\to 1}} & \dots & 0 & \dots & 0 \\ \hline 
 % % REGION 4: Si -> Node 0 % Si Row 1 
--\frac{1}{R_{Si,0\to 1}} & 
+\frac{1}{R_{Si,0\to 1}} & 
 % REGION 5: Si Internal (Tri-diagonal) 
 -\left( \frac{1}{R_{Si,0\to 1}} + \frac{1}{R_{lat,1}} + \frac{1}{R_{v,1}} \right) & \frac{1}{R_{lat,1}} & 0 & \dots & 0 & 
 % REGION 6: Si -> TEC (Diagonal) 
@@ -172,7 +174,7 @@ $$\tiny \mathbf{M} = \left[ \begin{array}{c|ccccc|ccccc}
 % Si Row N 
 0 & 0 & \dots & \frac{1}{R_{lat,N-1}} & -\left( \frac{1}{R_{lat,N-1}} + \frac{1}{R_{v,N}} \right) & 0 & 0 & 0 & \dots & \frac{1}{R_{v,N}} \\ \hline 
 % % REGION 7: TEC -> Node 0 % TEC Row 1
--\frac{1}{R_{c,0\to 1}} & 
+\frac{1}{R_{c,0\to 1}} & 
 % REGION 8: TEC -> Si (Diagonal) 
 \frac{1}{R_{v,1}} & 0 & 0 & \dots & 0 & 
 % REGION 9: TEC Internal (Tri-diagonal)
@@ -186,7 +188,7 @@ $$
 Variable Vector:
 $$ \mathbf{T} = \begin{bmatrix} \mathbf{T_0} \\ \hline \mathbf{T_{Si}} \\ \hline \mathbf{T_{TEC}} \end{bmatrix} =   \left[ \begin{array}{c} T_0 \\ \hline T_{Si,1} \\ \vdots \\ T_{Si,i} \\ \vdots \\ T_{Si,N} \\ \hline T_{c,1} \\ \vdots \\ T_{c,i} \\ \vdots \\ T_{c,N} \end{array} \right] $$
 The RHS Vector ($\mathbf{B}$) 
-$$\mathbf{B}= \begin{bmatrix} \mathbf{B_0} \\ \hline \mathbf{B_{Si}} \\ \hline \mathbf{B_{TEC}} \end{bmatrix} =  =  \left[ \begin{array}{c} Q_{gen,0} \\ \hline -Q_{gen,1} \\ \vdots \\ -Q_{gen,i} \\ \vdots \\ -Q_{gen,N} \\ \hline -I_{0}^2 \left( \frac{R_{leg,0}}{2} + R_{oc,0} \right) - I_{1}^2 \left( \frac{R_{leg,1}}{2} + R_{ic,1} \right) \\ \vdots \\ -I_{i-1}^2 \left( \frac{R_{leg,i-1}}{2} + R_{oc,i-1} \right) - I_{i}^2 \left( \frac{R_{leg,i}}{2} + R_{ic,i} \right) \\ \vdots \\ -K_NT_{w}-I_{N-1}^2 \left( \frac{R_{leg,N-1}}{2} + R_{oc,N-1} \right) - I_{N}^2 \left( \frac{R_{leg,N}}{2} + R_{ic,N} \right) \end{array} \right] $$
+$$\mathbf{B}= \begin{bmatrix} \mathbf{B_0} \\ \hline \mathbf{B_{Si}} \\ \hline \mathbf{B_{TEC}} \end{bmatrix} =  =  \left[ \begin{array}{c} -Q_{gen,0} \\ \hline -Q_{gen,1} \\ \vdots \\ -Q_{gen,i} \\ \vdots \\ -Q_{gen,N} \\ \hline -I_{0}^2 \left( \frac{R_{leg,0}}{2} + R_{oc,0} \right) - I_{1}^2 \left( \frac{R_{leg,1}}{2} + R_{ic,1} \right) \\ \vdots \\ -I_{i-1}^2 \left( \frac{R_{leg,i-1}}{2} + R_{oc,i-1} \right) - I_{i}^2 \left( \frac{R_{leg,i}}{2} + R_{ic,i} \right) \\ \vdots \\ -K_NT_{w}-I_{N-1}^2 \left( \frac{R_{leg,N-1}}{2} + R_{oc,N-1} \right) - I_{N}^2 \left( \frac{R_{leg,N}}{2} + R_{ic,N} \right) \end{array} \right] $$
 
 --- 
 
@@ -197,7 +199,7 @@ Here is the **full expanded matrix formulation** for a 3-Stage, 3-Node system ($
 * 3 Rows for Silicon ($T_{Si,1}, T_{Si,2}, T_{Si,3}$) 
 * 3 Rows for TEC ($T_{c,1}, T_{c,2}, T_{c,3}$) 
 ### 5.1.1 Variable & Source Vectors 
-$$ \mathbf{x} = \begin{bmatrix} T_0 \\ T_{Si,1} \\ T_{Si,2} \\ T_{Si,3} \\ T_{c,1} \\ T_{c,2} \\ T_{c,3} \end{bmatrix} \quad \quad \mathbf{B} = \begin{bmatrix} Q_{gen,0} \\ -Q_{gen,1} \\ -Q_{gen,2} \\ -Q_{gen,3} \\ - I_{1}^2 \left( \frac{R_{leg,1}}{2} + R_{ic,1} \right) \\ -I_{1}^2 \left( \frac{R_{leg,1}}{2} + R_{oc,1} \right) - I_{2}^2 \left( \frac{R_{leg,2}}{2} + R_{ic,2} \right) \\ -K_3 T_w -I_{2}^2 \left( \frac{R_{leg,2}}{2} + R_{oc,2} \right) - I_{3}^2 \left( \frac{R_{leg,3}}{2} + R_{ic,3} \right) \end{bmatrix} $$ --- 
+$$ \mathbf{x} = \begin{bmatrix} T_0 \\ T_{Si,1} \\ T_{Si,2} \\ T_{Si,3} \\ T_{c,1} \\ T_{c,2} \\ T_{c,3} \end{bmatrix} \quad \quad \mathbf{B} = \begin{bmatrix} -Q_{gen,0} \\ -Q_{gen,1} \\ -Q_{gen,2} \\ -Q_{gen,3} \\ - I_{1}^2 \left( \frac{R_{leg,1}}{2} + R_{ic,1} \right) \\ -I_{1}^2 \left( \frac{R_{leg,1}}{2} + R_{oc,1} \right) - I_{2}^2 \left( \frac{R_{leg,2}}{2} + R_{ic,2} \right) \\ -K_3 T_w -I_{2}^2 \left( \frac{R_{leg,2}}{2} + R_{oc,2} \right) - I_{3}^2 \left( \frac{R_{leg,3}}{2} + R_{ic,3} \right) \end{bmatrix} $$ --- 
 ### 5.1.2 The Global Conductance Matrix (7x7) 
 
 This matrix is divided into the **9 Regions**. Note that zeros are omitted in empty spots for clarity, but the structure preserves the tridiagonal/diagonal nature. 
@@ -205,14 +207,14 @@ This matrix is divided into the **9 Regions**. Note that zeros are omitted in em
 $$ \tiny \mathbf{M} = \left[ \begin{array}{c|ccc|ccc} 
 % ===================== ROW 1: NODE 0 ===================== 
 % REGION 1 (0->0) 
-\left(\frac{1}{R_{Si,0\to 1}}+\frac{1}{R_{c,0\to 1}}\right) & 
+-\left(\frac{1}{R_{Si,0\to 1}}+\frac{1}{R_{c,0\to 1}}\right) & 
 % REGION 2 (0->Si) 
--\frac{1}{R_{Si,0\to 1}} & 0 & 0 & 
+\frac{1}{R_{Si,0\to 1}} & 0 & 0 & 
 % REGION 3 (0->TEC) 
--\frac{1}{R_{c,0\to 1}} & 0 & 0 \\ \hline 
+\frac{1}{R_{c,0\to 1}} & 0 & 0 \\ \hline 
 % % ===================== ROWS 2-4: SILICON LAYER ===================== 
 % REGION 4 (Si->0) 
--\frac{1}{R_{Si,0\to 1}} & 
+\frac{1}{R_{Si,0\to 1}} & 
 % REGION 5 (Si Internal - Tridiagonal) 
 -\left( \frac{1}{R_{Si,0\to 1}} + \frac{1}{R_{lat,1}} + \frac{1}{R_{v,1}} \right) & \frac{1}{R_{lat,1}} & 0 & 
 % REGION 6 (Si->TEC - Diagonal) 
@@ -223,7 +225,7 @@ $$ \tiny \mathbf{M} = \left[ \begin{array}{c|ccc|ccc}
 0 & 0 & \frac{1}{R_{lat,2}} & -\left( \frac{1}{R_{lat,2}} + \frac{1}{R_{v,3}} \right) & 0 & 0 & \frac{1}{R_{v,3}} \\ \hline 
 % % ===================== ROWS 5-7: TEC LAYER ===================== 
 % REGION 7 (TEC->0) 
--\frac{1}{R_{c,0\to 1}} & 
+\frac{1}{R_{c,0\to 1}} & 
 % REGION 8 (TEC->Si - Diagonal) 
 \frac{1}{R_{v,1}} & 0 & 0 & 
 % REGION 9 (TEC Internal - Tridiagonal) 

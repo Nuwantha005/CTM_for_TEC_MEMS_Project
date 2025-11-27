@@ -78,6 +78,10 @@ $$\left(\frac{1}{R_{Si,0\to 1}}+\frac{1}{R_{TEC,0\to 1}}\right)T_0-\frac{1}{R_{S
         
     - RHS Vector: $Q_{gen,0}$ (The portion of heat generated in the center cylinder).
 
+To make be consistent with the sign convention used in the [[System of Equations (TEC Preliminary Optimization)]], we should multiply this term by (-) and make the diagonal component negative and off diagonals positive.
+$$-\left(\frac{1}{R_{Si,0\to 1}}+\frac{1}{R_{TEC,0\to 1}}\right)T_0+\frac{1}{R_{Si,0\to 1}}T_{Si,1}+\frac{1}{R_{c,0\to 1}}T_{c,1}=-Q_{gen,0}$$
+
+
 ## 3.2 Resistance Values
 
 We need to find the resistance between Silicon cylinder and the TEC, as well as the other chip layer elements. We consider the node 0 as the center for the chip / TEC layer.
@@ -101,11 +105,11 @@ $$R_{is}= \frac{1}{\kappa_{is} t \theta}ln\left(\frac{R_{cyl}+w_{is}}{R_{cyl}}\r
 We can write,
 $$R_{TEC, 0\to 1} =\frac{1}{t\theta}\left[\frac{1}{2 k_{Si}}+\frac{1}{\kappa_{is}}ln\left(\frac{R_{cyl}+w_{is}}{R_{cyl}}\right)\right]$$
 
-# Modelling Node N
+# 4 Modelling Node N
 
 
 
-# 4 Modelling a Representative Wedge
+# 5 Modelling a Representative Wedge
 
 instead of combining resistors in parallel (which creates tiny resistance values and massive total currents), we should solve for **one single wedge** and scale the inputs.
 
@@ -124,7 +128,7 @@ instead of combining resistors in parallel (which creates tiny resistance values
 
 **Why this is better:** It keeps your numbers relatable (e.g., 2 Amps per wedge rather than 2000 Amps total) and makes debugging easier.
 
-# 5 Chip Layer Calculations
+# 6 Chip Layer Calculations
 
 To calculate the physics of the "Chip Layer" (Layer 1), we cannot treat it as a 2D surface; it must have a volume. We must add the thickness of the silicon die to your parameter list. In modern 3D stacked ICs, wafers are often thinned significantly.
 
@@ -133,7 +137,7 @@ To calculate the physics of the "Chip Layer" (Layer 1), we cannot treat it as a 
 - **Material:** Silicon ($k_{Si} \approx 130-148 \text{ W}/m\cdot K$).
 
 Without this, the lateral resistance is mathematically infinite (area = 0).
-## 5.1 Lateral Resistance
+## 6.1 Lateral Resistance
 This is the resistance to heat flowing **radially** through the silicon from the center of Node $i$ to the center of Node $i+1$.
 
 **The Geometry:**
@@ -144,7 +148,7 @@ The Integration:
 Just like for the TEC legs in [[Variable Cross section area TEC]] the resistance of a wedge-shaped block is logarithmic. The resistance between two radii $r_a$ and $r_b$ in the chip is:
 $$R = \int_{r_a}^{r_b} \frac{dr}{k_{Si} A_{cross}(r)} = \int_{r_a}^{r_b} \frac{dr}{k_{Si} t_{chip} \theta r}$$
 $$R = \frac{1}{k_{Si} t_{chip} \theta} \ln\left(\frac{r_b}{r_a}\right)$$
-## 5.2 Heat Generation Area
+## 6.2 Heat Generation Area
 
 Inside the chip layer $Q_{gen} = \text{Flux} \times \text{Area}$.
 - **The Physics:** Heat is generated on the active face of the transistor layer. This corresponds to the **Top Surface Area** (floor area) of the wedge segment.

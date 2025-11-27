@@ -28,14 +28,15 @@ end
 %% Define optimization space
 % Now including N_stages as a variable!
 
-fprintf('Optimization Variables:\n');
+fprintf('Optimization Variables (EXTENDED RANGE):\n');
 fprintf('─────────────────────────────────────────────────────────────\n');
 fprintf('  N_stages:      1 - 5 (discrete)\n');
-fprintf('  I_current:     10 - 250 mA\n');
-fprintf('  thickness:     50 - 500 µm\n');
-fprintf('  k_r:           0.8 - 1.5\n');
+fprintf('  I_current:     1 - 500 mA\n');
+fprintf('  thickness:     50 - 1000 µm\n');
+fprintf('  k_r:           0.8 - 2.0\n');
 fprintf('  fill_factor:   0.7 - 0.99\n');
 fprintf('  wedge_angle:   15 - 60° (discrete: 15, 20, 30, 45, 60)\n');
+fprintf('  q_flux:        up to 500 kW/m² (search range)\n');
 fprintf('─────────────────────────────────────────────────────────────\n');
 fprintf('Constraint: T_chip < %.0f°C\n\n', T_CHIP_MAX_C);
 
@@ -156,26 +157,49 @@ fprintf('║           COMPONENT MATCHING ANALYSIS                         ║\n
 fprintf('║       What can we put on the bottom die?                      ║\n');
 fprintf('╚════════════════════════════════════════════════════════════════════╝\n\n');
 
-% Component database (typical heat flux values)
+% Component database (typical heat flux values) - EXPANDED
 components = {
+    % Low power components
     'SRAM Cache (256KB)',       500,   0.5,   'Memory';
     'SRAM Cache (512KB)',       800,   1.0,   'Memory';
     'SRAM Cache (1MB)',         1200,  2.0,   'Memory';
     'SRAM Cache (2MB)',         1800,  4.0,   'Memory';
+    'SRAM Cache (4MB)',         2500,  8.0,   'Memory';
     'L3 Cache Slice',           2000,  3.0,   'Memory';
+    'L3 Cache (Full)',          3500,  10.0,  'Memory';
     'Low-Power MCU Core',       1000,  0.3,   'Logic';
     'DSP Block',                1500,  0.5,   'Logic';
     'Media Engine (H.264)',     2500,  1.5,   'Logic';
+    'Media Engine (H.265/AV1)', 4000,  3.0,   'Logic';
     'NPU/AI Accelerator',       3000,  2.0,   'Logic';
+    'NPU (High Perf)',          8000,  5.0,   'Logic';
+    'GPU Shader Core',          10000, 3.0,   'Logic';
+    'ARM Cortex-A55',           5000,  1.5,   'Logic';
+    'ARM Cortex-A78',           15000, 4.0,   'Logic';
+    'RISC-V Core (Simple)',     2000,  0.5,   'Logic';
+    'RISC-V Core (OoO)',        8000,  2.5,   'Logic';
     'Bluetooth LE',             300,   0.01,  'RF';
     'WiFi 6 Baseband',          1500,  0.3,   'RF';
+    'WiFi 6E/7 Baseband',       3000,  0.6,   'RF';
+    '5G Modem Baseband',        12000, 4.0,   'RF';
     'Audio Codec',              200,   0.05,  'Analog';
     'ADC/DAC Block',            500,   0.1,   'Analog';
+    'High-Speed SerDes',        5000,  0.8,   'Analog';
     'Power Management IC',      800,   0.2,   'Power';
     'Sensor Hub',               400,   0.05,  'Sensor';
+    'ISP (Image Signal Proc)',  6000,  2.0,   'Sensor';
     'Security Engine',          600,   0.1,   'Security';
+    'Crypto Accelerator',       4000,  1.0,   'Security';
     'USB Controller',           700,   0.15,  'I/O';
     'PCIe Controller',          1200,  0.25,  'I/O';
+    'DDR5 PHY',                 8000,  2.0,   'I/O';
+    'HBM PHY',                  15000, 5.0,   'I/O';
+    % High power density components
+    'Voltage Regulator (PoL)',  20000, 3.0,   'Power';
+    'RF Power Amplifier',       25000, 2.0,   'RF';
+    'Laser Driver (Photonics)', 30000, 1.5,   'Photonics';
+    'VCSEL Array',              40000, 2.0,   'Photonics';
+    'High-Power LED Driver',    50000, 3.0,   'Power';
 };
 
 if ~isempty(all_results)
@@ -329,10 +353,10 @@ function [q_max, x_opt, T_achieved, exitflag] = find_max_q_for_config(base_confi
     % Find maximum heat flux for given configuration
     % Optimization variables: [I, thickness, k_r, fill_factor, q]
     
-    % Variable bounds
+    % Variable bounds - EXPANDED for true capability search
     %       I(A)    t(um)   k_r    ff      q(W/m²)
-    lb = [0.01,    50,    0.8,   0.70,   100];
-    ub = [0.25,   500,    1.5,   0.99,   50000];
+    lb = [0.001,   50,    0.8,   0.70,   100];
+    ub = [0.50,   1000,   2.0,   0.99,   500000];  % 500 kW/m² upper limit
     
     % Initial guess
     x0 = [0.1, 200, 1.0, 0.9, 2000];
@@ -357,13 +381,15 @@ function [q_max, x_opt, T_achieved, exitflag] = find_max_q_for_config(base_confi
     best_T = T_max_K;
     best_exitflag = 0;
     
-    % Starting points
-    I_starts = [0.05, 0.1, 0.15, 0.2];
-    t_starts = [100, 200, 300];
+    % Starting points - expanded grid
+    I_starts = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4];
+    t_starts = [100, 200, 400, 600, 800];
     
     for I0 = I_starts
         for t0 = t_starts
-            x0_try = [I0, t0, 1.0, 0.9, 2000];
+            % Start with higher q guess based on iteration
+            q0 = 10000 + (I0 * 1000) * 100;  % Higher current -> higher q guess
+            x0_try = [I0, t0, 1.0, 0.9, q0];
             
             try
                 [x, fval, exitflag, ~] = fmincon(objective, x0_try, ...

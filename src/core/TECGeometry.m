@@ -190,17 +190,30 @@ classdef TECGeometry < handle
                 N_tsv_limit = obj.Params.N_tsv_limit;
             end
 
+            tsv = obj.Params.tsv;
+            t_SOI = tsv.t_SOI_um * 1e-6;
+            
+            % Get stage geometry to calculate wedge area for this stage
+            [r_in_stage, L_stage, ~, ~, ~, ~, ~, ~, ~, ~] = obj.get_stage_geometry(stage_idx);
+            r_out_stage = r_in_stage + L_stage;
+            A_wedge = 0.5 * obj.WedgeAngle * (r_out_stage^2 - r_in_stage^2);
+            
+            % For stages beyond TSV limit, use SOI layer resistance
+            % R_SOI = t_SOI / (k_Si * A_wedge)
+            % Note: k_TSV input is actually k_Cu, we need k_Si for SOI
+            % Silicon thermal conductivity ~ 150 W/m-K
+            k_Si = 150;  % W/m-K (approximate, temperature dependent)
+            
             if stage_idx > N_tsv_limit
                 N_TSV = 0;
-                R_TSV_tot = 1e9;
+                % Heat flows through SOI layer (silicon) instead of copper TSVs
+                R_TSV_tot = t_SOI / (k_Si * A_wedge);
                 return;
             end
 
-            tsv = obj.Params.tsv;
             R_TSV_rad = tsv.R_TSV_um * 1e-6;
             P_TSV = tsv.P_TSV_um * 1e-6;
             g_rad = tsv.g_rad_um * 1e-6;
-            t_SOI = tsv.t_SOI_um * 1e-6;
 
             N_row = floor(w_ic / (2 * R_TSV_rad + g_rad));
             N_per_row = floor((r * beta_ic) / P_TSV);
@@ -208,12 +221,24 @@ classdef TECGeometry < handle
 
             if N_TSV < 1
                 N_TSV = 0;
-                R_TSV_tot = 1e9;
+                % Even with no TSVs, heat flows through SOI
+                R_TSV_tot = t_SOI / (k_Si * A_wedge);
             else
-                % Thermal resistance: R = L / (k * A)
-                A_single = pi * R_TSV_rad^2;
-                R_single = t_SOI / (k_TSV * A_single);
-                R_TSV_tot = R_single / N_TSV;  % Parallel TSVs
+                % Thermal resistance through TSV array: R = L / (k * A)
+                A_single_TSV = pi * R_TSV_rad^2;
+                A_TSV_total = N_TSV * A_single_TSV;
+                R_TSV_only = t_SOI / (k_TSV * A_TSV_total);
+                
+                % Thermal resistance through remaining SOI (wedge area - TSV area)
+                A_SOI_remaining = A_wedge - A_TSV_total;
+                if A_SOI_remaining > 0
+                    R_SOI_remaining = t_SOI / (k_Si * A_SOI_remaining);
+                    % Parallel combination: 1/R_total = 1/R_TSV + 1/R_SOI
+                    R_TSV_tot = 1 / (1/R_TSV_only + 1/R_SOI_remaining);
+                else
+                    % Edge case: TSVs fill entire area (unlikely)
+                    R_TSV_tot = R_TSV_only;
+                end
             end
         end
 

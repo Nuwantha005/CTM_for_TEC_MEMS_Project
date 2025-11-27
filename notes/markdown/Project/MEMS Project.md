@@ -1,6 +1,6 @@
 #project
 ### Description
-This project aims to design a system to cool modern stacked microchips. More importantly, the goal is to extract heat from the bottom dies in horizontal direction. Project aims to use a combination of thermoelectric coolers [[TEC]] and [[micro channel heat-sink]] to extract the heat from the bottom dies of the stacked chip.
+This project aims to design a system to cool modern [[3D Stacked Microchips]]. More importantly, the goal is to extract heat from the bottom dies in horizontal direction. Project aims to use a combination of thermoelectric coolers [[TEC]] and [[micro channel heat-sink]] to extract the heat from the bottom dies of the stacked chip.
 
 ### Existing Literature
 Most proposes in existing literature falls under two main branches. One aims to use [[TFTEC]] to extract heat in vertical direction, toward the top of the chip. method suffers from the fact that heat from the bottom dies has to pass through top dies, needing the top TECs to have higher pumping power as well as maintaining a steep temperature gradient across the chip. Also this puts a maximum limit on how many dies can be stacked.

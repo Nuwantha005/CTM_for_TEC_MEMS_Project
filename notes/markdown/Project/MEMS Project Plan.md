@@ -2,30 +2,32 @@
 
 1) [x] Basic Research about [[TEC]]
 2) [x] Finding Governing Equations for the Optimization Process
-3) [ ] [[Basic Radial TEC Design]]
-	1) [ ] [[TEC Thermal Network]]
+3) [x] [[Basic Radial TEC Design]]
+	1) [x] [[TEC Thermal Network]]
 	2) [x] Geometric Arrangement
 	3) [x] Electric Network
 	4) [x] Basic Geometric Arrangement
 	5) [x] [[Variable Cross section area TEC]]
-4) [ ] Formulating the optimization problem
-	1) [ ] Solver
-	2) [ ] [[Resistance Network Solver and COMSOL Result Comparison]]
-	3) [ ] [[Radial TEC Parameter List]]
-	4) [ ] Objective Function
-	5) [ ] [[Radial TEC Constraints]]
-5) [ ] [[Preliminary Optimization of TEC]]
+4) [x] Formulating the optimization problem
+	1) [x] Solver
+	2) [x] [[Resistance Network Solver and COMSOL Result Comparison (1)]]
+	3) [x] [[Resistance Network Solver and COMSOL Result Comparison (2)]]
+	4) [x] [[Radial TEC Parameter List]]
+	5) [x] Objective Function
+	6) [x] [[Radial TEC Constraints]]
+5) [ ] [[Heat Generation of Micrprocessors Based on their Compartments]]
+6) [ ] [[Preliminary Optimization of TEC]]
 	1) [ ] Plots
 	2) [ ] Comparison of different modes
-6) [ ] Basic Design on COMSOL for selected candidates
-7) [ ] [[Advanced Optimization of selected TEC]]
-8) [ ] Mechanical Analysis
+7) [ ] Basic Design on COMSOL for selected candidates
+8) [ ] [[Advanced Optimization of selected TEC]]
+9) [ ] Mechanical Analysis
 	1) [ ] Structural Analysis - Stress, Strain
 	2) [ ] Thermal TSVs
 	3) [ ] Thermal Stresses (Expansion/Contraction)
 	4) [ ] Modal Analysis
-9) [ ] Modifications
-10) [ ] Re-Iterate
+10) [ ] Modifications
+11) [ ] Re-Iterate
 
 >[!Advanced Optimization Process]
 >$$\begin{matrix}\mathrm{Parametric}&& && \mathrm{COMSOL}\\\mathrm{SolidWorks}&&\longleftrightarrow&&\updownarrow\\\mathrm{model}&&&&\mathrm{MATLAB}\end{matrix}$$
