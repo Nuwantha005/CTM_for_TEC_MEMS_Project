@@ -9,10 +9,12 @@
 clear; clc; close all;
 
 %% Add paths
-addpath(genpath('src'));
+% Resolve config_path and add src to path robustly
+config_path = get_config_path();
+src_dir = fileparts(fileparts(config_path));
+addpath(genpath(src_dir));
 
 %% Parameters
-config_path = 'src/config/default_params.json';
 config = jsondecode(fileread(config_path));
 
 fprintf('\n========================================\n');

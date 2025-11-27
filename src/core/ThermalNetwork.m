@@ -14,23 +14,11 @@ classdef ThermalNetwork
 
         function [T_new, Q_out, Q_in] = solve(obj, T_current)
             [M, B] = obj.assemble_system(T_current);
-            
-            % Check matrix conditioning
-            cond_M = condest(M);
-            if cond_M > 1e14
-                warning('ThermalNetwork:IllConditioned', ...
-                    'Matrix is ill-conditioned (cond=%.2e). Results may be unreliable.', cond_M);
-            end
-            
             T_new = M \ B;
-            
-            % Validate solution - enforce physical bounds
-            T_water = obj.Params.boundary_conditions.T_water_K;
-            T_new = max(T_new, T_water - 10);  % Cannot be much below coolant
-            T_new = min(T_new, 2000);           % Cap at reasonable max
 
             N = obj.Geometry.N_stages;
             idx_c_N = 2*N + 1;
+            T_water = obj.Params.boundary_conditions.T_water_K;
 
             T_cold = T_new(idx_c_N);
             T_avg = (T_cold + T_water) / 2;
@@ -137,7 +125,7 @@ classdef ThermalNetwork
                 rho_c = obj.Materials.get_rho('Cu', T_avg);
                 k_is = obj.Materials.get_k('AlN', T_avg);
                 k_az = obj.Materials.get_k('SiO2', T_avg);
-                k_TSV = obj.Materials.get_k('Cu', T_avg);  % Thermal conductivity for TSV
+                rho_TSV = obj.Materials.get_rho('Cu', T_avg);
 
                 G = obj.Geometry.calculate_G(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is, w_is_stage);
 
@@ -170,7 +158,7 @@ classdef ThermalNetwork
                     R_lat_Si(i) = inf;
                 end
 
-                [~, R_TSV_tot] = obj.Geometry.calculate_TSV_vertical_resistance(r_in, w_ic, beta_ic, k_TSV, i);
+                [~, R_TSV_tot] = obj.Geometry.calculate_TSV_vertical_resistance(r_in, w_ic, beta_ic, rho_TSV, i);
                 R_vert(i) = R_TSV_tot;
 
                 A_top = 0.5 * theta * (r_out^2 - r_in^2);
@@ -188,9 +176,9 @@ classdef ThermalNetwork
             term2 = (1 / (k_is_0 * t_tec * theta)) * log((R_cyl + w_is) / R_cyl);
             R_TEC_01 = term1 + term2;
 
-            M(idx_0, idx_0) = -(1/R_Si_01 + 1/R_TEC_01);  % Negative: sum of conductances leaving
-            M(idx_0, idx_Si_start) = +1/R_Si_01;  % Positive: conductance to neighbor
-            M(idx_0, idx_c_start) = +1/R_TEC_01;  % Positive: conductance to neighbor
+            M(idx_0, idx_0) = -(1/R_Si_01 + 1/R_TEC_01);
+            M(idx_0, idx_Si_start) = 1/R_Si_01;
+            M(idx_0, idx_c_start) = 1/R_TEC_01;
             B(idx_0) = -Q_gen_0;
 
             for i = 1:N
@@ -198,7 +186,7 @@ classdef ThermalNetwork
                 idx_c = idx_c_start + i - 1;
 
                 if i == 1
-                    M(idx_Si, idx_0) = +1/R_Si_01;  % Positive: heat flows from T_0 to T_Si,1
+                    M(idx_Si, idx_0) = 1/R_Si_01;
                     G_left = 1/R_Si_01;
                 else
                     idx_Si_prev = idx_Si - 1;
@@ -224,7 +212,7 @@ classdef ThermalNetwork
                 M(idx_c, idx_Si) = G_vert;
 
                 if i == 1
-                    M(idx_c, idx_0) = +1/R_TEC_01;  % Positive: heat flows from T_0 to T_c,1
+                    M(idx_c, idx_0) = 1/R_TEC_01;
                 end
 
                 if i > 1
@@ -234,9 +222,9 @@ classdef ThermalNetwork
 
                 if i < N
                     idx_c_next = idx_c + 1;
-                    M(idx_c, idx_c_next) = -K_stages(i);  % Back conduction: -K_i from derivation
+                    M(idx_c, idx_c_next) = K_stages(i); %+K
                 else
-                    B(idx_c) = B(idx_c) - K_stages(i) * T_water;  % Negative: K*T_water moved to RHS
+                    B(idx_c) = B(idx_c) - K_stages(i) * T_water; %-K
                 end
                 
                 B(idx_c) = B(idx_c) - I^2 * (Re_stages_leg(i)/2 + R_ic_stages(i));
@@ -244,16 +232,7 @@ classdef ThermalNetwork
                     B(idx_c) = B(idx_c) - I^2 * (Re_stages_leg(i-1)/2 + R_oc_stages(i-1));
                 end
 
-                % Diagonal: -(G_vert + K_{i-1} + S_i*I + K_i) for boundary
-                %           -(G_vert + K_{i-1} + S_i*I - K_i) for interior (K_i cancels with off-diag)
-                % For i < N: -K_i in diagonal is cancelled by +K_i coefficient of T_{i+1}
-                % For i = N: K_i goes to boundary term, so +K_i in diagonal (no cancellation)
-                sum_diag = G_vert + S_stages(i)*I;
-                if i < N
-                    sum_diag = sum_diag - K_stages(i);  % Interior: subtract K_i (will add T_{i+1} term)
-                else
-                    sum_diag = sum_diag + K_stages(i);  % Boundary: add K_i (T_water is known)
-                end
+                sum_diag = G_vert + S_stages(i)*I + K_stages(i); % -K
                 if i > 1
                     sum_diag = sum_diag + K_stages(i-1);
                 end

@@ -6,10 +6,13 @@
 clear; clc; close all;
 
 %% Add paths
-addpath(genpath('src'));
+% Ensure src is on the MATLAB path and config is resolved from project root
+config_path = get_config_path();
+src_dir = fileparts(fileparts(config_path));
+addpath(genpath(src_dir));
 
 %% Configuration
-config_path = 'src/config/default_params.json';
+% config_path already set from helper
 
 % Create optimizer
 optimizer = DesignOptimizer(config_path);

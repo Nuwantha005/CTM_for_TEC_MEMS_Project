@@ -14,10 +14,21 @@
 clear; clc; close all;
 
 %% Add paths
-addpath(genpath('src'));
+% Robust path handling: determine project root relative to this script so
+% the script works no matter the current working directory when launched.
+script_fullpath = which('run_design_optimization');
+if isempty(script_fullpath)
+    script_dir = pwd; % fallback if which() can't find the script
+else
+    script_dir = fileparts(script_fullpath);
+end
+project_root = fileparts(fileparts(script_dir)); % ..\scripts\..\ -> project root
+src_dir = fullfile(project_root, 'src');
+
+addpath(genpath(src_dir));
 
 %% Configuration
-config_path = 'src/config/default_params.json';
+config_path = fullfile(src_dir, 'config', 'default_params.json');
 
 % Modify config for your heat flux
 config = jsondecode(fileread(config_path));
@@ -36,14 +47,14 @@ optimizer.T_target_C = 100;  % Target: chip below 100°C
 % Adjust these based on your constraints
 
 % Number of stages to test
-N_stages_list = [2, 3, 4, 5, 6];
+N_stages_list = [2, 3, 4, 5, 6, 7, 8, 9 , 10, 11, 12];
 
 % Wedge angles (degrees) - affects number of wedges per chip
 % 360/theta = number of wedges (e.g., 30° -> 12 wedges, 20° -> 18 wedges)
 theta_list = [15, 20, 25, 30, 45];
 
 % TEC thickness (μm) - constrained by 3D stacking requirements
-t_TEC_list = [40, 50, 60, 80, 100];
+t_TEC_list = [40, 50, 60, 80, 100, 200, 300, 400, 500, 600, 700, 800, 900 , 1000];
 
 % Radial expansion factor - how each stage length grows
 k_r_list = [0.8, 0.9, 1.0, 1.1, 1.2];

@@ -4,21 +4,31 @@
 % This finds the globally optimal TEC design by exploring the full
 % parameter space, avoiding local minima that gradient-based methods miss.
 %
+% Optimizes ALL parameters as RATIOS (except N_stages, T_target, N_tsv_limit)
+%
 % Uses: Global Optimization Toolbox (ga, particleswarm)
 
 clear; clc;
 addpath(genpath('../../src'));
 
-fprintf('╔════════════════════════════════════════════════════════════╗\n');
-fprintf('║           GLOBAL OPTIMIZATION FOR TEC DESIGN               ║\n');
-fprintf('╚════════════════════════════════════════════════════════════╝\n\n');
+fprintf('╔════════════════════════════════════════════════════════════════════╗\n');
+fprintf('║         GLOBAL OPTIMIZATION FOR TEC DESIGN (FULL PARAMETERS)       ║\n');
+fprintf('╚════════════════════════════════════════════════════════════════════╝\n\n');
 
-%% Configuration
+%% Configuration - FIXED PARAMETERS (not optimized)
 CONFIG = struct();
-CONFIG.q_flux_W_m2 = 1000;          % Heat flux to optimize for
-CONFIG.T_target_C = 85;              % Target max temperature (°C)
-CONFIG.N_stages = 3;                 % Fixed for COMSOL template
-CONFIG.wedge_angle_deg = 30;         % Fixed for COMSOL template
+CONFIG.T_target_C = 85;              % Target max temperature (°C) - FIXED
+CONFIG.N_stages = 3;                 % Number of stages - FIXED
+CONFIG.N_tsv_limit = 0;              % TSV limit - FIXED
+
+% Fixed boundary conditions (design requirements)
+CONFIG.q_flux_W_m2 = 1e6;            % Heat flux (W/m²) - FIXED DESIGN REQUIREMENT
+CONFIG.h_conv_W_m2K = 1e6;           % Convection coefficient (W/m²K) - FIXED
+CONFIG.T_water_K = 300;              % Coolant temperature (K) - FIXED
+
+% Reference values for ratio-based parameters
+CONFIG.ref.w_chip_um = 10000;        % Reference chip width (µm)
+CONFIG.ref.thickness_um = 100;       % Reference TEC thickness (µm)
 
 % Output directory
 timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
@@ -28,23 +38,95 @@ if ~exist(OUTPUT_DIR, 'dir')
 end
 
 %% Define optimization variables and bounds
-% Variables: [I_current (A), thickness (um), k_r, fill_factor]
+% Geometry and operating parameters as ratios or normalized values
+% (q_flux, h_conv, T_water are FIXED design requirements)
+%
+% Variable vector x:
+%  1. I_current_A          - Current (A)
+%  2. wedge_angle_deg      - Wedge angle (degrees)
+%  3. thickness_ratio      - TEC thickness ratio (actual = ratio * ref_thickness)
+%  4. t_chip_ratio         - Chip thickness ratio (actual = ratio * 100 µm)
+%  5. R_cyl_ratio          - Cylinder radius ratio (actual = ratio * w_chip)
+%  6. radial_expansion_factor - k_r
+%  7. fill_factor          - TEC fill factor
+%  8. interconnect_ratio   - Interconnect width ratio
+%  9. outerconnect_ratio   - Outerconnect width ratio
+% 10. interconnect_angle_ratio - Interconnect angle ratio
+% 11. outerconnect_angle_ratio - Outerconnect angle ratio
+% 12. interconnect_thickness_ratio - Interconnect thickness ratio
+% 13. outerconnect_thickness_ratio - Outerconnect thickness ratio
+% 14. insulation_width_ratio - Insulation width ratio
 
-var_names = {'I_current (A)', 'thickness (µm)', 'k_r', 'fill_factor'};
-nvars = 4;
+var_names = {
+    'I_current (A)'; ...                  % 1
+    'wedge_angle (deg)'; ...              % 2
+    'thickness_ratio'; ...                % 3
+    't_chip_ratio'; ...                   % 4
+    'R_cyl_ratio'; ...                    % 5
+    'k_r (radial_exp)'; ...               % 6
+    'fill_factor'; ...                    % 7
+    'interconnect_ratio'; ...             % 8
+    'outerconnect_ratio'; ...             % 9
+    'interconnect_angle_ratio'; ...       % 10
+    'outerconnect_angle_ratio'; ...       % 11
+    'interconnect_thickness_ratio'; ...   % 12
+    'outerconnect_thickness_ratio'; ...   % 13
+    'insulation_width_ratio'              % 14
+};
+nvars = length(var_names);
 
 % Lower bounds
-lb = [0.01,   50,  0.8, 0.70];  % 10 mA, 50 µm, k_r=0.8, ff=0.70
+lb = [
+    0.001; ...   % I_current: 1 mA
+    10; ...      % wedge_angle: 10°
+    0.25; ...    % thickness_ratio: 25 µm (0.25 * 100)
+    0.25; ...    % t_chip_ratio: 25 µm
+    0.05; ...    % R_cyl_ratio: 5% of w_chip
+    0.5; ...     % k_r: 0.5
+    0.50; ...    % fill_factor: 50%
+    0.05; ...    % interconnect_ratio: 5%
+    0.05; ...    % outerconnect_ratio: 5%
+    0.05; ...    % interconnect_angle_ratio: 5%
+    0.05; ...    % outerconnect_angle_ratio: 5%
+    0.5; ...     % interconnect_thickness_ratio: 50%
+    0.5; ...     % outerconnect_thickness_ratio: 50%
+    0.01         % insulation_width_ratio: 1%
+];
 
 % Upper bounds  
-ub = [0.20,  400,  1.5, 0.99];  % 200 mA, 400 µm, k_r=1.5, ff=0.99
+ub = [
+    0.50; ...    % I_current: 500 mA
+    90; ...      % wedge_angle: 90°
+    5.0; ...     % thickness_ratio: 500 µm (5 * 100)
+    2.0; ...     % t_chip_ratio: 200 µm
+    0.25; ...    % R_cyl_ratio: 25% of w_chip
+    2.0; ...     % k_r: 2.0
+    0.99; ...    % fill_factor: 99%
+    0.40; ...    % interconnect_ratio: 40%
+    0.40; ...    % outerconnect_ratio: 40%
+    0.40; ...    % interconnect_angle_ratio: 40%
+    0.40; ...    % outerconnect_angle_ratio: 40%
+    2.0; ...     % interconnect_thickness_ratio: 200%
+    2.0; ...     % outerconnect_thickness_ratio: 200%
+    0.15         % insulation_width_ratio: 15%
+];
 
-fprintf('Optimization Variables:\n');
-fprintf('─────────────────────────────────────────\n');
+fprintf('Optimization Variables (%d total):\n', nvars);
+fprintf('═══════════════════════════════════════════════════════════════\n');
+fprintf('  %-35s  %12s  %12s\n', 'Variable', 'Lower', 'Upper');
+fprintf('───────────────────────────────────────────────────────────────\n');
 for i = 1:nvars
-    fprintf('  %s: [%.2f, %.2f]\n', var_names{i}, lb(i), ub(i));
+    fprintf('  %-35s  %12.4f  %12.4f\n', var_names{i}, lb(i), ub(i));
 end
-fprintf('─────────────────────────────────────────\n\n');
+fprintf('═══════════════════════════════════════════════════════════════\n');
+fprintf('\nFixed Parameters (Design Requirements):\n');
+fprintf('  N_stages:     %d\n', CONFIG.N_stages);
+fprintf('  N_tsv_limit:  %d\n', CONFIG.N_tsv_limit);
+fprintf('  T_target:     %.0f °C\n', CONFIG.T_target_C);
+fprintf('  q_flux:       %.2e W/m² (%.0f kW/m²)\n', CONFIG.q_flux_W_m2, CONFIG.q_flux_W_m2/1e3);
+fprintf('  h_conv:       %.2e W/m²K\n', CONFIG.h_conv_W_m2K);
+fprintf('  T_water:      %.1f K (%.1f °C)\n', CONFIG.T_water_K, CONFIG.T_water_K - 273.15);
+fprintf('───────────────────────────────────────────────────────────────\n\n');
 
 %% Create base configuration
 base_config = create_base_config(CONFIG);
@@ -52,7 +134,7 @@ base_config = create_base_config(CONFIG);
 %% Define objective function
 % Minimize T_max while penalizing infeasible designs
 
-objective = @(x) tec_objective(x, base_config, CONFIG.T_target_C);
+objective = @(x) tec_objective(x, base_config, CONFIG);
 
 %% Genetic Algorithm Options
 fprintf('=== PHASE 1: GENETIC ALGORITHM ===\n\n');
@@ -148,25 +230,118 @@ fprintf('  %-25s  T_max = %7.2f °C  (%.1f s)\n', 'Local Refinement:', fval_loca
 fprintf('─────────────────────────────────────────────────────────────\n\n');
 
 fprintf('BEST SOLUTION (from %s):\n', method_best);
-fprintf('─────────────────────────────────────────────────────────────\n');
-fprintf('  Current:        %.1f mA\n', x_best(1) * 1000);
-fprintf('  TEC Thickness:  %.0f µm\n', x_best(2));
-fprintf('  k_r:            %.3f\n', x_best(3));
-fprintf('  Fill Factor:    %.3f\n', x_best(4));
-fprintf('  ─────────────────────\n');
-fprintf('  T_max:          %.2f °C\n', fval_best);
-fprintf('─────────────────────────────────────────────────────────────\n\n');
+fprintf('═══════════════════════════════════════════════════════════════\n');
+fprintf('Fixed Design Requirements:\n');
+fprintf('  Heat Flux:         %.2e W/m² (%.0f kW/m²)\n', CONFIG.q_flux_W_m2, CONFIG.q_flux_W_m2/1e3);
+fprintf('  Coolant Temp:      %.1f K (%.1f °C)\n', CONFIG.T_water_K, CONFIG.T_water_K - 273.15);
+fprintf('  h_conv:            %.2e W/m²K\n', CONFIG.h_conv_W_m2K);
+fprintf('\nOptimized Operating Conditions:\n');
+fprintf('  Current:           %.3f A (%.1f mA)\n', x_best(1), x_best(1)*1000);
+fprintf('\nOptimized Geometry:\n');
+fprintf('  Wedge Angle:       %.1f°\n', x_best(2));
+fprintf('  TEC Thickness:     %.1f µm (ratio=%.3f)\n', x_best(3)*CONFIG.ref.thickness_um, x_best(3));
+fprintf('  Chip Thickness:    %.1f µm (ratio=%.3f)\n', x_best(4)*100, x_best(4));
+fprintf('  R_cyl:             %.1f µm (ratio=%.3f)\n', x_best(5)*CONFIG.ref.w_chip_um, x_best(5));
+fprintf('  k_r (radial exp):  %.3f\n', x_best(6));
+fprintf('  Fill Factor:       %.3f\n', x_best(7));
+fprintf('\nOptimized Interconnects:\n');
+fprintf('  Interconnect ratio:          %.3f\n', x_best(8));
+fprintf('  Outerconnect ratio:          %.3f\n', x_best(9));
+fprintf('  Interconnect angle ratio:    %.3f\n', x_best(10));
+fprintf('  Outerconnect angle ratio:    %.3f\n', x_best(11));
+fprintf('  Interconnect thickness ratio:%.3f\n', x_best(12));
+fprintf('  Outerconnect thickness ratio:%.3f\n', x_best(13));
+fprintf('  Insulation width ratio:      %.3f\n', x_best(14));
+fprintf('───────────────────────────────────────────────────────────────\n');
+fprintf('  T_max:             %.2f °C\n', fval_best);
+fprintf('═══════════════════════════════════════════════════════════════\n\n');
 
-%% Validate best solution
-fprintf('Validating best solution...\n');
-[T_max, T_profile, Q_in, Q_out, COP] = evaluate_design(x_best, base_config);
+%% Validate best solution with physical feasibility checks
+fprintf('Validating best solution with physical feasibility checks...\n');
+
+% Validate all candidate solutions
+candidates = {
+    x_ga, fval_ga, 'Genetic Algorithm';
+    x_pso, fval_pso, 'Particle Swarm';
+    x_local, fval_local, 'Local Refinement'
+};
+
+valid_solutions = {};
+
+% T_water is now fixed from CONFIG
+T_water_K_fixed = CONFIG.T_water_K;
+
+for i = 1:size(candidates, 1)
+    x_cand = candidates{i, 1};
+    fval_cand = candidates{i, 2};
+    method_cand = candidates{i, 3};
+    
+    [is_valid, reason, T_max_cand, T_profile_cand, COP_cand] = ...
+        validate_solution(x_cand, base_config, T_water_K_fixed, CONFIG);
+    
+    if is_valid
+        valid_solutions{end+1} = struct(...
+            'x', x_cand, ...
+            'fval', fval_cand, ...
+            'method', method_cand, ...
+            'T_max', T_max_cand, ...
+            'T_profile', T_profile_cand, ...
+            'COP', COP_cand);
+        fprintf('  ✓ %s: VALID (T_max = %.2f °C)\n', method_cand, T_max_cand - 273.15);
+    else
+        fprintf('  ✗ %s: INVALID - %s\n', method_cand, reason);
+    end
+end
+
+% Select best valid solution
+if isempty(valid_solutions)
+    fprintf('\n⚠ WARNING: No physically valid solutions found!\n');
+    fprintf('  All solutions violate physical constraints.\n');
+    fprintf('  Consider adjusting bounds or checking the model.\n\n');
+    
+    % Fall back to least bad solution
+    x_best = x_local;
+    fval_best = fval_local;
+    method_best = 'Local Refinement (unvalidated)';
+    [T_max, T_profile, Q_in, Q_out, COP] = evaluate_design(x_best, base_config, CONFIG);
+else
+    % Find best among valid solutions
+    best_idx = 1;
+    best_Tmax = valid_solutions{1}.T_max;
+    for i = 2:length(valid_solutions)
+        if valid_solutions{i}.T_max < best_Tmax
+            best_idx = i;
+            best_Tmax = valid_solutions{i}.T_max;
+        end
+    end
+    
+    x_best = valid_solutions{best_idx}.x;
+    fval_best = valid_solutions{best_idx}.fval;
+    method_best = valid_solutions{best_idx}.method;
+    T_max = valid_solutions{best_idx}.T_max;
+    T_profile = valid_solutions{best_idx}.T_profile;
+    COP = valid_solutions{best_idx}.COP;
+    
+    % Recalculate Q values for the best solution
+    [~, ~, Q_in, Q_out, ~] = evaluate_design(x_best, base_config, CONFIG);
+    
+    fprintf('\n✓ Selected best VALID solution from: %s\n', method_best);
+end
 
 fprintf('\nDetailed Results:\n');
 fprintf('  T_max:    %.2f °C\n', T_max - 273.15);
 fprintf('  T_center: %.2f °C\n', T_profile(1) - 273.15);
+fprintf('  T_edge:   %.2f °C\n', T_profile(end) - 273.15);
+fprintf('  ΔT:       %.2f K\n', T_profile(1) - T_profile(end));
 fprintf('  Q_in:     %.4f W\n', Q_in);
 fprintf('  Q_out:    %.4f W\n', Q_out);
 fprintf('  COP:      %.3f\n', COP);
+
+% Temperature profile sanity check
+fprintf('\nTemperature Profile (should decrease from center to edge):\n');
+for i = 1:length(T_profile)
+    fprintf('  Node %d: %.2f °C\n', i, T_profile(i) - 273.15);
+end
 
 %% Save results
 results = struct();
@@ -198,10 +373,32 @@ results.best.COP = COP;
 
 save(fullfile(OUTPUT_DIR, 'global_optimization_results.mat'), 'results');
 
-% Save to CSV for easy viewing
-T = table(x_best(1)*1000, x_best(2), x_best(3), x_best(4), fval_best, COP, ...
-    'VariableNames', {'I_mA', 't_um', 'k_r', 'fill_factor', 'T_max_C', 'COP'});
-writetable(T, fullfile(OUTPUT_DIR, 'optimal_design.csv'));
+% Save to CSV for easy viewing - include all parameters
+% Fix: var_names is already a column cell array, use it directly
+valid_var_names = matlab.lang.makeValidName(var_names);
+csv_data = array2table(x_best(:)', 'VariableNames', valid_var_names(:)');
+csv_data.T_max_C = fval_best;
+csv_data.COP = COP;
+writetable(csv_data, fullfile(OUTPUT_DIR, 'optimal_design.csv'));
+
+% Also save a human-readable summary
+fid = fopen(fullfile(OUTPUT_DIR, 'optimal_design_summary.txt'), 'w');
+fprintf(fid, 'Global Optimization Results\n');
+fprintf(fid, '===========================\n');
+fprintf(fid, 'Timestamp: %s\n', timestamp);
+fprintf(fid, 'Method: %s\n\n', method_best);
+fprintf(fid, 'Fixed Parameters:\n');
+fprintf(fid, '  N_stages: %d\n', CONFIG.N_stages);
+fprintf(fid, '  N_tsv_limit: %d\n', CONFIG.N_tsv_limit);
+fprintf(fid, '  T_target: %.0f C\n\n', CONFIG.T_target_C);
+fprintf(fid, 'Optimized Parameters:\n');
+for i = 1:nvars
+    fprintf(fid, '  %s: %.6f\n', var_names{i}, x_best(i));
+end
+fprintf(fid, '\nResults:\n');
+fprintf(fid, '  T_max: %.2f C\n', fval_best);
+fprintf(fid, '  COP: %.4f\n', COP);
+fclose(fid);
 
 fprintf('\nResults saved to: %s\n', OUTPUT_DIR);
 
@@ -224,33 +421,80 @@ grid on;
 
 saveas(gcf, fullfile(OUTPUT_DIR, 'optimization_comparison.png'));
 
+%% Plot temperature profile for best solution using ResultsManager
+fprintf('\nGenerating temperature profile plot...\n');
+
+% Create a full config for the best solution to get geometry
+best_config = build_full_config(x_best, base_config, CONFIG);
+best_geometry = TECGeometry(best_config);
+
+% Create a temporary ResultsManager pointing to our output directory
+rm = ResultsManager(best_config);
+% Override output directory to use our global optimization folder
+rm.OutputDir = OUTPUT_DIR;
+
+% T_water is fixed from CONFIG
+T_water_best = CONFIG.T_water_K;
+
+% Plot and save the temperature profile
+rm.plot_temperature_profile(T_profile, best_geometry, ...
+    'best_solution_temp_profile.png', ...
+    sprintf('Best Solution (T_{max}=%.1f°C, COP=%.3f)', fval_best, COP), ...
+    '', T_water_best);
+
+fprintf('Temperature profile saved to: %s\n', fullfile(OUTPUT_DIR, 'best_solution_temp_profile.png'));
+
+% Also display the figure
+h = figure('Name', 'Global Optimization - Best Solution Temperature Profile');
+N = best_geometry.N_stages;
+T_0 = T_profile(1);
+T_Si = T_profile(2:N+1);
+T_c = T_profile(N+2:end);
+
+r_chip = 0:N;
+T_chip = [T_0; T_Si];
+r_tec = 1:(N+1);
+T_tec = [T_c; T_water_best];
+
+plot(r_chip, T_chip - 273.15, '-ob', 'LineWidth', 1.8, 'MarkerFaceColor', 'b', 'DisplayName', 'Silicon Layer'); hold on;
+plot(r_tec, T_tec - 273.15, '-sr', 'LineWidth', 1.8, 'MarkerFaceColor', 'r', 'DisplayName', 'TEC Cold Side');
+plot(N+1, T_water_best - 273.15, 'g^', 'MarkerSize', 10, 'MarkerFaceColor', 'g', 'DisplayName', 'Coolant');
+
+xlabel('Stage Index');
+ylabel('Temperature (°C)');
+title(sprintf('Best Solution Temperature Profile\nMethod: %s | T_{max}=%.1f°C | COP=%.3f', ...
+    method_best, fval_best, COP));
+legend('Location', 'best');
+grid on;
+
+saveas(h, fullfile(OUTPUT_DIR, 'best_solution_temp_profile_celsius.png'));
+fprintf('Temperature profile (Celsius) saved.\n');
+
 fprintf('\n✓ Global optimization complete!\n');
 
 %% ==================== HELPER FUNCTIONS ====================
 
 function config = create_base_config(CONFIG)
+    % Create base configuration with FIXED parameters only
+    % Optimizable parameters will be set in evaluate_design
+    
     config = struct();
+    
+    % Fixed geometry parameters
     config.geometry.N_stages = CONFIG.N_stages;
-    config.geometry.wedge_angle_deg = CONFIG.wedge_angle_deg;
-    config.geometry.w_chip_um = 10000;
-    config.geometry.R_cyl_um = 1000;
-    config.geometry.t_chip_um = 50;
-    config.geometry.interconnect_ratio = 0.15;
-    config.geometry.outerconnect_ratio = 0.15;
-    config.geometry.insulation_width_ratio = 0.04;
-    config.geometry.interconnect_angle_ratio = 0.16;
-    config.geometry.outerconnect_angle_ratio = 0.16;
-    config.geometry.interconnect_thickness_ratio = 1.0;
-    config.geometry.outerconnect_thickness_ratio = 1.0;
+    config.geometry.N_tsv_limit = CONFIG.N_tsv_limit;
+    config.geometry.w_chip_um = CONFIG.ref.w_chip_um;
+    
+    % TSV parameters (fixed)
     config.geometry.tsv.R_TSV_um = 10;
     config.geometry.tsv.P_TSV_um = 20;
     config.geometry.tsv.g_rad_um = 10;
     config.geometry.tsv.t_SOI_um = 100;
     
-    config.boundary_conditions.q_flux_W_m2 = CONFIG.q_flux_W_m2;
-    config.boundary_conditions.T_water_K = 300;
-    config.boundary_conditions.h_conv_W_m2K = 1e6;
+    % Reference values for ratio calculations
+    config.ref = CONFIG.ref;
     
+    % Material properties (fixed)
     config.materials.Bi2Te3 = struct('k', 1.2, 'rho', 1e-5, 'S', 0.0002);
     config.materials.Cu = struct('k', 400, 'rho', 1.7e-8);
     config.materials.Si = struct('k', 150, 'rho', 0.01);
@@ -259,48 +503,211 @@ function config = create_base_config(CONFIG)
     config.materials.Al2O3 = struct('k', 30, 'rho', 1e12);
 end
 
-function cost = tec_objective(x, base_config, T_target_C)
-    % Objective function for optimization
-    % x = [I_current, thickness, k_r, fill_factor]
+function config = build_full_config(x, base_config, CONFIG)
+    % Build a complete config struct from optimization vector x (14 params)
+    % Used for creating geometry objects for plotting
+    %
+    % x vector (14 variables):
+    %  1. I_current_A, 2. wedge_angle, 3. thickness_ratio, 4. t_chip_ratio,
+    %  5. R_cyl_ratio, 6. k_r, 7. fill_factor, 8. interconnect_ratio,
+    %  9. outerconnect_ratio, 10. interconnect_angle_ratio,
+    % 11. outerconnect_angle_ratio, 12. interconnect_thickness_ratio,
+    % 13. outerconnect_thickness_ratio, 14. insulation_width_ratio
+    
+    config = base_config;
+    
+    % Operating conditions
+    config.operating_conditions.I_current_A = x(1);
+    
+    % Boundary conditions - FIXED from CONFIG
+    config.boundary_conditions.q_flux_W_m2 = CONFIG.q_flux_W_m2;
+    config.boundary_conditions.h_conv_W_m2K = CONFIG.h_conv_W_m2K;
+    config.boundary_conditions.T_water_K = CONFIG.T_water_K;
+    
+    % Geometry
+    config.geometry.wedge_angle_deg = x(2);
+    config.geometry.thickness_um = x(3) * base_config.ref.thickness_um;
+    config.geometry.t_chip_um = x(4) * 100;
+    config.geometry.R_cyl_um = x(5) * base_config.ref.w_chip_um;
+    config.geometry.radial_expansion_factor = x(6);
+    config.geometry.fill_factor = x(7);
+    config.geometry.interconnect_ratio = x(8);
+    config.geometry.outerconnect_ratio = x(9);
+    config.geometry.interconnect_angle_ratio = x(10);
+    config.geometry.outerconnect_angle_ratio = x(11);
+    config.geometry.interconnect_thickness_ratio = x(12);
+    config.geometry.outerconnect_thickness_ratio = x(13);
+    config.geometry.insulation_width_ratio = x(14);
+end
+
+function cost = tec_objective(x, base_config, CONFIG)
+    % Objective function for optimization with 14 parameters
+    %
+    % x vector (14 variables):
+    %  1. I_current_A          - Current (A)
+    %  2. wedge_angle_deg      - Wedge angle (degrees)
+    %  3. thickness_ratio      - TEC thickness ratio
+    %  4. t_chip_ratio         - Chip thickness ratio
+    %  5. R_cyl_ratio          - Cylinder radius ratio
+    %  6. radial_expansion_factor - k_r
+    %  7. fill_factor          - TEC fill factor
+    %  8. interconnect_ratio   - Interconnect width ratio
+    %  9. outerconnect_ratio   - Outerconnect width ratio
+    % 10. interconnect_angle_ratio - Interconnect angle ratio
+    % 11. outerconnect_angle_ratio - Outerconnect angle ratio
+    % 12. interconnect_thickness_ratio - Interconnect thickness ratio
+    % 13. outerconnect_thickness_ratio - Outerconnect thickness ratio
+    % 14. insulation_width_ratio - Insulation width ratio
+    %
+    % FIXED from CONFIG: q_flux, h_conv, T_water
+    %
+    % Includes guardrails for physically unrealistic results
+    
+    PENALTY = 1e6;  % Large penalty for infeasible designs
+    T_target_C = CONFIG.T_target_C;
+    T_water_K = CONFIG.T_water_K;  % Fixed from CONFIG
     
     try
-        [T_max_K, ~, ~, ~, ~] = evaluate_design(x, base_config);
+        [T_max_K, T_profile, Q_in, Q_out, COP] = evaluate_design(x, base_config, CONFIG);
         T_max_C = T_max_K - 273.15;
+        T_min_K = min(T_profile);
+        T_center_K = T_profile(1);  % Center/hot side temperature
+        T_edge_K = T_profile(end);  % Edge/cold side temperature
+        
+        % ============ PHYSICAL FEASIBILITY CHECKS ============
+        
+        % Check 1: No negative temperatures (absolute zero violation)
+        if any(T_profile < 0)
+            cost = PENALTY;
+            return;
+        end
+        
+        % Check 2: All temperatures must be above absolute zero with margin
+        if T_min_K < 200  % Below -73°C is unrealistic for this application
+            cost = PENALTY;
+            return;
+        end
+        
+        % Check 3: Center should be hotter than edge (heat flows outward)
+        % Heat is applied at center, removed at edge
+        if T_center_K < T_edge_K
+            cost = PENALTY;
+            return;
+        end
+        
+        % Check 4: Edge temperature should be near or above coolant temp
+        % TEC can cool below ambient, but not excessively
+        T_min_allowed = T_water_K - 50;  % Max 50K subcooling is realistic
+        if T_edge_K < T_min_allowed
+            cost = PENALTY;
+            return;
+        end
+        
+        % Check 5: Temperature must not be unrealistically high
+        if T_max_C > 500  % Above 500°C is unrealistic
+            cost = PENALTY;
+            return;
+        end
+        
+        % Check 6: COP sanity check (should be positive for cooling)
+        if COP < -1  % Negative COP indicates heating, not cooling
+            cost = PENALTY;
+            return;
+        end
+        
+        % Check 7: Energy balance - Q_out should be greater than Q_in
+        if Q_out < Q_in * 0.5  % Gross energy imbalance
+            cost = PENALTY;
+            return;
+        end
+        
+        % Check 8: Monotonic temperature profile (heat should flow outward)
+        % For radial TEC, temperature should generally decrease from center to edge
+        % Allow small violations due to TEC pumping effects
+        for i = 2:length(T_profile)
+            if T_profile(i) > T_profile(i-1) + 5  % Allow 5K tolerance
+                cost = PENALTY;
+                return;
+            end
+        end
+        
+        % ============ OBJECTIVE CALCULATION ============
         
         % Primary objective: minimize T_max
         cost = T_max_C;
         
-        % Penalty for exceeding target
+        % Soft penalty for exceeding target (gradual, not hard cutoff)
         if T_max_C > T_target_C
             cost = cost + 10 * (T_max_C - T_target_C);
         end
         
-        % Penalty for negative or unrealistic temperatures
-        if T_max_C < 0 || T_max_C > 500
-            cost = 1e6;
+        % Bonus for good COP (encourages efficient designs)
+        if COP > 0.1
+            cost = cost - 0.5 * min(COP, 2);  % Small bonus, capped
         end
         
-    catch
-        cost = 1e6;  % Penalty for failed simulations
+    catch ME
+        % Debug: uncomment to see what's failing
+        % fprintf('Objective failed: %s\n', ME.message);
+        cost = PENALTY;  % Penalty for failed simulations
     end
 end
 
-function [T_max, T_profile, Q_in, Q_out, COP] = evaluate_design(x, base_config)
-    % Evaluate a TEC design
-    % x = [I_current, thickness, k_r, fill_factor]
+function [T_max, T_profile, Q_in, Q_out, COP] = evaluate_design(x, base_config, CONFIG)
+    % Evaluate a TEC design with 14 optimization parameters
+    %
+    % x vector (14 variables):
+    %  1. I_current_A          - Current (A)
+    %  2. wedge_angle_deg      - Wedge angle (degrees)
+    %  3. thickness_ratio      - TEC thickness ratio
+    %  4. t_chip_ratio         - Chip thickness ratio
+    %  5. R_cyl_ratio          - Cylinder radius ratio
+    %  6. radial_expansion_factor - k_r
+    %  7. fill_factor          - TEC fill factor
+    %  8. interconnect_ratio   - Interconnect width ratio
+    %  9. outerconnect_ratio   - Outerconnect width ratio
+    % 10. interconnect_angle_ratio - Interconnect angle ratio
+    % 11. outerconnect_angle_ratio - Outerconnect angle ratio
+    % 12. interconnect_thickness_ratio - Interconnect thickness ratio
+    % 13. outerconnect_thickness_ratio - Outerconnect thickness ratio
+    % 14. insulation_width_ratio - Insulation width ratio
+    %
+    % FIXED from CONFIG: q_flux, h_conv, T_water
     
     config = base_config;
-    config.operating_conditions.I_current_A = x(1);
-    config.geometry.thickness_um = x(2);
-    config.geometry.radial_expansion_factor = x(3);
-    config.geometry.fill_factor = x(4);
     
+    % Operating conditions
+    config.operating_conditions.I_current_A = x(1);
+    
+    % Boundary conditions - FIXED from CONFIG
+    config.boundary_conditions.q_flux_W_m2 = CONFIG.q_flux_W_m2;
+    config.boundary_conditions.h_conv_W_m2K = CONFIG.h_conv_W_m2K;
+    config.boundary_conditions.T_water_K = CONFIG.T_water_K;
+    
+    % Geometry - angles and ratios
+    config.geometry.wedge_angle_deg = x(2);
+    config.geometry.thickness_um = x(3) * base_config.ref.thickness_um;  % ratio * ref
+    config.geometry.t_chip_um = x(4) * 100;  % ratio * 100 µm
+    config.geometry.R_cyl_um = x(5) * base_config.ref.w_chip_um;  % ratio * w_chip
+    config.geometry.radial_expansion_factor = x(6);
+    config.geometry.fill_factor = x(7);
+    
+    % Interconnect ratios
+    config.geometry.interconnect_ratio = x(8);
+    config.geometry.outerconnect_ratio = x(9);
+    config.geometry.interconnect_angle_ratio = x(10);
+    config.geometry.outerconnect_angle_ratio = x(11);
+    config.geometry.interconnect_thickness_ratio = x(12);
+    config.geometry.outerconnect_thickness_ratio = x(13);
+    config.geometry.insulation_width_ratio = x(14);
+    
+    % Create solver objects
     materials = MaterialProperties(config);
     geometry = TECGeometry(config);
     network = ThermalNetwork(geometry, materials, config);
     
     N = geometry.N_stages;
-    T = ones(2*N + 1, 1) * 300;
+    T = ones(2*N + 1, 1) * config.boundary_conditions.T_water_K;
     
     for iter = 1:100
         T_old = T;
@@ -322,11 +729,97 @@ function [T_max, T_profile, Q_in, Q_out, COP] = evaluate_design(x, base_config)
     end
 end
 
-function [state, options, optchanged] = ga_output(options, state, flag, var_names)
+function [state, options, optchanged] = ga_output(options, state, flag, ~)
     % Custom output function for GA
+    % var_names argument replaced with ~ as it's unused
     optchanged = false;
     
     if strcmp(flag, 'iter')
         % Could log or save intermediate results here
+    end
+end
+
+function [is_valid, reason, T_max, T_profile, COP] = validate_solution(x, base_config, T_water_K, CONFIG)
+    % Validate a solution for physical feasibility
+    % Returns: is_valid (bool), reason (string), and thermal results
+    %
+    % Physical constraints checked:
+    % 1. No negative temperatures
+    % 2. Temperatures above reasonable minimum (200 K)
+    % 3. Center hotter than edge (correct heat flow direction)
+    % 4. Edge temperature reasonable relative to coolant
+    % 5. Monotonic temperature profile (no inversions)
+    % 6. Reasonable COP
+    
+    is_valid = false;
+    reason = 'Unknown error';  % Default reason
+    T_max = NaN;
+    T_profile = [];
+    COP = NaN;
+    
+    try
+        [T_max, T_profile, Q_in, Q_out, COP] = evaluate_design(x, base_config, CONFIG);
+        
+        T_min = min(T_profile);
+        T_center = T_profile(1);
+        T_edge = T_profile(end);
+        
+        % Check 1: No negative temperatures
+        if any(T_profile < 0)
+            reason = 'Negative temperature detected';
+            return;
+        end
+        
+        % Check 2: Minimum temperature check
+        if T_min < 200  % Below -73°C
+            reason = sprintf('Temperature too low (%.1f K)', T_min);
+            return;
+        end
+        
+        % Check 3: Center should be hotter than edge
+        if T_center < T_edge
+            reason = sprintf('Inverted profile: center (%.1f K) < edge (%.1f K)', T_center, T_edge);
+            return;
+        end
+        
+        % Check 4: Edge temperature relative to coolant
+        T_min_allowed = T_water_K - 50;  % Max 50K subcooling
+        if T_edge < T_min_allowed
+            reason = sprintf('Edge too cold (%.1f K < %.1f K limit)', T_edge, T_min_allowed);
+            return;
+        end
+        
+        % Check 5: Maximum temperature check
+        if T_max > 773.15  % Above 500°C
+            reason = sprintf('Temperature too high (%.1f °C)', T_max - 273.15);
+            return;
+        end
+        
+        % Check 6: Monotonic profile check (allow small violations)
+        for i = 2:length(T_profile)
+            if T_profile(i) > T_profile(i-1) + 10  % 10K tolerance
+                reason = sprintf('Non-monotonic profile at node %d', i);
+                return;
+            end
+        end
+        
+        % Check 7: COP sanity
+        if COP < -0.5
+            reason = sprintf('Invalid COP (%.3f)', COP);
+            return;
+        end
+        
+        % Check 8: Energy balance
+        if Q_out < 0 || Q_in < 0
+            reason = 'Negative heat flow';
+            return;
+        end
+        
+        % All checks passed
+        is_valid = true;
+        reason = 'Valid';
+        
+    catch ME
+        reason = sprintf('Evaluation failed: %s', ME.message);
     end
 end

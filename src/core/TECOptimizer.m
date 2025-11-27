@@ -33,19 +33,19 @@ classdef TECOptimizer < handle
             fprintf('Heat flux: %.0f W/m² (%.2f W total chip)\n', q_flux, q_flux * 100e-6);
             
             vars = {
-                % name, lower_bound, upper_bound, initial_value
-                'current', 0.005, 0.5, 0.025;  % Lower current often better
-                'k_r', 0.8, 1.5, 1.15;
-                'interconnect_ratio', 0.1, 0.35, 0.15;
-                'outerconnect_ratio', 0.1, 0.35, 0.15;
-                'interconnect_angle_ratio', 0.1, 0.4, 0.16;
-                'outerconnect_angle_ratio', 0.1, 0.4, 0.16;
-                'fill_factor', 0.8, 0.99, 0.95;
-                'thickness_um', 50, 500, 200;  % Thicker TEC helps
-                'wedge_angle_deg', 15, 60, 30;
-                'insulation_width_ratio', 0.02, 0.1, 0.04;
-                'interconnect_thickness_ratio', 0.5, 2.0, 1.0;
-                'outerconnect_thickness_ratio', 0.5, 2.0, 1.0
+            % name, lower_bound, upper_bound, initial_value
+            'current', 0.0005, 1.0, 0.025;  % Lower current often better
+            'k_r', 0.2, 3.0, 1.15;
+            'interconnect_ratio', 0.1, 0.35, 0.15;
+            'outerconnect_ratio', 0.1, 0.35, 0.15;
+            'interconnect_angle_ratio', 0.1, 0.4, 0.16;
+            'outerconnect_angle_ratio', 0.1, 0.4, 0.16;
+            'fill_factor', 0.8, 0.99, 0.95;
+            'thickness_um', 50, 1000, 200;  % Thicker TEC helps
+            'wedge_angle_deg', 10, 90, 30;
+            'insulation_width_ratio', 0.02, 0.1, 0.04;
+            'interconnect_thickness_ratio', 0.5, 2.0, 1.0;
+            'outerconnect_thickness_ratio', 0.5, 2.0, 1.0
             };
             var_names = vars(:, 1);
             lb = [vars{:, 2}];
@@ -57,29 +57,37 @@ classdef TECOptimizer < handle
             
             % Use optimoptions with live plot callback
             options = optimoptions('fmincon', 'Display', 'iter', ...
-                'MaxFunctionEvaluations', 500, ...
-                'OptimalityTolerance', 1e-4, ...
-                'StepTolerance', 1e-6, ...
-                'PlotFcn', {@optimplotfval, @optimplotx}, ...
-                'OutputFcn', @(x,optimValues,state) obj.update_live_plots(x, optimValues, state, var_names));
+            'MaxFunctionEvaluations', 500, ...
+            'OptimalityTolerance', 1e-4, ...
+            'StepTolerance', 1e-6, ...
+            'PlotFcn', {@optimplotfval, @optimplotx}, ...
+            'OutputFcn', @(x,optimValues,state) obj.update_live_plots(x, optimValues, state, var_names));
             
             if exist('fmincon', 'file')
-                fprintf('Using fmincon...\n');
-                [x_opt, fval] = fmincon(@(x) obj.evaluate_cost(x, var_names), x0, [], [], [], [], lb, ub, [], options);
+            fprintf('Using fmincon...\n');
+            [x_opt, fval] = fmincon(@(x) obj.evaluate_cost(x, var_names), x0, [], [], [], [], lb, ub, [], options);
             else
-                fprintf('Using fminsearch (bounds handled by penalty)...\n');
-                opts = optimset('Display', 'iter', 'MaxFunEvals', 500, 'PlotFcns', @optimplotfval);
-                [x_opt, fval] = fminsearch(@(x) obj.evaluate_cost_penalty(x, var_names, lb, ub), x0, opts);
+            fprintf('Using fminsearch (bounds handled by penalty)...\n');
+            opts = optimset('Display', 'iter', 'MaxFunEvals', 500, 'PlotFcns', @optimplotfval);
+            [x_opt, fval] = fminsearch(@(x) obj.evaluate_cost_penalty(x, var_names, lb, ub), x0, opts);
             end
             fprintf('Optimization Complete.\n');
             fprintf('Optimal T_max: %.4f K (%.1f °C)\n', fval, fval - 273.15);
+            
+            % Print optimal parameters
+            fprintf('\nOptimal Parameters:\n==============================\n');
+            for i = 1:length(var_names)
+            fprintf('%s: %.4f\n', var_names{i}, x_opt(i));
+            end
+            fprintf('==============================\n');
+            
             obj.update_config(x_opt, var_names);
             [T_final, ~, ~] = obj.Solver.run();
             obj.log_optimization_results(x_opt, var_names, fval, T_final);
             
             % Close live plot figure
             if ~isempty(obj.TempProfileFig) && isvalid(obj.TempProfileFig)
-                close(obj.TempProfileFig);
+            close(obj.TempProfileFig);
             end
         end
         

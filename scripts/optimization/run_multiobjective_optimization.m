@@ -15,7 +15,7 @@ fprintf('╚══════════════════════�
 
 %% Configuration
 CONFIG = struct();
-CONFIG.q_flux_W_m2 = 1000;          % Heat flux
+CONFIG.q_flux_W_m2 = 20000;          % Heat flux
 CONFIG.N_stages = 3;                 % Fixed for COMSOL template
 CONFIG.wedge_angle_deg = 30;         % Fixed for COMSOL template
 
