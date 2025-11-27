@@ -38,85 +38,26 @@ if ~exist(OUTPUT_DIR, 'dir')
 end
 
 %% Define optimization variables and bounds
-% Geometry and operating parameters as ratios or normalized values
-% (q_flux, h_conv, T_water are FIXED design requirements)
-%
-% Variable vector x:
-%  1. I_current_A          - Current (A)
-%  2. wedge_angle_deg      - Wedge angle (degrees)
-%  3. thickness_ratio      - TEC thickness ratio (actual = ratio * ref_thickness)
-%  4. t_chip_ratio         - Chip thickness ratio (actual = ratio * 100 µm)
-%  5. R_cyl_ratio          - Cylinder radius ratio (actual = ratio * w_chip)
-%  6. radial_expansion_factor - k_r
-%  7. fill_factor          - TEC fill factor
-%  8. interconnect_ratio   - Interconnect width ratio
-%  9. outerconnect_ratio   - Outerconnect width ratio
-% 10. interconnect_angle_ratio - Interconnect angle ratio
-% 11. outerconnect_angle_ratio - Outerconnect angle ratio
-% 12. interconnect_thickness_ratio - Interconnect thickness ratio
-% 13. outerconnect_thickness_ratio - Outerconnect thickness ratio
-% 14. insulation_width_ratio - Insulation width ratio
+% ═══════════════════════════════════════════════════════════════════════════
+% OPTIMIZATION VARIABLE CONFIGURATION
+% ═══════════════════════════════════════════════════════════════════════════
+% Variables are loaded from: src/config/optimization_variables.m
+% Edit that file to change bounds, defaults, or enable/disable variables.
+% This provides a SINGLE CONTROL POINT for all optimization scripts.
+% ═══════════════════════════════════════════════════════════════════════════
 
-var_names = {
-    'I_current (A)'; ...                  % 1
-    'wedge_angle (deg)'; ...              % 2
-    'thickness_ratio'; ...                % 3
-    't_chip_ratio'; ...                   % 4
-    'R_cyl_ratio'; ...                    % 5
-    'k_r (radial_exp)'; ...               % 6
-    'fill_factor'; ...                    % 7
-    'interconnect_ratio'; ...             % 8
-    'outerconnect_ratio'; ...             % 9
-    'interconnect_angle_ratio'; ...       % 10
-    'outerconnect_angle_ratio'; ...       % 11
-    'interconnect_thickness_ratio'; ...   % 12
-    'outerconnect_thickness_ratio'; ...   % 13
-    'insulation_width_ratio'              % 14
-};
+[var_names, lb, ub, x0, all_vars] = optimization_variables();
 nvars = length(var_names);
 
-% Lower bounds
-lb = [
-    0.001; ...   % I_current: 1 mA
-    10; ...      % wedge_angle: 10°
-    0.25; ...    % thickness_ratio: 25 µm (0.25 * 100)
-    0.25; ...    % t_chip_ratio: 25 µm
-    0.05; ...    % R_cyl_ratio: 5% of w_chip
-    0.5; ...     % k_r: 0.5
-    0.50; ...    % fill_factor: 50%
-    0.05; ...    % interconnect_ratio: 5%
-    0.05; ...    % outerconnect_ratio: 5%
-    0.05; ...    % interconnect_angle_ratio: 5%
-    0.05; ...    % outerconnect_angle_ratio: 5%
-    0.5; ...     % interconnect_thickness_ratio: 50%
-    0.5; ...     % outerconnect_thickness_ratio: 50%
-    0.01         % insulation_width_ratio: 1%
-];
+% Store all_vars in CONFIG for use in objective function
+CONFIG.all_vars = all_vars;
 
-% Upper bounds  
-ub = [
-    0.50; ...    % I_current: 500 mA
-    90; ...      % wedge_angle: 90°
-    5.0; ...     % thickness_ratio: 500 µm (5 * 100)
-    2.0; ...     % t_chip_ratio: 200 µm
-    0.25; ...    % R_cyl_ratio: 25% of w_chip
-    2.0; ...     % k_r: 2.0
-    0.99; ...    % fill_factor: 99%
-    0.40; ...    % interconnect_ratio: 40%
-    0.40; ...    % outerconnect_ratio: 40%
-    0.40; ...    % interconnect_angle_ratio: 40%
-    0.40; ...    % outerconnect_angle_ratio: 40%
-    2.0; ...     % interconnect_thickness_ratio: 200%
-    2.0; ...     % outerconnect_thickness_ratio: 200%
-    0.15         % insulation_width_ratio: 15%
-];
-
-fprintf('Optimization Variables (%d total):\n', nvars);
+fprintf('Optimization Variables (%d enabled):\n', nvars);
 fprintf('═══════════════════════════════════════════════════════════════\n');
-fprintf('  %-35s  %12s  %12s\n', 'Variable', 'Lower', 'Upper');
+fprintf('  %-35s  %10s  %10s  %10s\n', 'Variable', 'Lower', 'Upper', 'Initial');
 fprintf('───────────────────────────────────────────────────────────────\n');
 for i = 1:nvars
-    fprintf('  %-35s  %12.4f  %12.4f\n', var_names{i}, lb(i), ub(i));
+    fprintf('  %-35s  %10.4f  %10.4f  %10.4f\n', var_names{i}, lb(i), ub(i), x0(i));
 end
 fprintf('═══════════════════════════════════════════════════════════════\n');
 fprintf('\nFixed Parameters (Design Requirements):\n');
@@ -504,62 +445,76 @@ function config = create_base_config(CONFIG)
 end
 
 function config = build_full_config(x, base_config, CONFIG)
-    % Build a complete config struct from optimization vector x (14 params)
-    % Used for creating geometry objects for plotting
-    %
-    % x vector (14 variables):
-    %  1. I_current_A, 2. wedge_angle, 3. thickness_ratio, 4. t_chip_ratio,
-    %  5. R_cyl_ratio, 6. k_r, 7. fill_factor, 8. interconnect_ratio,
-    %  9. outerconnect_ratio, 10. interconnect_angle_ratio,
-    % 11. outerconnect_angle_ratio, 12. interconnect_thickness_ratio,
-    % 13. outerconnect_thickness_ratio, 14. insulation_width_ratio
+    % Build a complete config struct from optimization vector x
+    % Uses the same variable names as optimization_variables.m
     
     config = base_config;
     
-    % Operating conditions
-    config.operating_conditions.I_current_A = x(1);
+    % Get variable names from CONFIG
+    all_vars = CONFIG.all_vars;
+    enabled_mask = [all_vars{:, 5}];
+    
+    % Create a map of variable values: enabled get x values, disabled get initial values
+    var_map = containers.Map();
+    x_idx = 1;
+    for i = 1:size(all_vars, 1)
+        name = all_vars{i, 1};
+        if enabled_mask(i)  % enabled
+            var_map(name) = x(x_idx);
+            x_idx = x_idx + 1;
+        else  % disabled - use initial value
+            var_map(name) = all_vars{i, 4};
+        end
+    end
+    
+    % Helper function to get value (with default)
+    get_val = @(name, default) get_var_or_default(var_map, name, default);
+    
+    % Operating conditions - variable name is 'current' (matching optimization_variables.m)
+    config.operating_conditions.I_current_A = get_val('current', 0.025);
     
     % Boundary conditions - FIXED from CONFIG
     config.boundary_conditions.q_flux_W_m2 = CONFIG.q_flux_W_m2;
     config.boundary_conditions.h_conv_W_m2K = CONFIG.h_conv_W_m2K;
     config.boundary_conditions.T_water_K = CONFIG.T_water_K;
     
-    % Geometry
-    config.geometry.wedge_angle_deg = x(2);
-    config.geometry.thickness_um = x(3) * base_config.ref.thickness_um;
-    config.geometry.t_chip_um = x(4) * 100;
-    config.geometry.R_cyl_um = x(5) * base_config.ref.w_chip_um;
-    config.geometry.radial_expansion_factor = x(6);
-    config.geometry.fill_factor = x(7);
-    config.geometry.interconnect_ratio = x(8);
-    config.geometry.outerconnect_ratio = x(9);
-    config.geometry.interconnect_angle_ratio = x(10);
-    config.geometry.outerconnect_angle_ratio = x(11);
-    config.geometry.interconnect_thickness_ratio = x(12);
-    config.geometry.outerconnect_thickness_ratio = x(13);
-    config.geometry.insulation_width_ratio = x(14);
+    % Geometry - main parameters (direct values, not ratios)
+    config.geometry.thickness_um = get_val('thickness_um', 200);
+    config.geometry.wedge_angle_deg = get_val('wedge_angle_deg', 30);
+    config.geometry.R_cyl_um = get_val('R_cyl_um', 1000);
+    
+    % TSV/SOI
+    if isfield(config.geometry, 'tsv')
+        config.geometry.tsv.t_SOI_um = get_val('t_SOI_um', 100);
+    end
+    
+    % Expansion and fill
+    config.geometry.radial_expansion_factor = get_val('k_r', 1.15);
+    config.geometry.fill_factor = get_val('fill_factor', 0.95);
+    config.geometry.insulation_width_ratio = get_val('insulation_width_ratio', 0.04);
+    
+    % Interconnects
+    config.geometry.interconnect_ratio = get_val('interconnect_ratio', 0.15);
+    config.geometry.outerconnect_ratio = get_val('outerconnect_ratio', 0.15);
+    config.geometry.interconnect_angle_ratio = get_val('interconnect_angle_ratio', 0.16);
+    config.geometry.outerconnect_angle_ratio = get_val('outerconnect_angle_ratio', 0.16);
+    config.geometry.interconnect_thickness_ratio = get_val('interconnect_thickness_ratio', 1.0);
+    config.geometry.outerconnect_thickness_ratio = get_val('outerconnect_thickness_ratio', 1.0);
+end
+
+function val = get_var_or_default(var_map, name, default)
+    if var_map.isKey(name)
+        val = var_map(name);
+    else
+        val = default;
+    end
 end
 
 function cost = tec_objective(x, base_config, CONFIG)
-    % Objective function for optimization with 14 parameters
+    % Objective function for optimization
+    % Dynamically handles enabled/disabled variables from CONFIG.all_vars
     %
-    % x vector (14 variables):
-    %  1. I_current_A          - Current (A)
-    %  2. wedge_angle_deg      - Wedge angle (degrees)
-    %  3. thickness_ratio      - TEC thickness ratio
-    %  4. t_chip_ratio         - Chip thickness ratio
-    %  5. R_cyl_ratio          - Cylinder radius ratio
-    %  6. radial_expansion_factor - k_r
-    %  7. fill_factor          - TEC fill factor
-    %  8. interconnect_ratio   - Interconnect width ratio
-    %  9. outerconnect_ratio   - Outerconnect width ratio
-    % 10. interconnect_angle_ratio - Interconnect angle ratio
-    % 11. outerconnect_angle_ratio - Outerconnect angle ratio
-    % 12. interconnect_thickness_ratio - Interconnect thickness ratio
-    % 13. outerconnect_thickness_ratio - Outerconnect thickness ratio
-    % 14. insulation_width_ratio - Insulation width ratio
-    %
-    % FIXED from CONFIG: q_flux, h_conv, T_water
+    % FIXED from CONFIG: q_flux, h_conv, T_water, N_stages, N_tsv_limit, T_target
     %
     % Includes guardrails for physically unrealistic results
     
@@ -654,52 +609,62 @@ function cost = tec_objective(x, base_config, CONFIG)
 end
 
 function [T_max, T_profile, Q_in, Q_out, COP] = evaluate_design(x, base_config, CONFIG)
-    % Evaluate a TEC design with 14 optimization parameters
-    %
-    % x vector (14 variables):
-    %  1. I_current_A          - Current (A)
-    %  2. wedge_angle_deg      - Wedge angle (degrees)
-    %  3. thickness_ratio      - TEC thickness ratio
-    %  4. t_chip_ratio         - Chip thickness ratio
-    %  5. R_cyl_ratio          - Cylinder radius ratio
-    %  6. radial_expansion_factor - k_r
-    %  7. fill_factor          - TEC fill factor
-    %  8. interconnect_ratio   - Interconnect width ratio
-    %  9. outerconnect_ratio   - Outerconnect width ratio
-    % 10. interconnect_angle_ratio - Interconnect angle ratio
-    % 11. outerconnect_angle_ratio - Outerconnect angle ratio
-    % 12. interconnect_thickness_ratio - Interconnect thickness ratio
-    % 13. outerconnect_thickness_ratio - Outerconnect thickness ratio
-    % 14. insulation_width_ratio - Insulation width ratio
-    %
-    % FIXED from CONFIG: q_flux, h_conv, T_water
+    % Evaluate a TEC design with dynamically configured optimization parameters
+    % Uses CONFIG.all_vars to map x vector to parameter names
+    % Uses same variable names as optimization_variables.m
     
     config = base_config;
     
-    % Operating conditions
-    config.operating_conditions.I_current_A = x(1);
+    % Get variable names from CONFIG
+    all_vars = CONFIG.all_vars;
+    enabled_mask = [all_vars{:, 5}];
+    
+    % Create a map of variable values: enabled get x values, disabled get initial values
+    var_map = containers.Map();
+    x_idx = 1;
+    for i = 1:size(all_vars, 1)
+        name = all_vars{i, 1};
+        if enabled_mask(i)  % enabled
+            var_map(name) = x(x_idx);
+            x_idx = x_idx + 1;
+        else  % disabled - use initial value
+            var_map(name) = all_vars{i, 4};
+        end
+    end
+    
+    % Helper function to get value (with default)
+    get_val = @(name, default) get_var_or_default(var_map, name, default);
+    
+    % Operating conditions - variable name is 'current' (matching optimization_variables.m)
+    config.operating_conditions.I_current_A = get_val('current', 0.025);
     
     % Boundary conditions - FIXED from CONFIG
     config.boundary_conditions.q_flux_W_m2 = CONFIG.q_flux_W_m2;
     config.boundary_conditions.h_conv_W_m2K = CONFIG.h_conv_W_m2K;
     config.boundary_conditions.T_water_K = CONFIG.T_water_K;
     
-    % Geometry - angles and ratios
-    config.geometry.wedge_angle_deg = x(2);
-    config.geometry.thickness_um = x(3) * base_config.ref.thickness_um;  % ratio * ref
-    config.geometry.t_chip_um = x(4) * 100;  % ratio * 100 µm
-    config.geometry.R_cyl_um = x(5) * base_config.ref.w_chip_um;  % ratio * w_chip
-    config.geometry.radial_expansion_factor = x(6);
-    config.geometry.fill_factor = x(7);
+    % Geometry - main parameters (direct values, not ratios)
+    config.geometry.thickness_um = get_val('thickness_um', 200);
+    config.geometry.wedge_angle_deg = get_val('wedge_angle_deg', 30);
+    config.geometry.R_cyl_um = get_val('R_cyl_um', 1000);
     
-    % Interconnect ratios
-    config.geometry.interconnect_ratio = x(8);
-    config.geometry.outerconnect_ratio = x(9);
-    config.geometry.interconnect_angle_ratio = x(10);
-    config.geometry.outerconnect_angle_ratio = x(11);
-    config.geometry.interconnect_thickness_ratio = x(12);
-    config.geometry.outerconnect_thickness_ratio = x(13);
-    config.geometry.insulation_width_ratio = x(14);
+    % TSV/SOI
+    if isfield(config.geometry, 'tsv')
+        config.geometry.tsv.t_SOI_um = get_val('t_SOI_um', 100);
+    end
+    
+    % Expansion and fill
+    config.geometry.radial_expansion_factor = get_val('k_r', 1.15);
+    config.geometry.fill_factor = get_val('fill_factor', 0.95);
+    config.geometry.insulation_width_ratio = get_val('insulation_width_ratio', 0.04);
+    
+    % Interconnects
+    config.geometry.interconnect_ratio = get_val('interconnect_ratio', 0.15);
+    config.geometry.outerconnect_ratio = get_val('outerconnect_ratio', 0.15);
+    config.geometry.interconnect_angle_ratio = get_val('interconnect_angle_ratio', 0.16);
+    config.geometry.outerconnect_angle_ratio = get_val('outerconnect_angle_ratio', 0.16);
+    config.geometry.interconnect_thickness_ratio = get_val('interconnect_thickness_ratio', 1.0);
+    config.geometry.outerconnect_thickness_ratio = get_val('outerconnect_thickness_ratio', 1.0);
     
     % Create solver objects
     materials = MaterialProperties(config);
@@ -707,11 +672,41 @@ function [T_max, T_profile, Q_in, Q_out, COP] = evaluate_design(x, base_config, 
     network = ThermalNetwork(geometry, materials, config);
     
     N = geometry.N_stages;
-    T = ones(2*N + 1, 1) * config.boundary_conditions.T_water_K;
+    T_water = config.boundary_conditions.T_water_K;
     
+    % CRITICAL: Use warm initial guess (like TECOptimizer does)
+    % Starting from T_water causes convergence issues
+    T = ones(2*N + 1, 1) * (T_water + 50);
+    
+    % CRITICAL: Use relaxation iteration (like TECOptimizer does)
+    % Without relaxation, solver can diverge for extreme parameters
     for iter = 1:100
         T_old = T;
-        [T, Q_out, Q_in] = network.solve(T);
+        try
+            [T_new, Q_out, Q_in] = network.solve(T);
+        catch
+            % Solver failed - return penalty values
+            T_max = 1e6;
+            T_profile = T;
+            Q_in = 0;
+            Q_out = 0;
+            COP = 0;
+            return;
+        end
+        
+        % Check for invalid values
+        if any(isnan(T_new)) || any(isinf(T_new)) || any(T_new < 0)
+            T_max = 1e6;
+            T_profile = T;
+            Q_in = 0;
+            Q_out = 0;
+            COP = 0;
+            return;
+        end
+        
+        % RELAXATION: Blend old and new (critical for stability)
+        T = 0.5 * T_new + 0.5 * T;
+        
         if max(abs(T - T_old)) < 1e-6
             break;
         end

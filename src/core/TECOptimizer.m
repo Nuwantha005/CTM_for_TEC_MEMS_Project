@@ -3,6 +3,7 @@ classdef TECOptimizer < handle
         Solver
         BaseConfig
         OutputDir
+        CONFIG  % Centralized configuration from optimization_variables.m
         % Live plot handles
         TempProfileFig
         TempProfileAxes
@@ -14,6 +15,15 @@ classdef TECOptimizer < handle
             obj.Solver = RadialTECSolver(config_path);
             obj.BaseConfig = obj.Solver.Config;
             obj.LastT = [];
+            
+            % Load centralized configuration
+            [~, ~, ~, ~, ~, obj.CONFIG] = optimization_variables();
+            
+            % Apply CONFIG boundary conditions to solver
+            obj.Solver.Config.boundary_conditions.q_flux_W_m2 = obj.CONFIG.q_flux_W_m2;
+            obj.Solver.Config.boundary_conditions.T_water_K = obj.CONFIG.T_water_K;
+            obj.Solver.Config.boundary_conditions.h_conv_W_m2K = obj.CONFIG.h_conv_W_m2K;
+            
             if nargin > 1 && ~isempty(output_dir_override)
                 obj.OutputDir = output_dir_override;
             else
@@ -28,29 +38,27 @@ classdef TECOptimizer < handle
         function [x_opt, fval, T_final] = run_optimization(obj)
             fprintf('Starting Optimization...\n');
             
-            % Show current heat flux setting
-            q_flux = obj.Solver.Config.boundary_conditions.q_flux_W_m2;
-            fprintf('Heat flux: %.0f W/m² (%.2f W total chip)\n', q_flux, q_flux * 100e-6);
+            % Show settings from centralized config
+            fprintf('=== Settings from optimization_variables.m ===\n');
+            fprintf('Heat flux: %.0e W/m²\n', obj.CONFIG.q_flux_W_m2);
+            fprintf('Coolant temperature: %.1f K\n', obj.CONFIG.T_water_K);
+            fprintf('Convection coefficient: %.0e W/m²K\n', obj.CONFIG.h_conv_W_m2K);
+            fprintf('Target max temperature: %d°C\n\n', obj.CONFIG.T_target_C);
             
-            vars = {
-            % name, lower_bound, upper_bound, initial_value
-            'current', 0.0005, 1.0, 0.025;  % Lower current often better
-            'k_r', 0.2, 3.0, 1.15;
-            'interconnect_ratio', 0.1, 0.35, 0.15;
-            'outerconnect_ratio', 0.1, 0.35, 0.15;
-            'interconnect_angle_ratio', 0.1, 0.4, 0.16;
-            'outerconnect_angle_ratio', 0.1, 0.4, 0.16;
-            'fill_factor', 0.8, 0.99, 0.95;
-            'thickness_um', 50, 1000, 200;  % Thicker TEC helps
-            'wedge_angle_deg', 10, 90, 30;
-            'insulation_width_ratio', 0.02, 0.1, 0.04;
-            'interconnect_thickness_ratio', 0.5, 2.0, 1.0;
-            'outerconnect_thickness_ratio', 0.5, 2.0, 1.0
-            };
-            var_names = vars(:, 1);
-            lb = [vars{:, 2}];
-            ub = [vars{:, 3}];
-            x0 = [vars{:, 4}];
+            % ═══════════════════════════════════════════════════════════════
+            % OPTIMIZATION VARIABLE CONFIGURATION
+            % ═══════════════════════════════════════════════════════════════
+            % Variables are loaded from: src/config/optimization_variables.m
+            % Edit that file to change bounds, defaults, or enable/disable variables.
+            % This provides a SINGLE CONTROL POINT for all optimization scripts.
+            % ═══════════════════════════════════════════════════════════════
+            [var_names, lb, ub, x0, ~] = optimization_variables();
+            
+            fprintf('Optimizing %d variables:\n', length(var_names));
+            for i = 1:length(var_names)
+                fprintf('  %2d. %-30s [%.4f - %.4f], x0 = %.4f\n', i, var_names{i}, lb(i), ub(i), x0(i));
+            end
+            fprintf('\n');
             
             % Initialize live plots
             obj.init_live_plots();
@@ -176,6 +184,10 @@ classdef TECOptimizer < handle
                     obj.Solver.Config.geometry.interconnect_thickness_ratio = val;
                 elseif strcmp(name, 'outerconnect_thickness_ratio')
                     obj.Solver.Config.geometry.outerconnect_thickness_ratio = val;
+                elseif strcmp(name, 'R_cyl_um')
+                    obj.Solver.Config.geometry.R_cyl_um = val;
+                elseif strcmp(name, 't_SOI_um')
+                    obj.Solver.Config.geometry.tsv.t_SOI_um = val;
                 else
                     obj.Solver.Config.geometry.(name) = val;
                 end
