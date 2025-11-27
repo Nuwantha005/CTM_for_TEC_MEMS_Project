@@ -5,18 +5,24 @@ format longG;
 clc;
 clear all;
 
-addpath(genpath('src'));
+% Get the directory where this script is located (works both interactively and batch)
+script_dir = fileparts(mfilename('fullpath'));
+project_root = fullfile(script_dir, '..', '..');
+
+addpath(genpath(fullfile(project_root, 'src')));
 
 % Ensure output directory exists
-if ~exist('output', 'dir')
-    mkdir('output');
+output_dir = fullfile(project_root, 'output');
+if ~exist(output_dir, 'dir')
+    mkdir(output_dir);
 end
 
 % Load centralized configuration
 [~, ~, ~, ~, ~, CONFIG] = optimization_variables();
 
 % Create optimizer
-optimizer = TECOptimizer('src/config/default_params.json');
+config_path = fullfile(project_root, 'src', 'config', 'default_params.json');
+optimizer = TECOptimizer(config_path);
 
 % Apply configuration from centralized file
 optimizer.Solver.Config.boundary_conditions.q_flux_W_m2 = CONFIG.q_flux_W_m2;

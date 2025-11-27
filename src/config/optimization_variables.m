@@ -33,7 +33,7 @@ function [var_names, lb, ub, x0, all_vars, CONFIG] = optimization_variables()
     CONFIG.N_tsv_limit = 0;              % TSV limit (0 = no TSVs)
     
     % --- Boundary Conditions ---
-    CONFIG.q_flux_W_m2 = 2000;            % Heat flux at chip (W/m²)
+    CONFIG.q_flux_W_m2 = 20000;            % Heat flux at chip (W/m²)
     CONFIG.h_conv_W_m2K = 1e6;           % Convection coefficient (W/m²K)
     CONFIG.T_water_K = 300;              % Coolant temperature (K)
     
@@ -68,7 +68,7 @@ function [var_names, lb, ub, x0, all_vars, CONFIG] = optimization_variables()
         'current',                      0.0005, 1.0,   0.025,  true;   % TEC current [A]
         
         % === GEOMETRY - MAIN ===
-        'thickness_um',                 50,     2000,  200,    true;   % TEC element thickness [µm]
+        'thickness_um',                 50,     500,  200,    true;   % TEC element thickness [µm]
         'wedge_angle_deg',              10,     90,    30,     true;   % Wedge angle [deg]
         'R_cyl_um',                     500,    5000,  1000,   true;   % Cylinder radius [µm]
         't_SOI_um',                     20,     500,   100,    true;   % SOI thickness [µm]

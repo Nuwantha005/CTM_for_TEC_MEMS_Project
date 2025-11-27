@@ -9,7 +9,12 @@
 % Uses: Global Optimization Toolbox (ga, particleswarm)
 
 clear; clc;
-addpath(genpath('../../src'));
+
+% Get the directory where this script is located (works both interactively and batch)
+script_dir = fileparts(mfilename('fullpath'));
+project_root = fullfile(script_dir, '..', '..');
+
+addpath(genpath(fullfile(project_root, 'src')));
 
 fprintf('╔════════════════════════════════════════════════════════════════════╗\n');
 fprintf('║         GLOBAL OPTIMIZATION FOR TEC DESIGN (FULL PARAMETERS)       ║\n');
@@ -30,9 +35,9 @@ CONFIG.T_water_K = 300;              % Coolant temperature (K) - FIXED
 CONFIG.ref.w_chip_um = 10000;        % Reference chip width (µm)
 CONFIG.ref.thickness_um = 100;       % Reference TEC thickness (µm)
 
-% Output directory
+% Output directory (use absolute path based on script location)
 timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
-OUTPUT_DIR = fullfile('../../output', 'global_optimization', timestamp);
+OUTPUT_DIR = fullfile(project_root, 'output', 'global_optimization', timestamp);
 if ~exist(OUTPUT_DIR, 'dir')
     mkdir(OUTPUT_DIR);
 end

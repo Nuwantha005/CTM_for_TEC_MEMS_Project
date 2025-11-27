@@ -10,7 +10,12 @@
 % Uses: Global Optimization Toolbox (gamultiobj)
 
 clear; clc;
-addpath(genpath('../../src'));
+
+% Get the directory where this script is located (works both interactively and batch)
+script_dir = fileparts(mfilename('fullpath'));
+project_root = fullfile(script_dir, '..', '..');
+
+addpath(genpath(fullfile(project_root, 'src')));
 
 fprintf('╔════════════════════════════════════════════════════════════╗\n');
 fprintf('║        MULTI-OBJECTIVE OPTIMIZATION FOR TEC DESIGN        ║\n');
@@ -25,9 +30,9 @@ fprintf('╚══════════════════════�
 [var_names, lb, ub, x0, all_vars, CONFIG] = optimization_variables();
 nvars = length(var_names);
 
-% Output directory
+% Output directory (use absolute path based on script location)
 timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
-OUTPUT_DIR = fullfile('../../output', 'multiobjective_optimization', timestamp);
+OUTPUT_DIR = fullfile(project_root, 'output', 'multiobjective_optimization', timestamp);
 if ~exist(OUTPUT_DIR, 'dir')
     mkdir(OUTPUT_DIR);
 end
