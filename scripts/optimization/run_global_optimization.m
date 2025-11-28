@@ -20,42 +20,21 @@ fprintf('╔══════════════════════�
 fprintf('║         GLOBAL OPTIMIZATION FOR TEC DESIGN (FULL PARAMETERS)       ║\n');
 fprintf('╚════════════════════════════════════════════════════════════════════╝\n\n');
 
-%% Configuration - FIXED PARAMETERS (not optimized)
-CONFIG = struct();
-CONFIG.T_target_C = 85;              % Target max temperature (°C) - FIXED
-CONFIG.N_stages = 3;                 % Number of stages - FIXED
-CONFIG.N_tsv_limit = 0;              % TSV limit - FIXED
+%% Load ALL configuration from single control point
+% ═══════════════════════════════════════════════════════════════════════════
+% ALL parameters (variables, bounds, fixed params, BCs) come from:
+%   src/config/optimization_variables.m
+% ═══════════════════════════════════════════════════════════════════════════
 
-% Fixed boundary conditions (design requirements)
-CONFIG.q_flux_W_m2 = 1e6;            % Heat flux (W/m²) - FIXED DESIGN REQUIREMENT
-CONFIG.h_conv_W_m2K = 1e6;           % Convection coefficient (W/m²K) - FIXED
-CONFIG.T_water_K = 300;              % Coolant temperature (K) - FIXED
-
-% Reference values for ratio-based parameters
-CONFIG.ref.w_chip_um = 10000;        % Reference chip width (µm)
-CONFIG.ref.thickness_um = 100;       % Reference TEC thickness (µm)
+[var_names, lb, ub, x0, all_vars, CONFIG] = optimization_variables();
+nvars = length(var_names);
 
 % Output directory (use absolute path based on script location)
 timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
 OUTPUT_DIR = fullfile(project_root, 'output', 'global_optimization', timestamp);
 if ~exist(OUTPUT_DIR, 'dir')
     mkdir(OUTPUT_DIR);
-end
-
-%% Define optimization variables and bounds
-% ═══════════════════════════════════════════════════════════════════════════
-% OPTIMIZATION VARIABLE CONFIGURATION
-% ═══════════════════════════════════════════════════════════════════════════
-% Variables are loaded from: src/config/optimization_variables.m
-% Edit that file to change bounds, defaults, or enable/disable variables.
-% This provides a SINGLE CONTROL POINT for all optimization scripts.
-% ═══════════════════════════════════════════════════════════════════════════
-
-[var_names, lb, ub, x0, all_vars] = optimization_variables();
-nvars = length(var_names);
-
-% Store all_vars in CONFIG for use in objective function
-CONFIG.all_vars = all_vars;
+end;
 
 fprintf('Optimization Variables (%d enabled):\n', nvars);
 fprintf('═══════════════════════════════════════════════════════════════\n');
@@ -181,23 +160,10 @@ fprintf('Fixed Design Requirements:\n');
 fprintf('  Heat Flux:         %.2e W/m² (%.0f kW/m²)\n', CONFIG.q_flux_W_m2, CONFIG.q_flux_W_m2/1e3);
 fprintf('  Coolant Temp:      %.1f K (%.1f °C)\n', CONFIG.T_water_K, CONFIG.T_water_K - 273.15);
 fprintf('  h_conv:            %.2e W/m²K\n', CONFIG.h_conv_W_m2K);
-fprintf('\nOptimized Operating Conditions:\n');
-fprintf('  Current:           %.3f A (%.1f mA)\n', x_best(1), x_best(1)*1000);
-fprintf('\nOptimized Geometry:\n');
-fprintf('  Wedge Angle:       %.1f°\n', x_best(2));
-fprintf('  TEC Thickness:     %.1f µm (ratio=%.3f)\n', x_best(3)*CONFIG.ref.thickness_um, x_best(3));
-fprintf('  Chip Thickness:    %.1f µm (ratio=%.3f)\n', x_best(4)*100, x_best(4));
-fprintf('  R_cyl:             %.1f µm (ratio=%.3f)\n', x_best(5)*CONFIG.ref.w_chip_um, x_best(5));
-fprintf('  k_r (radial exp):  %.3f\n', x_best(6));
-fprintf('  Fill Factor:       %.3f\n', x_best(7));
-fprintf('\nOptimized Interconnects:\n');
-fprintf('  Interconnect ratio:          %.3f\n', x_best(8));
-fprintf('  Outerconnect ratio:          %.3f\n', x_best(9));
-fprintf('  Interconnect angle ratio:    %.3f\n', x_best(10));
-fprintf('  Outerconnect angle ratio:    %.3f\n', x_best(11));
-fprintf('  Interconnect thickness ratio:%.3f\n', x_best(12));
-fprintf('  Outerconnect thickness ratio:%.3f\n', x_best(13));
-fprintf('  Insulation width ratio:      %.3f\n', x_best(14));
+fprintf('\nOptimized Parameters:\n');
+for i = 1:length(var_names)
+    fprintf('  %-30s: %.4f\n', var_names{i}, x_best(i));
+end
 fprintf('───────────────────────────────────────────────────────────────\n');
 fprintf('  T_max:             %.2f °C\n', fval_best);
 fprintf('═══════════════════════════════════════════════════════════════\n\n');
@@ -421,32 +387,47 @@ fprintf('\n✓ Global optimization complete!\n');
 %% ==================== HELPER FUNCTIONS ====================
 
 function config = create_base_config(CONFIG)
-    % Create base configuration with FIXED parameters only
-    % Optimizable parameters will be set in evaluate_design
+    % Create base configuration from centralized CONFIG struct
+    % All values come from optimization_variables.m
     
     config = struct();
     
-    % Fixed geometry parameters
+    % Geometry from CONFIG
     config.geometry.N_stages = CONFIG.N_stages;
     config.geometry.N_tsv_limit = CONFIG.N_tsv_limit;
-    config.geometry.w_chip_um = CONFIG.ref.w_chip_um;
+    config.geometry.w_chip_um = CONFIG.w_chip_um;
+    config.geometry.t_chip_um = CONFIG.t_chip_um;
     
-    % TSV parameters (fixed)
-    config.geometry.tsv.R_TSV_um = 10;
-    config.geometry.tsv.P_TSV_um = 20;
-    config.geometry.tsv.g_rad_um = 10;
-    config.geometry.tsv.t_SOI_um = 100;
+    % TSV parameters from CONFIG
+    config.geometry.tsv.R_TSV_um = CONFIG.tsv.R_TSV_um;
+    config.geometry.tsv.P_TSV_um = CONFIG.tsv.P_TSV_um;
+    config.geometry.tsv.g_rad_um = CONFIG.tsv.g_rad_um;
+    config.geometry.tsv.t_SOI_um = 100;  % Default, can be optimized
     
-    % Reference values for ratio calculations
-    config.ref = CONFIG.ref;
+    % Defaults for optimizable parameters (will be overwritten by optimizer)
+    config.geometry.R_cyl_um = 1000;
+    config.geometry.wedge_angle_deg = 30;
+    config.geometry.thickness_um = 200;
+    config.geometry.radial_expansion_factor = 1.15;
+    config.geometry.fill_factor = 0.95;
+    config.geometry.interconnect_ratio = 0.15;
+    config.geometry.outerconnect_ratio = 0.15;
+    config.geometry.insulation_width_ratio = 0.04;
+    config.geometry.interconnect_angle_ratio = 0.16;
+    config.geometry.outerconnect_angle_ratio = 0.16;
+    config.geometry.interconnect_thickness_ratio = 1.0;
+    config.geometry.outerconnect_thickness_ratio = 1.0;
     
-    % Material properties (fixed)
-    config.materials.Bi2Te3 = struct('k', 1.2, 'rho', 1e-5, 'S', 0.0002);
-    config.materials.Cu = struct('k', 400, 'rho', 1.7e-8);
-    config.materials.Si = struct('k', 150, 'rho', 0.01);
-    config.materials.AlN = struct('k', 170, 'rho', 1e10);
-    config.materials.SiO2 = struct('k', 1.4, 'rho', 1e14);
-    config.materials.Al2O3 = struct('k', 30, 'rho', 1e12);
+    % Boundary conditions from CONFIG
+    config.boundary_conditions.q_flux_W_m2 = CONFIG.q_flux_W_m2;
+    config.boundary_conditions.T_water_K = CONFIG.T_water_K;
+    config.boundary_conditions.h_conv_W_m2K = CONFIG.h_conv_W_m2K;
+    
+    % Operating conditions (default, will be optimized)
+    config.operating_conditions.I_current_A = 0.025;
+    
+    % Materials from CONFIG
+    config.materials = CONFIG.materials;
 end
 
 function config = build_full_config(x, base_config, CONFIG)
@@ -523,12 +504,25 @@ function cost = tec_objective(x, base_config, CONFIG)
     %
     % Includes guardrails for physically unrealistic results
     
+    persistent call_count;
+    if isempty(call_count)
+        call_count = 0;
+    end
+    call_count = call_count + 1;
+    
     PENALTY = 1e6;  % Large penalty for infeasible designs
     T_target_C = CONFIG.T_target_C;
     T_water_K = CONFIG.T_water_K;  % Fixed from CONFIG
     
     try
         [T_max_K, T_profile, Q_in, Q_out, COP] = evaluate_design(x, base_config, CONFIG);
+        
+        % Debug output for first few calls
+        if call_count <= 5
+            fprintf('  [GO Debug] Call %d: T_max=%.1f°C, q_flux=%.0e, Q_in=%.4f, Q_out=%.4f\n', ...
+                call_count, T_max_K - 273.15, CONFIG.q_flux_W_m2, Q_in, Q_out);
+        end
+        
         T_max_C = T_max_K - 273.15;
         T_min_K = min(T_profile);
         T_center_K = T_profile(1);  % Center/hot side temperature
@@ -618,7 +612,12 @@ function [T_max, T_profile, Q_in, Q_out, COP] = evaluate_design(x, base_config, 
     % Uses CONFIG.all_vars to map x vector to parameter names
     % Uses same variable names as optimization_variables.m
     
-    config = base_config;
+    % IMPORTANT: Create a FRESH config copy to avoid cross-contamination
+    config = struct();
+    config.geometry = base_config.geometry;
+    config.boundary_conditions = base_config.boundary_conditions;
+    config.operating_conditions = base_config.operating_conditions;
+    config.materials = base_config.materials;
     
     % Get variable names from CONFIG
     all_vars = CONFIG.all_vars;

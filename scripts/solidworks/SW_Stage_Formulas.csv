@@ -1,0 +1,44 @@
+Stage,L_i_um,r_in_um,r_out_um,w_ic_um,w_oc_um,w_az_um,Formula_L_i,Formula_r_in,Formula_r_out
+1,=L_1,=R_cyl+w_is,=C2+B2,=B2*ic_ratio,=B2*oc_ratio,=(1-fill_factor)*B2*0.577,=$L_1,=$R_cyl+$w_is,=C2+B2
+2,=L_1*k_r^1,=D2+w_is,=C3+B3,=B3*ic_ratio,=B3*oc_ratio,=(1-fill_factor)*B3*0.577,=$L_1*$k_r^1,=D2+$w_is,=C3+B3
+3,=L_1*k_r^2,=D3+w_is,=C4+B4,=B4*ic_ratio,=B4*oc_ratio,=(1-fill_factor)*B4*0.577,=$L_1*$k_r^2,=D3+$w_is,=C4+B4
+4,=L_1*k_r^3,=D4+w_is,=C5+B5,=B5*ic_ratio,=B5*oc_ratio,=(1-fill_factor)*B5*0.577,=$L_1*$k_r^3,=D4+$w_is,=C5+B5
+5,=L_1*k_r^4,=D5+w_is,=C6+B6,=B6*ic_ratio,=B6*oc_ratio,=(1-fill_factor)*B6*0.577,=$L_1*$k_r^4,=D5+$w_is,=C6+B6
+6,=L_1*k_r^5,=D6+w_is,=C7+B7,=B7*ic_ratio,=B7*oc_ratio,=(1-fill_factor)*B7*0.577,=$L_1*$k_r^5,=D6+$w_is,=C7+B7
+7,=L_1*k_r^6,=D7+w_is,=C8+B8,=B8*ic_ratio,=B8*oc_ratio,=(1-fill_factor)*B8*0.577,=$L_1*$k_r^6,=D7+$w_is,=C8+B8
+8,=L_1*k_r^7,=D8+w_is,=C9+B9,=B9*ic_ratio,=B9*oc_ratio,=(1-fill_factor)*B9*0.577,=$L_1*$k_r^7,=D8+$w_is,=C9+B9
+9,=L_1*k_r^8,=D9+w_is,=C10+B10,=B10*ic_ratio,=B10*oc_ratio,=(1-fill_factor)*B10*0.577,=$L_1*$k_r^8,=D9+$w_is,=C10+B10
+10,=L_1*k_r^9,=D10+w_is,=C11+B11,=B11*ic_ratio,=B11*oc_ratio,=(1-fill_factor)*B11*0.577,=$L_1*$k_r^9,=D10+$w_is,=C11+B11
+11,=L_1*k_r^10,=D11+w_is,=C12+B12,=B12*ic_ratio,=B12*oc_ratio,=(1-fill_factor)*B12*0.577,=$L_1*$k_r^10,=D11+$w_is,=C12+B12
+12,=L_1*k_r^11,=D12+w_is,=C13+B13,=B13*ic_ratio,=B13*oc_ratio,=(1-fill_factor)*B13*0.577,=$L_1*$k_r^11,=D12+$w_is,=C13+B13
+
+---GLOBAL VARIABLES (Define in SolidWorks first)---
+Variable,Value,Formula,Description
+N_stages,3,,Number of TEC stages (1-12)
+w_chip_um,10000,,Chip width in micrometers
+R_cyl_um,1000,,Inner cylinder radius in micrometers
+k_r,1.15,,Radial expansion factor
+theta_deg,30,,Wedge angle in degrees
+t_TEC_um,200,,TEC element thickness in micrometers
+w_is_um,40,,Inter-stage insulation width in micrometers
+fill_factor,0.95,,TE material fill factor (0.8-0.99)
+ic_ratio,0.15,,Interconnect width ratio (0.1-0.35)
+oc_ratio,0.15,,Outerconnect width ratio (0.1-0.35)
+R_base_um,7071.07,=w_chip_um/sqrt(2),Calculated base radius
+L_total_um,5911.07,=R_base_um-R_cyl_um-(N_stages+1)*w_is_um,Total active length
+L_1_um,1719.94,=IF(k_r=1; L_total_um/N_stages; L_total_um*(1-k_r)/(1-k_r^N_stages)),Stage 1 length
+
+---PRE-CALCULATED VALUES FOR REFERENCE (k_r=1.15)---
+N_stages,L_1,L_2,L_3,L_4,L_5,L_6,L_7,L_8,L_9,L_10,L_11,L_12
+1,5871.07,,,,,,,,,,,
+2,2724.22,3132.86,,,,,,,,,,
+3,1719.94,1977.93,2274.62,,,,,,,,,
+4,1218.61,1401.40,1611.61,1853.35,,,,,,,,
+5,923.21,1061.69,1220.94,1404.08,1614.70,,,,,,,
+6,729.54,839.00,964.80,1109.52,1275.95,1467.34,,,,,,
+7,594.86,684.09,786.70,904.71,1040.41,1196.48,1375.95,,,,,
+8,496.58,571.07,656.73,755.24,868.53,998.81,1148.63,1320.93,,,,
+9,421.73,485.00,557.74,641.41,737.62,848.26,975.50,1121.82,1290.10,,,
+10,363.18,417.66,480.31,552.36,635.21,730.49,840.06,966.07,1110.98,1277.63,,
+11,316.23,363.67,418.22,480.95,553.09,636.06,731.47,841.19,967.37,1112.47,1279.34,
+12,278.18,319.91,367.89,423.08,486.54,559.52,643.45,739.97,851.07,978.73,1125.54,1294.37

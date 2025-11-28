@@ -1,0 +1,2 @@
+$N_stages	$w_chip	$R_cyl	$k_r	$theta	$t_TEC	$w_is	$fill_factor	$ic_ratio	$oc_ratio	$R_base	$L_total	$L_1
+3	10000	1000	1.15	30	200	40	0.95	0.15	0.15	7071.07	5911.07	1719.94

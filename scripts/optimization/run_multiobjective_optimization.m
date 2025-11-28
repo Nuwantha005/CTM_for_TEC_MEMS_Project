@@ -301,8 +301,19 @@ function f = tec_multiobjective(x, base_config, CONFIG)
     % 2. Relaxation iteration (0.5 blend)
     % 3. Proper error handling
     
+    persistent call_count;
+    if isempty(call_count)
+        call_count = 0;
+    end
+    call_count = call_count + 1;
+    
     try
-        config = base_config;
+        % IMPORTANT: Create a FRESH config copy to avoid cross-contamination
+        config = struct();
+        config.geometry = base_config.geometry;
+        config.boundary_conditions = base_config.boundary_conditions;
+        config.operating_conditions = base_config.operating_conditions;
+        config.materials = base_config.materials;
         
         % Get variable names from CONFIG
         all_vars = CONFIG.all_vars;
@@ -356,13 +367,19 @@ function f = tec_multiobjective(x, base_config, CONFIG)
             T_old = T;
             try
                 [T_new, Q_out, Q_in] = network.solve(T);
-            catch
+            catch ME
+                if mod(call_count, 1000) == 1
+                    fprintf('  [MO Debug] Solver exception at call %d: %s\n', call_count, ME.message);
+                end
                 f = [1e6, 1e6];
                 return;
             end
             
             % Check for invalid values
             if any(isnan(T_new)) || any(isinf(T_new)) || any(T_new < 0)
+                if mod(call_count, 1000) == 1
+                    fprintf('  [MO Debug] Invalid T values at call %d\n', call_count);
+                end
                 f = [1e6, 1e6];
                 return;
             end
@@ -378,6 +395,12 @@ function f = tec_multiobjective(x, base_config, CONFIG)
         T_max_C = max(T) - 273.15;
         Power_W = Q_out - Q_in;  % Electrical power input
         
+        % Debug output for first few calls
+        if call_count <= 5
+            fprintf('  [MO Debug] Call %d: T_max=%.1f°C, Power=%.4fW, q_flux=%.0e\n', ...
+                call_count, T_max_C, Power_W, config.boundary_conditions.q_flux_W_m2);
+        end
+        
         % Penalize invalid solutions
         if T_max_C < 0 || T_max_C > 500 || Power_W < 0
             f = [1e6, 1e6];
@@ -385,7 +408,10 @@ function f = tec_multiobjective(x, base_config, CONFIG)
             f = [T_max_C, Power_W];
         end
         
-    catch
+    catch ME
+        if mod(call_count, 1000) == 1
+            fprintf('  [MO Debug] Outer exception at call %d: %s\n', call_count, ME.message);
+        end
         f = [1e6, 1e6];  % Penalty for failed simulations
     end
 end

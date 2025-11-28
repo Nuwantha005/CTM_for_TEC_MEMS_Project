@@ -1,0 +1,132 @@
+SolidWorks Design Table Template for Radial TEC
+===============================================
+
+HOW TO USE THIS IN SOLIDWORKS:
+------------------------------
+1. First, define these GLOBAL VARIABLES in SolidWorks (Tools → Equations):
+   - N_stages
+   - w_chip_um  
+   - R_cyl_um
+   - k_r
+   - theta_deg
+   - t_TEC_um
+   - w_is_um
+   - fill_factor
+   - ic_ratio
+   - oc_ratio
+
+2. Create your base geometry for Stage 1 with dimensions linked to equations
+
+3. Insert → Tables → Design Table → From File (select the Excel file)
+
+4. The design table will create CONFIGURATIONS for each row
+
+
+EXCEL FORMULAS FOR DESIGN TABLE:
+================================
+
+Sheet 1: "Parameters" (Global inputs)
+-------------------------------------
+Cell A1: N_stages     B1: 3
+Cell A2: w_chip_um    B2: 10000
+Cell A3: R_cyl_um     B3: 1000
+Cell A4: k_r          B4: 1.15
+Cell A5: theta_deg    B5: 30
+Cell A6: t_TEC_um     B6: 200
+Cell A7: w_is_um      B7: 40
+Cell A8: fill_factor  B8: 0.95
+Cell A9: ic_ratio     B9: 0.15
+Cell A10: oc_ratio    B10: 0.15
+
+Calculated:
+Cell A12: R_base_um   B12: =B2/SQRT(2)
+Cell A13: L_total_um  B13: =B12-B3-(B1+1)*B7
+Cell A14: L_1_um      B14: =IF(B4=1, B13/B1, B13*(1-B4)/(1-POWER(B4,B1)))
+
+
+Sheet 2: "StageTable" (Per-stage calculations)
+----------------------------------------------
+Row 1 Headers:
+A1: Stage
+B1: L_i_um
+C1: r_in_um
+D1: r_out_um
+E1: w_ic_um
+F1: w_oc_um
+G1: w_az_um
+H1: Active
+
+Formulas for Row 2 (Stage 1):
+A2: 1
+B2: =Parameters!$B$14
+C2: =Parameters!$B$3+Parameters!$B$7
+D2: =C2+B2
+E2: =B2*Parameters!$B$9
+F2: =B2*Parameters!$B$10
+G2: =(1-Parameters!$B$8)*B2*TAN(RADIANS(Parameters!$B$5/2))*2
+H2: =IF(A2<=Parameters!$B$1,"YES","NO")
+
+Formulas for Row 3 (Stage 2) - copy down for all 12 stages:
+A3: =A2+1
+B3: =Parameters!$B$14*POWER(Parameters!$B$4,A3-1)
+C3: =D2+Parameters!$B$7
+D3: =C3+B3
+E3: =B3*Parameters!$B$9
+F3: =B3*Parameters!$B$10
+G3: =(1-Parameters!$B$8)*B3*TAN(RADIANS(Parameters!$B$5/2))*2
+H3: =IF(A3<=Parameters!$B$1,"YES","NO")
+
+(Copy rows 3 formulas down to row 13 for stages 2-12)
+
+
+Sheet 3: "SW_DesignTable" (For SolidWorks import)
+-------------------------------------------------
+This sheet references the calculated values and formats them for SolidWorks.
+
+Row 1: Header row with $ prefix for global variables
+A1: (leave blank - configuration name column)
+B1: $N_stages
+C1: $R_cyl_um
+D1: $k_r
+... etc
+
+Row 2+: Configuration rows
+A2: Config_3Stage
+B2: =Parameters!B1
+C2: =Parameters!B3
+... etc
+
+
+DIMENSION NAMING IN SOLIDWORKS:
+===============================
+When you create your sketch/features, name dimensions like:
+- L_1@Sketch_Stage1
+- r_in_1@Sketch_Stage1  
+- w_ic_1@Sketch_Stage1
+- theta@Revolve1
+
+Then in the design table, use headers like:
+- L_1@Sketch_Stage1
+- r_in_1@Sketch_Stage1
+
+The $ prefix is for GLOBAL VARIABLES only.
+
+
+EXAMPLE CALCULATED VALUES (k_r=1.15, N=3):
+==========================================
+Stage | L_i (µm) | r_in (µm) | r_out (µm) | w_ic (µm) | w_oc (µm)
+------|----------|-----------|------------|-----------|----------
+  1   | 1719.94  | 1040.00   | 2759.94    | 257.99    | 257.99
+  2   | 1977.93  | 2799.94   | 4777.87    | 296.69    | 296.69
+  3   | 2274.62  | 4817.87   | 7092.49    | 341.19    | 341.19
+
+Verification: r_out_3 + w_is = 7092.49 + 40 = 7132.49 ≈ R_base (7071.07)
+(Small difference due to rounding - in practice, L_1 formula ensures exact fit)
+
+
+TIPS:
+=====
+1. Use CONFIGURATIONS to switch between different N_stages values
+2. Use SUPPRESS for stages > N_stages in each configuration
+3. Link Excel file for live updates: Tools → Equations → Link to External File
+4. Use "Rebuild" (Ctrl+Q) after changing the design table

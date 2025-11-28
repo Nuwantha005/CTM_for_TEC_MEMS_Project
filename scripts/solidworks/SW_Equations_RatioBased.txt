@@ -1,0 +1,234 @@
+SolidWorks Equations for Radial TEC (Ratio-Based)
+==================================================
+Copy these into Tools → Equations → Add
+
+=== PRIMARY INPUT PARAMETERS ===
+"N_stages" = 3
+"w_chip" = 10000
+"R_cyl" = 1000
+"k_r" = 1.2
+"theta_deg" = 30
+"t_TEC" = 50
+
+=== RATIO PARAMETERS (Match MATLAB optimization_variables.m) ===
+"interconnect_ratio" = 0.2
+"outerconnect_ratio" = 0.2
+"interconnect_angle_ratio" = 0.16
+"outerconnect_angle_ratio" = 0.16
+"interconnect_thickness_ratio" = 1
+"outerconnect_thickness_ratio" = 1
+"fill_factor" = 0.9
+"insulation_width_ratio" = 0.05
+
+=== CALCULATED BASE GEOMETRY ===
+"theta" = "theta_deg" * 3.14159265 / 180
+"R_base" = "w_chip" / sqr(2)
+
+=== STAGE 1 LENGTH CALCULATION ===
+' First estimate L_avg to get w_is, then iterate
+"L_avg_est" = ("R_base" - "R_cyl") / "N_stages"
+"w_is_est" = "insulation_width_ratio" * "L_avg_est"
+"L_total" = ("R_base" - "R_cyl") - ("N_stages" + 1) * "w_is_est"
+"L_1" = iif("k_r" = 1, "L_total" / "N_stages", "L_total" * (1 - "k_r") / (1 - "k_r" ^ "N_stages"))
+
+=== PER-STAGE LENGTHS (L_i = L_1 * k_r^(i-1)) ===
+"L_2" = "L_1" * "k_r"
+"L_3" = "L_1" * "k_r" ^ 2
+"L_4" = "L_1" * "k_r" ^ 3
+"L_5" = "L_1" * "k_r" ^ 4
+"L_6" = "L_1" * "k_r" ^ 5
+"L_7" = "L_1" * "k_r" ^ 6
+"L_8" = "L_1" * "k_r" ^ 7
+"L_9" = "L_1" * "k_r" ^ 8
+"L_10" = "L_1" * "k_r" ^ 9
+"L_11" = "L_1" * "k_r" ^ 10
+"L_12" = "L_1" * "k_r" ^ 11
+
+=== PER-STAGE INSULATION WIDTH (w_is_i = insulation_width_ratio * L_i) ===
+"w_is_1" = "insulation_width_ratio" * "L_1"
+"w_is_2" = "insulation_width_ratio" * "L_2"
+"w_is_3" = "insulation_width_ratio" * "L_3"
+"w_is_4" = "insulation_width_ratio" * "L_4"
+"w_is_5" = "insulation_width_ratio" * "L_5"
+"w_is_6" = "insulation_width_ratio" * "L_6"
+"w_is_7" = "insulation_width_ratio" * "L_7"
+"w_is_8" = "insulation_width_ratio" * "L_8"
+"w_is_9" = "insulation_width_ratio" * "L_9"
+"w_is_10" = "insulation_width_ratio" * "L_10"
+"w_is_11" = "insulation_width_ratio" * "L_11"
+"w_is_12" = "insulation_width_ratio" * "L_12"
+
+=== PER-STAGE INNER RADII ===
+"r_in_1" = "R_cyl" + "w_is_1"
+"r_in_2" = "r_in_1" + "L_1" + "w_is_2"
+"r_in_3" = "r_in_2" + "L_2" + "w_is_3"
+"r_in_4" = "r_in_3" + "L_3" + "w_is_4"
+"r_in_5" = "r_in_4" + "L_4" + "w_is_5"
+"r_in_6" = "r_in_5" + "L_5" + "w_is_6"
+"r_in_7" = "r_in_6" + "L_6" + "w_is_7"
+"r_in_8" = "r_in_7" + "L_7" + "w_is_8"
+"r_in_9" = "r_in_8" + "L_8" + "w_is_9"
+"r_in_10" = "r_in_9" + "L_9" + "w_is_10"
+"r_in_11" = "r_in_10" + "L_10" + "w_is_11"
+"r_in_12" = "r_in_11" + "L_11" + "w_is_12"
+
+=== PER-STAGE OUTER RADII ===
+"r_out_1" = "r_in_1" + "L_1"
+"r_out_2" = "r_in_2" + "L_2"
+"r_out_3" = "r_in_3" + "L_3"
+"r_out_4" = "r_in_4" + "L_4"
+"r_out_5" = "r_in_5" + "L_5"
+"r_out_6" = "r_in_6" + "L_6"
+"r_out_7" = "r_in_7" + "L_7"
+"r_out_8" = "r_in_8" + "L_8"
+"r_out_9" = "r_in_9" + "L_9"
+"r_out_10" = "r_in_10" + "L_10"
+"r_out_11" = "r_in_11" + "L_11"
+"r_out_12" = "r_in_12" + "L_12"
+
+=== INTERCONNECT WIDTHS (w_ic_i = interconnect_ratio * L_i) ===
+"w_ic_1" = "interconnect_ratio" * "L_1"
+"w_ic_2" = "interconnect_ratio" * "L_2"
+"w_ic_3" = "interconnect_ratio" * "L_3"
+"w_ic_4" = "interconnect_ratio" * "L_4"
+"w_ic_5" = "interconnect_ratio" * "L_5"
+"w_ic_6" = "interconnect_ratio" * "L_6"
+"w_ic_7" = "interconnect_ratio" * "L_7"
+"w_ic_8" = "interconnect_ratio" * "L_8"
+"w_ic_9" = "interconnect_ratio" * "L_9"
+"w_ic_10" = "interconnect_ratio" * "L_10"
+"w_ic_11" = "interconnect_ratio" * "L_11"
+"w_ic_12" = "interconnect_ratio" * "L_12"
+
+=== OUTERCONNECT WIDTHS (w_oc_i = outerconnect_ratio * L_i) ===
+"w_oc_1" = "outerconnect_ratio" * "L_1"
+"w_oc_2" = "outerconnect_ratio" * "L_2"
+"w_oc_3" = "outerconnect_ratio" * "L_3"
+"w_oc_4" = "outerconnect_ratio" * "L_4"
+"w_oc_5" = "outerconnect_ratio" * "L_5"
+"w_oc_6" = "outerconnect_ratio" * "L_6"
+"w_oc_7" = "outerconnect_ratio" * "L_7"
+"w_oc_8" = "outerconnect_ratio" * "L_8"
+"w_oc_9" = "outerconnect_ratio" * "L_9"
+"w_oc_10" = "outerconnect_ratio" * "L_10"
+"w_oc_11" = "outerconnect_ratio" * "L_11"
+"w_oc_12" = "outerconnect_ratio" * "L_12"
+
+=== INTERCONNECT THICKNESSES (t_ic_i = interconnect_thickness_ratio * t_TEC) ===
+"t_ic_1" = "interconnect_thickness_ratio" * "t_TEC"
+"t_ic_2" = "interconnect_thickness_ratio" * "t_TEC"
+"t_ic_3" = "interconnect_thickness_ratio" * "t_TEC"
+"t_ic_4" = "interconnect_thickness_ratio" * "t_TEC"
+"t_ic_5" = "interconnect_thickness_ratio" * "t_TEC"
+"t_ic_6" = "interconnect_thickness_ratio" * "t_TEC"
+"t_ic_7" = "interconnect_thickness_ratio" * "t_TEC"
+"t_ic_8" = "interconnect_thickness_ratio" * "t_TEC"
+"t_ic_9" = "interconnect_thickness_ratio" * "t_TEC"
+"t_ic_10" = "interconnect_thickness_ratio" * "t_TEC"
+"t_ic_11" = "interconnect_thickness_ratio" * "t_TEC"
+"t_ic_12" = "interconnect_thickness_ratio" * "t_TEC"
+
+=== OUTERCONNECT THICKNESSES (t_oc_i = outerconnect_thickness_ratio * t_TEC) ===
+"t_oc_1" = "outerconnect_thickness_ratio" * "t_TEC"
+"t_oc_2" = "outerconnect_thickness_ratio" * "t_TEC"
+"t_oc_3" = "outerconnect_thickness_ratio" * "t_TEC"
+"t_oc_4" = "outerconnect_thickness_ratio" * "t_TEC"
+"t_oc_5" = "outerconnect_thickness_ratio" * "t_TEC"
+"t_oc_6" = "outerconnect_thickness_ratio" * "t_TEC"
+"t_oc_7" = "outerconnect_thickness_ratio" * "t_TEC"
+"t_oc_8" = "outerconnect_thickness_ratio" * "t_TEC"
+"t_oc_9" = "outerconnect_thickness_ratio" * "t_TEC"
+"t_oc_10" = "outerconnect_thickness_ratio" * "t_TEC"
+"t_oc_11" = "outerconnect_thickness_ratio" * "t_TEC"
+"t_oc_12" = "outerconnect_thickness_ratio" * "t_TEC"
+
+=== INTERCONNECT ANGLES (beta_ic_i = interconnect_angle_ratio * theta_deg) ===
+"beta_ic_deg_1" = "interconnect_angle_ratio" * "theta_deg"
+"beta_ic_deg_2" = "interconnect_angle_ratio" * "theta_deg"
+"beta_ic_deg_3" = "interconnect_angle_ratio" * "theta_deg"
+"beta_ic_deg_4" = "interconnect_angle_ratio" * "theta_deg"
+"beta_ic_deg_5" = "interconnect_angle_ratio" * "theta_deg"
+"beta_ic_deg_6" = "interconnect_angle_ratio" * "theta_deg"
+"beta_ic_deg_7" = "interconnect_angle_ratio" * "theta_deg"
+"beta_ic_deg_8" = "interconnect_angle_ratio" * "theta_deg"
+"beta_ic_deg_9" = "interconnect_angle_ratio" * "theta_deg"
+"beta_ic_deg_10" = "interconnect_angle_ratio" * "theta_deg"
+"beta_ic_deg_11" = "interconnect_angle_ratio" * "theta_deg"
+"beta_ic_deg_12" = "interconnect_angle_ratio" * "theta_deg"
+
+=== OUTERCONNECT ANGLES (beta_oc_i = outerconnect_angle_ratio * theta_deg) ===
+"beta_oc_deg_1" = "outerconnect_angle_ratio" * "theta_deg"
+"beta_oc_deg_2" = "outerconnect_angle_ratio" * "theta_deg"
+"beta_oc_deg_3" = "outerconnect_angle_ratio" * "theta_deg"
+"beta_oc_deg_4" = "outerconnect_angle_ratio" * "theta_deg"
+"beta_oc_deg_5" = "outerconnect_angle_ratio" * "theta_deg"
+"beta_oc_deg_6" = "outerconnect_angle_ratio" * "theta_deg"
+"beta_oc_deg_7" = "outerconnect_angle_ratio" * "theta_deg"
+"beta_oc_deg_8" = "outerconnect_angle_ratio" * "theta_deg"
+"beta_oc_deg_9" = "outerconnect_angle_ratio" * "theta_deg"
+"beta_oc_deg_10" = "outerconnect_angle_ratio" * "theta_deg"
+"beta_oc_deg_11" = "outerconnect_angle_ratio" * "theta_deg"
+"beta_oc_deg_12" = "outerconnect_angle_ratio" * "theta_deg"
+
+=== AZIMUTHAL INSULATION WIDTH (w_az_i = (1 - fill_factor) * arc_length) ===
+' Arc at mid-radius of each stage
+"r_mid_1" = ("r_in_1" + "r_out_1") / 2
+"r_mid_2" = ("r_in_2" + "r_out_2") / 2
+"r_mid_3" = ("r_in_3" + "r_out_3") / 2
+"r_mid_4" = ("r_in_4" + "r_out_4") / 2
+"r_mid_5" = ("r_in_5" + "r_out_5") / 2
+"r_mid_6" = ("r_in_6" + "r_out_6") / 2
+"r_mid_7" = ("r_in_7" + "r_out_7") / 2
+"r_mid_8" = ("r_in_8" + "r_out_8") / 2
+"r_mid_9" = ("r_in_9" + "r_out_9") / 2
+"r_mid_10" = ("r_in_10" + "r_out_10") / 2
+"r_mid_11" = ("r_in_11" + "r_out_11") / 2
+"r_mid_12" = ("r_in_12" + "r_out_12") / 2
+
+"w_az_1" = (1 - "fill_factor") * "r_mid_1" * "theta"
+"w_az_2" = (1 - "fill_factor") * "r_mid_2" * "theta"
+"w_az_3" = (1 - "fill_factor") * "r_mid_3" * "theta"
+"w_az_4" = (1 - "fill_factor") * "r_mid_4" * "theta"
+"w_az_5" = (1 - "fill_factor") * "r_mid_5" * "theta"
+"w_az_6" = (1 - "fill_factor") * "r_mid_6" * "theta"
+"w_az_7" = (1 - "fill_factor") * "r_mid_7" * "theta"
+"w_az_8" = (1 - "fill_factor") * "r_mid_8" * "theta"
+"w_az_9" = (1 - "fill_factor") * "r_mid_9" * "theta"
+"w_az_10" = (1 - "fill_factor") * "r_mid_10" * "theta"
+"w_az_11" = (1 - "fill_factor") * "r_mid_11" * "theta"
+"w_az_12" = (1 - "fill_factor") * "r_mid_12" * "theta"
+
+
+==================================================
+PARAMETER MAPPING: MATLAB ↔ SolidWorks
+==================================================
+
+MATLAB (optimization_variables.m)    |  SolidWorks Variable
+-------------------------------------|----------------------
+thickness_um                         |  t_TEC
+wedge_angle_deg                      |  theta_deg
+R_cyl_um                             |  R_cyl
+k_r                                  |  k_r
+fill_factor                          |  fill_factor
+insulation_width_ratio               |  insulation_width_ratio
+interconnect_ratio                   |  interconnect_ratio
+outerconnect_ratio                   |  outerconnect_ratio
+interconnect_angle_ratio             |  interconnect_angle_ratio
+outerconnect_angle_ratio             |  outerconnect_angle_ratio
+interconnect_thickness_ratio         |  interconnect_thickness_ratio
+outerconnect_thickness_ratio         |  outerconnect_thickness_ratio
+N_stages (CONFIG)                    |  N_stages
+w_chip_um (CONFIG)                   |  w_chip
+
+
+==================================================
+HOW TO USE:
+==================================================
+1. Open SolidWorks → Tools → Equations
+2. Copy-paste each equation (one at a time or use "Import")
+3. Start with PRIMARY INPUT PARAMETERS
+4. Then add RATIO PARAMETERS
+5. Then add CALCULATED equations
+6. Link your sketch dimensions to these variables
+
+Example: In a sketch, set a dimension to "= r_in_1" (without quotes)

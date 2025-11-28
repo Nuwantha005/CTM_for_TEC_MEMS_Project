@@ -33,7 +33,7 @@ function [var_names, lb, ub, x0, all_vars, CONFIG] = optimization_variables()
     CONFIG.N_tsv_limit = 0;              % TSV limit (0 = no TSVs)
     
     % --- Boundary Conditions ---
-    CONFIG.q_flux_W_m2 = 20000;            % Heat flux at chip (W/m²)
+    CONFIG.q_flux_W_m2 = 50000;            % Heat flux at chip (W/m²)
     CONFIG.h_conv_W_m2K = 1e6;           % Convection coefficient (W/m²K)
     CONFIG.T_water_K = 300;              % Coolant temperature (K)
     
