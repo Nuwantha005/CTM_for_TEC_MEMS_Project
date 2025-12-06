@@ -11,6 +11,7 @@
         "w_chip_um": 10000,
         "thickness_um": 50,
         "t_chip_um": 50,
+        "t_ins_um": 10,
         "R_cyl_um": 1000,
         "interconnect_ratio": 0.2,
         "outerconnect_ratio": 0.2,
@@ -20,14 +21,7 @@
         "outerconnect_thickness_ratio": 1,
         "fill_factor": 0.9,
         "insulation_width_ratio": 0.05,
-        "radial_expansion_factor": 1.2,
-        "N_tsv_limit": 0,
-        "tsv": {
-            "R_TSV_um": 10,
-            "P_TSV_um": 20,
-            "g_rad_um": 10,
-            "t_SOI_um": 100
-        }
+        "radial_expansion_factor": 1.2
     },
     "materials": {
         "Bi2Te3": {

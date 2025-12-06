@@ -32,13 +32,14 @@ classdef ThermalNetwork
 
             [r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is] = obj.Geometry.get_stage_geometry(N);
             G = obj.Geometry.calculate_G(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is);
-            
+
             K_legs = (k_p + k_n) / G;
 
             k_is = obj.Materials.get_k('AlN', T_avg);
             k_az = obj.Materials.get_k('SiO2', T_avg);
 
-            r_end_leg = r_in + L - w_is;
+            r_out = r_in + L;
+            r_end_leg = r_out;
             R_is = obj.Geometry.calculate_R_thermal_insulator(r_end_leg, w_is, obj.Geometry.Thickness, obj.Geometry.WedgeAngle, k_is);
 
             R_eff_series = R_is + 1/K_legs;
@@ -57,18 +58,55 @@ classdef ThermalNetwork
 
             % Q_c equation: Heat INTO cold side of stage N
             % Q_c = S*I*T_c + K*(T_h - T_c) - [Joule at cold]
-            % Note: Cold side Joule heating uses R_ic (interconnect), not R_oc (outerconnect)
-            Q_c_N = S_N * I * T_cold + K_N * (T_water - T_cold) - (0.5 * I^2 * Re_N + I^2 * R_ic);
 
-            %n_wedges = 2*pi / obj.Geometry.WedgeAngle;
-            Q_out = Q_c_N ;%* n_wedges;
+            % We want Q_out (Heat rejected to water at hot side)
+            % Q_h = S*I*T_h - k*(T_h - T_c) + 0.5*I^2*R + I^2*R_oc
+            % Note: Check directions. K*(T_c - T_h) flows TO water.
 
-            % Calculate total input heat
+            % Correct Q_out calculation:
+            % S term: Carries heat to hot side
+            % K term: Conducts heat from hot to cold (backflow). We want net flow OUT.
+            % Net flow OUT = Peltier_at_hot - Back_Conduction + Joule_Heating
+
+            Q_Peltier_hot = S_N * I * T_water;
+            Q_Back_Cond = K_N * (T_water - T_cold); % Heat flowing flowing from Water to Cold
+            % If T_cold > T_water, this term is negative, meaning heat flows TO water.
+            % But usually formulated as: Q_cond = K(dT).
+            % Let's use: Q_out = S*I*T_h + K*(T_c - T_h) + Joule
+
+            Q_Conduction_to_Water = K_N * (T_cold - T_water);
+            Q_Joule_Hot = 0.5 * I^2 * Re_N + I^2 * R_oc;
+
+            Q_out = Q_Peltier_hot + Q_Conduction_to_Water + Q_Joule_Hot;
+
+
+            % n_wedges = 2*pi / obj.Geometry.WedgeAngle;
+            % Q_out is already total for the wedge
+
+            % Calculate total input heat (Simulated)
+            % Note: The Latex model assigns heat generation based on TEC element areas.
+            % This ignores flux falling on radial insulators.
+            % To maintain energy balance consistency in results, we report the actual heat
+            % injected into the nodes, not the theoretical full-area flux.
+
+            % We need to access Q_gen terms calculated in assemble_system.
+            % Since they aren't stored, we re-calculate or sum them here.
+            % Actually, let's just recalculate the effective area sum.
+
             q_flux = obj.Params.boundary_conditions.q_flux_W_m2;
             theta = obj.Geometry.WedgeAngle;
-            R_base = obj.Geometry.R_base;
-            A_wedge = 0.5 * theta * R_base^2;
-            Q_in = q_flux * A_wedge; %* n_wedges
+            A_active_sum = 0;
+            % Cylinder
+            A_active_sum = A_active_sum + 0.5 * theta * obj.Geometry.R_cyl^2;
+
+            % Stages
+            for i = 1:N
+                [r_in, L] = obj.Geometry.get_stage_geometry(i);
+                r_out = r_in + L;
+                A_active_sum = A_active_sum + 0.5 * theta * (r_out^2 - r_in^2);
+            end
+
+            Q_in = q_flux * A_active_sum;
         end
 
         function [M, B] = assemble_system(obj, T_current)
@@ -88,10 +126,10 @@ classdef ThermalNetwork
             theta = obj.Geometry.WedgeAngle;
             t_chip = obj.Params.geometry.t_chip_um * 1e-6;
             t_tec = obj.Geometry.Thickness;
-            
+
             % Get insulation width from geometry - support both ratio and absolute
             [~, L1, ~, ~, ~, ~, ~, ~, ~, w_is] = obj.Geometry.get_stage_geometry(1);
-            
+
             R_cyl = obj.Geometry.R_cyl;
 
             K_stages = zeros(N, 1);
@@ -125,7 +163,6 @@ classdef ThermalNetwork
                 rho_c = obj.Materials.get_rho('Cu', T_avg);
                 k_is = obj.Materials.get_k('AlN', T_avg);
                 k_az = obj.Materials.get_k('SiO2', T_avg);
-                rho_TSV = obj.Materials.get_rho('Cu', T_avg);
 
                 G = obj.Geometry.calculate_G(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is, w_is_stage);
 
@@ -136,7 +173,7 @@ classdef ThermalNetwork
                 R_ic_stages(i) = R_ic;
                 R_oc_stages(i) = R_oc;
 
-                r_end_leg = r_in + L - w_is_stage;
+                r_end_leg = r_out; % End of TEC material is start of insulator
                 R_is = obj.Geometry.calculate_R_thermal_insulator(r_end_leg, w_is_stage, t_tec, theta, k_is);
 
                 R_eff_series = R_is + 1/K_legs; % Thermal
@@ -158,8 +195,7 @@ classdef ThermalNetwork
                     R_lat_Si(i) = inf;
                 end
 
-                [~, R_TSV_tot] = obj.Geometry.calculate_TSV_vertical_resistance(r_in, w_ic, beta_ic, rho_TSV, i);
-                R_vert(i) = R_TSV_tot;
+                R_vert(i) = obj.Geometry.calculate_vertical_resistance(r_in, r_out, k_is);
 
                 A_top = 0.5 * theta * (r_out^2 - r_in^2);
                 Q_gen_nodes(i) = q_flux * A_top;
@@ -226,7 +262,7 @@ classdef ThermalNetwork
                 else
                     B(idx_c) = B(idx_c) - K_stages(i) * T_water; %-K
                 end
-                
+
                 B(idx_c) = B(idx_c) - I^2 * (Re_stages_leg(i)/2 + R_ic_stages(i));
                 if i > 1
                     B(idx_c) = B(idx_c) - I^2 * (Re_stages_leg(i-1)/2 + R_oc_stages(i-1));

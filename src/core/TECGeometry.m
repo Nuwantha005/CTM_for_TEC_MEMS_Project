@@ -30,23 +30,25 @@ classdef TECGeometry < handle
         function calculate_L1(obj)
             % Get insulation width - support both ratio and absolute value
             if isfield(obj.Params, 'insulation_width_ratio')
-                % Will be computed per-stage, use estimate for L1 calculation
-                % Use an initial estimate assuming average stage length
-                L_avg_estimate = (obj.R_base - obj.R_cyl) / obj.N_stages;
-                w_is = obj.Params.insulation_width_ratio * L_avg_estimate;
+                % This is a circular dependency if L1 depends on w_is which depends on L_avg
+                % We will use a simplified estimate for w_is first
+                L_avg_approx = (obj.R_base - obj.R_cyl) / obj.N_stages;
+                w_is = obj.Params.insulation_width_ratio * L_avg_approx;
             elseif isfield(obj.Params, 'insulation_width_um')
                 w_is = obj.Params.insulation_width_um * 1e-6;
             else
                 w_is = 40e-6;  % Default 40 um
             end
-            
+
             k_r = obj.Params.radial_expansion_factor;
             N = obj.N_stages;
 
+            % Total length available for TEC material
+            % Subtract (N+1) insulators: 0..N
             L_total_active = (obj.R_base - obj.R_cyl) - (N + 1) * w_is;
 
             if L_total_active <= 0
-                error('Geometry Error: No space for TE material. Check dimensions.');
+                error('Geometry Error: No space for TE material. Check dimensions and insulator widths.');
             end
 
             if k_r == 1
@@ -76,7 +78,10 @@ classdef TECGeometry < handle
                 sum_L_prev = obj.L_1 * (1 - k_r^(i-1)) / (1 - k_r);
             end
 
-            r_in = obj.R_cyl + sum_L_prev; % + i * w_is becasue in the original formulation, w_is is inside the L
+            % Radius start calculation:
+            % R_cyl + sum(exisiting stages) + (i)*w_is
+            % Because stage i is preceded by i insulators (0 to i-1)
+            r_in = obj.R_cyl + sum_L_prev + i * w_is;
 
             % Length Ratios
             w_ic = L * obj.Params.interconnect_ratio;
@@ -88,7 +93,7 @@ classdef TECGeometry < handle
             else
                 t_ic = obj.Thickness;
             end
-            
+
             if isfield(obj.Params, 'outerconnect_thickness_ratio')
                 t_oc = obj.Thickness * obj.Params.outerconnect_thickness_ratio;
             else
@@ -131,7 +136,7 @@ classdef TECGeometry < handle
             C1 = t*theta/2 - t_ic*beta_ic/2;
             D = t*w_az;
 
-            r_start = r1 + w_is/2;
+            r_start = r1;
             r_limit_1 = r1 + w_ic;
 
             term1 = (1/C1) * log( abs( ( C1*r_limit_1 - D ) / ( C1*r_start - D ) ) );
@@ -142,7 +147,7 @@ classdef TECGeometry < handle
             term2 = (1/C2) * log( abs( ( C2*r_limit_2 - D ) / ( C2*r_limit_1 - D ) ) );
 
             C3 = t*theta/2 - t_oc*beta_oc/2;
-            r_end = r1 + L - w_is/2;
+            r_end = r1 + L;
 
             term3 = (1/C3) * log( abs( ( C3*r_end - D ) / ( C3*r_limit_2 - D ) ) );
 
@@ -176,70 +181,23 @@ classdef TECGeometry < handle
             K_az = k_az * (w_az * t) / L;
         end
 
-        function [N_TSV, R_TSV_tot] = calculate_TSV_vertical_resistance(obj, r, w_ic, beta_ic, k_TSV, stage_idx)
-            % Calculates THERMAL resistance of TSV array
-            % k_TSV: thermal conductivity of TSV material (W/m·K)
-            if ~isfield(obj.Params, 'tsv')
-                N_TSV = 1;
-                R_TSV_tot = 1e-4;
-                return;
-            end
+        function R_ve = calculate_vertical_resistance(obj, r_in, r_out, k_ins)
+            % Calculates Vertical thermal resistance through insulator layer
+            % Eq 785: R_ve = 2*t_ins / (k_ins * theta * (r_out^2 - r_in^2))
 
-            N_tsv_limit = 1;
-            if isfield(obj.Params, 'N_tsv_limit')
-                N_tsv_limit = obj.Params.N_tsv_limit;
-            end
-
-            tsv = obj.Params.tsv;
-            t_SOI = tsv.t_SOI_um * 1e-6;
-            
-            % Get stage geometry to calculate wedge area for this stage
-            [r_in_stage, L_stage, ~, ~, ~, ~, ~, ~, ~, ~] = obj.get_stage_geometry(stage_idx);
-            r_out_stage = r_in_stage + L_stage;
-            A_wedge = 0.5 * obj.WedgeAngle * (r_out_stage^2 - r_in_stage^2);
-            
-            % For stages beyond TSV limit, use SOI layer resistance
-            % R_SOI = t_SOI / (k_Si * A_wedge)
-            % Note: k_TSV input is actually k_Cu, we need k_Si for SOI
-            % Silicon thermal conductivity ~ 150 W/m-K
-            k_Si = 150;  % W/m-K (approximate, temperature dependent)
-            
-            if stage_idx > N_tsv_limit
-                N_TSV = 0;
-                % Heat flows through SOI layer (silicon) instead of copper TSVs
-                R_TSV_tot = t_SOI / (k_Si * A_wedge);
-                return;
-            end
-
-            R_TSV_rad = tsv.R_TSV_um * 1e-6;
-            P_TSV = tsv.P_TSV_um * 1e-6;
-            g_rad = tsv.g_rad_um * 1e-6;
-
-            N_row = floor(w_ic / (2 * R_TSV_rad + g_rad));
-            N_per_row = floor((r * beta_ic) / P_TSV);
-            N_TSV = N_row * N_per_row;
-
-            if N_TSV < 1
-                N_TSV = 0;
-                % Even with no TSVs, heat flows through SOI
-                R_TSV_tot = t_SOI / (k_Si * A_wedge);
+            if isfield(obj.Params, 't_ins_um')
+                t_ins = obj.Params.t_ins_um * 1e-6;
             else
-                % Thermal resistance through TSV array: R = L / (k * A)
-                A_single_TSV = pi * R_TSV_rad^2;
-                A_TSV_total = N_TSV * A_single_TSV;
-                R_TSV_only = t_SOI / (k_TSV * A_TSV_total);
-                
-                % Thermal resistance through remaining SOI (wedge area - TSV area)
-                A_SOI_remaining = A_wedge - A_TSV_total;
-                if A_SOI_remaining > 0
-                    R_SOI_remaining = t_SOI / (k_Si * A_SOI_remaining);
-                    % Parallel combination: 1/R_total = 1/R_TSV + 1/R_SOI
-                    R_TSV_tot = 1 / (1/R_TSV_only + 1/R_SOI_remaining);
-                else
-                    % Edge case: TSVs fill entire area (unlikely)
-                    R_TSV_tot = R_TSV_only;
-                end
+                t_ins = 10e-6; % Default
             end
+
+            theta = obj.WedgeAngle;
+
+            % Area of the ANNULAR SEGMENT under the TEC element
+            % A = (theta/2) * (r_out^2 - r_in^2)
+            % Note: Formula in Latex uses A_TEC, which is correct.
+
+            R_ve = (2 * t_ins) / (k_ins * theta * (r_out^2 - r_in^2));
         end
 
         function export_comsol_params(obj, filename)

@@ -1,0 +1,1442 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.8.13)  6 DEC 2025 16:02
+entering extended mode
+ restricted \write18 enabled.
+ file:line:error style messages enabled.
+ %&-line parsing enabled.
+**"e:/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Paper/Thermal_Network_For_Radial_TEC.tex"
+(e:/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Paper/Thermal_Network_For_Radial_TEC.tex
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-04>
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/base\article.cls
+Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/base\size10.clo
+File: size10.clo 2023/05/17 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count187
+\c@section=\count188
+\c@subsection=\count189
+\c@subsubsection=\count190
+\c@paragraph=\count191
+\c@subparagraph=\count192
+\c@figure=\count193
+\c@table=\count194
+\abovecaptionskip=\skip48
+\belowcaptionskip=\skip49
+\bibindent=\dimen140
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\times.sty
+Package: times 2020/03/25 PSNFSS-v9.3 (SPQR) 
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/setspace\setspace.sty
+Package: setspace 2022/12/04 v6.7b set line spacing
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty
+Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
+\KV@toks@=\toks17
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
+Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty
+Package: iftex 2022/02/03 v1.0f TeX engine tests
+))
+\Gm@cnth=\count195
+\Gm@cntv=\count196
+\c@Gm@tempcnt=\count197
+\Gm@bindingoffset=\dimen141
+\Gm@wd@mp=\dimen142
+\Gm@odd@mp=\dimen143
+\Gm@even@mp=\dimen144
+\Gm@layoutwidth=\dimen145
+\Gm@layoutheight=\dimen146
+\Gm@layouthoffset=\dimen147
+\Gm@layoutvoffset=\dimen148
+\Gm@dimlist=\toks18
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+Package: amsmath 2023/05/13 v2.17o AMS math features
+\@mathmargin=\skip50
+
+For additional information on amsmath, use the `?' option.
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+Package: amstext 2021/08/26 v2.01 AMS text
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks19
+\ex@=\dimen149
+)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen150
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
+Package: amsopn 2022/04/08 v2.04 operator names
+)
+\inf@bad=\count198
+LaTeX Info: Redefining \frac on input line 234.
+\uproot@=\count199
+\leftroot@=\count266
+LaTeX Info: Redefining \overline on input line 399.
+LaTeX Info: Redefining \colon on input line 410.
+\classnum@=\count267
+\DOTSCASE@=\count268
+LaTeX Info: Redefining \ldots on input line 496.
+LaTeX Info: Redefining \dots on input line 499.
+LaTeX Info: Redefining \cdots on input line 620.
+\Mathstrutbox@=\box51
+\strutbox@=\box52
+LaTeX Info: Redefining \big on input line 722.
+LaTeX Info: Redefining \Big on input line 723.
+LaTeX Info: Redefining \bigg on input line 724.
+LaTeX Info: Redefining \Bigg on input line 725.
+\big@size=\dimen151
+LaTeX Font Info:    Redeclaring font encoding OML on input line 743.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 744.
+\macc@depth=\count269
+LaTeX Info: Redefining \bmod on input line 905.
+LaTeX Info: Redefining \pmod on input line 910.
+LaTeX Info: Redefining \smash on input line 940.
+LaTeX Info: Redefining \relbar on input line 970.
+LaTeX Info: Redefining \Relbar on input line 971.
+\c@MaxMatrixCols=\count270
+\dotsspace@=\muskip16
+\c@parentequation=\count271
+\dspbrk@lvl=\count272
+\tag@help=\toks20
+\row@=\count273
+\column@=\count274
+\maxfields@=\count275
+\andhelp@=\toks21
+\eqnshift@=\dimen152
+\alignsep@=\dimen153
+\tagshift@=\dimen154
+\tagwidth@=\dimen155
+\totwidth@=\dimen156
+\lineht@=\dimen157
+\@envbody=\toks22
+\multlinegap=\skip51
+\multlinetaggap=\skip52
+\mathdisplay@stack=\toks23
+LaTeX Info: Redefining \[ on input line 2953.
+LaTeX Info: Redefining \] on input line 2954.
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\symAMSa=\mathgroup4
+\symAMSb=\mathgroup5
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mathtools.sty
+Package: mathtools 2024/10/04 v1.31 mathematical typesetting tools
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tools\calc.sty
+Package: calc 2023/07/08 v4.3 Infix arithmetic (KKT,FJ)
+\calc@Acount=\count276
+\calc@Bcount=\count277
+\calc@Adimen=\dimen158
+\calc@Bdimen=\dimen159
+\calc@Askip=\skip53
+\calc@Bskip=\skip54
+LaTeX Info: Redefining \setlength on input line 80.
+LaTeX Info: Redefining \addtolength on input line 81.
+\calc@Ccount=\count278
+\calc@Cskip=\skip55
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/mathtools\mhsetup.sty
+Package: mhsetup 2021/03/18 v1.4 programming setup (MH)
+)
+\g_MT_multlinerow_int=\count279
+\l_MT_multwidth_dim=\dimen160
+\origjot=\skip56
+\l_MT_shortvdotswithinadjustabove_dim=\dimen161
+\l_MT_shortvdotswithinadjustbelow_dim=\dimen162
+\l_MT_above_intertext_sep=\dimen163
+\l_MT_below_intertext_sep=\dimen164
+\l_MT_above_shortintertext_sep=\dimen165
+\l_MT_below_shortintertext_sep=\dimen166
+\xmathstrut@box=\box53
+\xmathstrut@dim=\dimen167
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty
+Package: array 2023/10/16 v2.5g Tabular extension package (FMi)
+\col@sep=\dimen168
+\ar@mcellbox=\box54
+\extrarowheight=\dimen169
+\NC@list=\toks24
+\extratabsurround=\skip57
+\backup@length=\skip58
+\ar@cellbox=\box55
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+Package: graphics 2022/03/10 v1.4e Standard LaTeX Graphics (DPC,SPQR)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty
+Package: trig 2021/08/11 v1.11 sin cos tan (DPC)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 107.
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+File: pdftex.def 2022/09/22 v1.2b Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen170
+\Gin@req@width=\dimen171
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count280
+\float@exts=\toks25
+\float@box=\box56
+\@float@everytoks=\toks26
+\@floatcapt=\box57
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/pgf/frontendlayer\tikz.sty (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/pgf/basiclayer\pgf.sty (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfrcs.sty (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfutil-common.tex
+\pgfutil@everybye=\toks27
+\pgfutil@tempdima=\dimen172
+\pgfutil@tempdimb=\dimen173
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfutil-latex.def
+\pgfutil@abb=\box58
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfrcs.code.tex (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf\pgf.revision.tex)
+Package: pgfrcs 2023-01-15 v3.1.10 (3.1.10)
+))
+Package: pgf 2023-01-15 v3.1.10 (3.1.10)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/pgf/basiclayer\pgfcore.sty (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/pgf/systemlayer\pgfsys.sty (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsys.code.tex
+Package: pgfsys 2023-01-15 v3.1.10 (3.1.10)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys.code.tex
+\pgfkeys@pathtoks=\toks28
+\pgfkeys@temptoks=\toks29
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeyslibraryfiltered.code.tex
+\pgfkeys@tmptoks=\toks30
+))
+\pgf@x=\dimen174
+\pgf@y=\dimen175
+\pgf@xa=\dimen176
+\pgf@ya=\dimen177
+\pgf@xb=\dimen178
+\pgf@yb=\dimen179
+\pgf@xc=\dimen180
+\pgf@yc=\dimen181
+\pgf@xd=\dimen182
+\pgf@yd=\dimen183
+\w@pgf@writea=\write3
+\r@pgf@reada=\read2
+\c@pgf@counta=\count281
+\c@pgf@countb=\count282
+\c@pgf@countc=\count283
+\c@pgf@countd=\count284
+\t@pgf@toka=\toks31
+\t@pgf@tokb=\toks32
+\t@pgf@tokc=\toks33
+\pgf@sys@id@count=\count285
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgf.cfg
+File: pgf.cfg 2023-01-15 v3.1.10 (3.1.10)
+)
+Driver file for pgf: pgfsys-pdftex.def
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsys-pdftex.def
+File: pgfsys-pdftex.def 2023-01-15 v3.1.10 (3.1.10)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsys-common-pdf.def
+File: pgfsys-common-pdf.def 2023-01-15 v3.1.10 (3.1.10)
+))) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsyssoftpath.code.tex
+File: pgfsyssoftpath.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfsyssoftpath@smallbuffer@items=\count286
+\pgfsyssoftpath@bigbuffer@items=\count287
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsysprotocol.code.tex
+File: pgfsysprotocol.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+Package: xcolor 2023/11/15 v3.01 LaTeX color extensions (UK)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: pdftex.def on input line 274.
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.ltx)
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1350.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1354.
+Package xcolor Info: Model `RGB' extended on input line 1366.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1368.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1370.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1371.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1372.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1373.
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcore.code.tex
+Package: pgfcore 2023-01-15 v3.1.10 (3.1.10)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmath.code.tex (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathutil.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathparser.code.tex
+\pgfmath@dimen=\dimen184
+\pgfmath@count=\count288
+\pgfmath@box=\box59
+\pgfmath@toks=\toks34
+\pgfmath@stack@operand=\toks35
+\pgfmath@stack@operation=\toks36
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.basic.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.trigonometric.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.random.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.comparison.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.base.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.round.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.misc.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.integerarithmetics.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathcalc.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfloat.code.tex
+\c@pgfmathroundto@lastzeros=\count289
+)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfint.code.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepoints.code.tex
+File: pgfcorepoints.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@picminx=\dimen185
+\pgf@picmaxx=\dimen186
+\pgf@picminy=\dimen187
+\pgf@picmaxy=\dimen188
+\pgf@pathminx=\dimen189
+\pgf@pathmaxx=\dimen190
+\pgf@pathminy=\dimen191
+\pgf@pathmaxy=\dimen192
+\pgf@xx=\dimen193
+\pgf@xy=\dimen194
+\pgf@yx=\dimen195
+\pgf@yy=\dimen196
+\pgf@zx=\dimen197
+\pgf@zy=\dimen198
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepathconstruct.code.tex
+File: pgfcorepathconstruct.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@path@lastx=\dimen199
+\pgf@path@lasty=\dimen256
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepathusage.code.tex
+File: pgfcorepathusage.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@shorten@end@additional=\dimen257
+\pgf@shorten@start@additional=\dimen258
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorescopes.code.tex
+File: pgfcorescopes.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfpic=\box60
+\pgf@hbox=\box61
+\pgf@layerbox@main=\box62
+\pgf@picture@serial@count=\count290
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoregraphicstate.code.tex
+File: pgfcoregraphicstate.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgflinewidth=\dimen259
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoretransformations.code.tex
+File: pgfcoretransformations.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@pt@x=\dimen260
+\pgf@pt@y=\dimen261
+\pgf@pt@temp=\dimen262
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorequick.code.tex
+File: pgfcorequick.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreobjects.code.tex
+File: pgfcoreobjects.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepathprocessing.code.tex
+File: pgfcorepathprocessing.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorearrows.code.tex
+File: pgfcorearrows.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfarrowsep=\dimen263
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreshade.code.tex
+File: pgfcoreshade.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@max=\dimen264
+\pgf@sys@shading@range@num=\count291
+\pgf@shadingcount=\count292
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreimage.code.tex
+File: pgfcoreimage.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreexternal.code.tex
+File: pgfcoreexternal.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfexternal@startupbox=\box63
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorelayers.code.tex
+File: pgfcorelayers.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcoretransparency.code.tex
+File: pgfcoretransparency.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepatterns.code.tex
+File: pgfcorepatterns.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcorerdf.code.tex
+File: pgfcorerdf.code.tex 2023-01-15 v3.1.10 (3.1.10)
+))) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmoduleshapes.code.tex
+File: pgfmoduleshapes.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfnodeparttextbox=\box64
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmoduleplot.code.tex
+File: pgfmoduleplot.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/pgf/compatibility\pgfcomp-version-0-65.sty
+Package: pgfcomp-version-0-65 2023-01-15 v3.1.10 (3.1.10)
+\pgf@nodesepstart=\dimen265
+\pgf@nodesepend=\dimen266
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/pgf/compatibility\pgfcomp-version-1-18.sty
+Package: pgfcomp-version-1-18 2023-01-15 v3.1.10 (3.1.10)
+)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgffor.sty (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfkeys.sty (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys.code.tex)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/pgf/math\pgfmath.sty (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmath.code.tex)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgffor.code.tex
+Package: pgffor 2023-01-15 v3.1.10 (3.1.10)
+\pgffor@iter=\dimen267
+\pgffor@skip=\dimen268
+\pgffor@stack=\toks37
+\pgffor@toks=\toks38
+)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz\tikz.code.tex
+Package: tikz 2023-01-15 v3.1.10 (3.1.10)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibraryplothandlers.code.tex
+File: pgflibraryplothandlers.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@plot@mark@count=\count293
+\pgfplotmarksize=\dimen269
+)
+\tikz@lastx=\dimen270
+\tikz@lasty=\dimen271
+\tikz@lastxsaved=\dimen272
+\tikz@lastysaved=\dimen273
+\tikz@lastmovetox=\dimen274
+\tikz@lastmovetoy=\dimen275
+\tikzleveldistance=\dimen276
+\tikzsiblingdistance=\dimen277
+\tikz@figbox=\box65
+\tikz@figbox@bg=\box66
+\tikz@tempbox=\box67
+\tikz@tempbox@bg=\box68
+\tikztreelevel=\count294
+\tikznumberofchildren=\count295
+\tikznumberofcurrentchild=\count296
+\tikz@fig@count=\count297
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodulematrix.code.tex
+File: pgfmodulematrix.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfmatrixcurrentrow=\count298
+\pgfmatrixcurrentcolumn=\count299
+\pgf@matrix@numberofcolumns=\count300
+)
+\tikz@expandcount=\count301
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibrarytopaths.code.tex
+File: tikzlibrarytopaths.code.tex 2023-01-15 v3.1.10 (3.1.10)
+))) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryangles.code.tex
+File: tikzlibraryangles.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryquotes.code.tex
+File: tikzlibraryquotes.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibrarycalc.code.tex
+File: tikzlibrarycalc.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibraryarrows.meta.code.tex
+File: pgflibraryarrows.meta.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfarrowinset=\dimen278
+\pgfarrowlength=\dimen279
+\pgfarrowwidth=\dimen280
+\pgfarrowlinewidth=\dimen281
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibrarydecorations.pathreplacing.code.tex (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibrarydecorations.code.tex (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmoduledecorations.code.tex
+\pgfdecoratedcompleteddistance=\dimen282
+\pgfdecoratedremainingdistance=\dimen283
+\pgfdecoratedinputsegmentcompleteddistance=\dimen284
+\pgfdecoratedinputsegmentremainingdistance=\dimen285
+\pgf@decorate@distancetomove=\dimen286
+\pgf@decorate@repeatstate=\count302
+\pgfdecorationsegmentamplitude=\dimen287
+\pgfdecorationsegmentlength=\dimen288
+)
+\tikz@lib@dec@box=\box69
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/decorations\pgflibrarydecorations.pathreplacing.code.tex)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/circuitikz\circuitikz.sty
+Package: circuitikz 2025/07/08{} The CircuiTikz circuit drawing package version 1.8.2
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibrarybending.code.tex
+File: tikzlibrarybending.code.tex 2023-01-15 v3.1.10 (3.1.10)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodulebending.code.tex
+File: pgfmodulebending.code.tex 2023-01-15 v3.1.10 (3.1.10)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodulenonlineartransformations.code.tex
+File: pgfmodulenonlineartransformations.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgftransformnonlinearflatness=\dimen289
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibrarycurvilinear.code.tex
+File: pgflibrarycurvilinear.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@curvilinear@time@a=\dimen290
+\pgf@curvilinear@length@a=\dimen291
+\pgf@curvilinear@length@b=\dimen292
+\pgf@curvilinear@length@c=\dimen293
+\pgf@curvilinear@length@d=\dimen294
+)
+\pgf@arrows@the@rigidity=\dimen295
+)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryfpu.code.tex (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibraryfpu.code.tex)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcirc.defines.tex
+\pgf@circ@count@a=\count303
+\pgf@circ@count@b=\count304
+\pgf@circ@count@c=\count305
+\pgf@circ@res@up=\dimen296
+\pgf@circ@res@down=\dimen297
+\pgf@circ@res@zero=\dimen298
+\pgf@circ@res@left=\dimen299
+\pgf@circ@res@right=\dimen300
+\pgf@circ@res@other=\dimen301
+\pgf@circ@res@step=\dimen302
+\pgf@circ@res@temp=\dimen303
+\pgf@circ@Rlen=\dimen304
+\pgf@circ@scaled@Rlen=\dimen305
+\pgfstartlinewidth=\dimen306
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcircutils.tex
+\ctikz@scratchbox=\box70
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcircpath.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcircshapes.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcircmonopoles.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcircbipoles.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcirctripoles.tex
+\pgf@circ@res@count=\count306
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcircquadpoles.tex)
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcircmultipoles.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcirclabel.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcircvoltage.tex
+\pgfcirc@labelshift=\dimen307
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcirccurrent.tex) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/circuitikz\pgfcircflow.tex)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+Package: hyperref 2023-11-26 v7.01g Hypertext links for LaTeX
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.sty
+Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty
+Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefinekeys.sty
+Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.sty
+Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty
+Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO)
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty
+Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/letltxmacro\letltxmacro.sty
+Package: letltxmacro 2019/12/03 v1.6 Let assignment for LaTeX macros (HO)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/auxhook\auxhook.sty
+Package: auxhook 2019-12-17 v1.6 Hooks for auxiliary files (HO)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+Package: nameref 2023-11-26 v2.56 Cross-referencing by name of section
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty
+Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettitlestring.sty
+Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
+Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
+))
+\c@section@level=\count307
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
+Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count308
+)
+\@linkdim=\dimen308
+\Hy@linkcounter=\count309
+\Hy@pagecounter=\count310
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
+File: pd1enc.def 2023-11-26 v7.01g Hyperref: PDFDocEncoding definition (HO)
+Now handling font encoding PD1 ...
+... no UTF-8 mapping file for font encoding PD1
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
+Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
+)
+\Hy@SavedSpaceFactor=\count311
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def
+File: puenc.def 2023-11-26 v7.01g Hyperref: PDF Unicode definition (HO)
+Now handling font encoding PU ...
+... no UTF-8 mapping file for font encoding PU
+)
+Package hyperref Info: Option `colorlinks' set `true' on input line 4064.
+Package hyperref Info: Hyper figures OFF on input line 4181.
+Package hyperref Info: Link nesting OFF on input line 4186.
+Package hyperref Info: Hyper index ON on input line 4189.
+Package hyperref Info: Plain pages OFF on input line 4196.
+Package hyperref Info: Backreferencing OFF on input line 4201.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4448.
+\c@Hy@tempcnt=\count312
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty
+\Urlmuskip=\muskip17
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 4786.
+\XeTeXLinkMargin=\dimen309
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc.sty
+Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
+))
+\Fld@menulength=\count313
+\Field@Width=\dimen310
+\Fld@charsize=\dimen311
+Package hyperref Info: Hyper figures OFF on input line 6065.
+Package hyperref Info: Link nesting OFF on input line 6070.
+Package hyperref Info: Hyper index ON on input line 6073.
+Package hyperref Info: backreferencing OFF on input line 6080.
+Package hyperref Info: Link coloring ON on input line 6083.
+Package hyperref Info: Link coloring with OCG OFF on input line 6090.
+Package hyperref Info: PDF/A mode OFF on input line 6095.
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/base\atbegshi-ltx.sty
+Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
+package with kernel methods
+)
+\Hy@abspage=\count314
+\c@Item=\count315
+\c@Hfootnote=\count316
+)
+Package hyperref Info: Driver (autodetected): hpdftex.
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+File: hpdftex.def 2023-11-26 v7.01g Hyperref driver for pdfTeX
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/base\atveryend-ltx.sty
+Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atveryend package
+with kernel methods
+)
+\Fld@listcount=\count317
+\c@bookmark@seq@number=\count318
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfilecheck.sty
+Package: rerunfilecheck 2025-06-21 v1.11 Rerun checks for auxiliary files (HO)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquecounter.sty
+Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
+)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 284.
+)
+\Hy@SectionHShift=\skip59
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/cleveref\cleveref.sty
+Package: cleveref 2018/03/27 v0.21.4 Intelligent cross-referencing
+Package cleveref Info: `hyperref' support loaded on input line 2370.
+LaTeX Info: Redefining \cref on input line 2370.
+LaTeX Info: Redefining \Cref on input line 2370.
+LaTeX Info: Redefining \crefrange on input line 2370.
+LaTeX Info: Redefining \Crefrange on input line 2370.
+LaTeX Info: Redefining \cpageref on input line 2370.
+LaTeX Info: Redefining \Cpageref on input line 2370.
+LaTeX Info: Redefining \cpagerefrange on input line 2370.
+LaTeX Info: Redefining \Cpagerefrange on input line 2370.
+LaTeX Info: Redefining \labelcref on input line 2370.
+LaTeX Info: Redefining \labelcpageref on input line 2370.
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/siunitx\siunitx.sty
+Package: siunitx 2025-07-09 v3.4.14 A comprehensive (SI) units package
+\l__siunitx_number_uncert_offset_int=\count319
+\l__siunitx_number_exponent_fixed_int=\count320
+\l__siunitx_number_min_decimal_int=\count321
+\l__siunitx_number_min_integer_int=\count322
+\l__siunitx_number_round_precision_int=\count323
+\l__siunitx_number_lower_threshold_int=\count324
+\l__siunitx_number_upper_threshold_int=\count325
+\l__siunitx_number_group_first_int=\count326
+\l__siunitx_number_group_size_int=\count327
+\l__siunitx_number_group_minimum_int=\count328
+\l__siunitx_angle_tmp_dim=\dimen312
+\l__siunitx_angle_marker_box=\box71
+\l__siunitx_angle_unit_box=\box72
+\l__siunitx_compound_count_int=\count329
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/translations\translations.sty
+Package: translations 2022/02/05 v1.12 internationalization of LaTeX2e packages (CN)
+)
+\l__siunitx_table_tmp_box=\box73
+\l__siunitx_table_tmp_dim=\dimen313
+\l__siunitx_table_column_width_dim=\dimen314
+\l__siunitx_table_integer_box=\box74
+\l__siunitx_table_decimal_box=\box75
+\l__siunitx_table_uncert_box=\box76
+\l__siunitx_table_before_box=\box77
+\l__siunitx_table_after_box=\box78
+\l__siunitx_table_before_dim=\dimen315
+\l__siunitx_table_carry_dim=\dimen316
+\l__siunitx_unit_tmp_int=\count330
+\l__siunitx_unit_position_int=\count331
+\l__siunitx_unit_total_int=\count332
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption.sty
+Package: caption 2023/08/05 v3.6o Customizing captions (AR)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption3.sty
+Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
+\caption@tempdima=\dimen317
+\captionmargin=\dimen318
+\caption@leftmargin=\dimen319
+\caption@rightmargin=\dimen320
+\caption@width=\dimen321
+\caption@indent=\dimen322
+\caption@parindent=\dimen323
+\caption@hangindent=\dimen324
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count333
+\c@continuedfloat=\count334
+Package caption Info: float package is loaded.
+Package caption Info: hyperref package is loaded.
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcolorbox.sty
+Package: tcolorbox 2024/01/10 version 6.2.0 text color boxes
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tools\verbatim.sty
+Package: verbatim 2023-11-06 v1.5v LaTeX2e package for verbatim enhancements
+\every@verbatim=\toks39
+\verbatim@line=\toks40
+\verbatim@in@stream=\read3
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/environ\environ.sty
+Package: environ 2014/05/04 v0.3 A new way to define environments
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/trimspaces\trimspaces.sty
+Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
+))
+\tcb@titlebox=\box79
+\tcb@upperbox=\box80
+\tcb@lowerbox=\box81
+\tcb@phantombox=\box82
+\c@tcbbreakpart=\count335
+\c@tcblayer=\count336
+\c@tcolorbox@number=\count337
+\l__tcobox_tmpa_box=\box83
+\l__tcobox_tmpa_dim=\dimen325
+\tcb@temp=\box84
+\tcb@temp=\box85
+\tcb@temp=\box86
+\tcb@temp=\box87
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbraster.code.tex
+Library (tcolorbox): 'tcbraster.code.tex' version '6.2.0'
+\c@tcbrastercolumn=\count338
+\c@tcbrasterrow=\count339
+\c@tcbrasternum=\count340
+\c@tcbraster=\count341
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbskins.code.tex
+Library (tcolorbox): 'tcbskins.code.tex' version '6.2.0'
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tikzfill\tikzfill.image.sty
+Package: tikzfill.image 2023/08/08 v1.0.1 Image filling library for TikZ
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tikzfill\tikzfill-common.sty
+Package: tikzfill-common 2023/08/08 v1.0.1 Auxiliary code for tikzfill
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tikzfill\tikzlibraryfill.image.code.tex
+File: tikzlibraryfill.image.code.tex 2023/08/08 v1.0.1 Image filling library
+\l__tikzfill_img_box=\box88
+)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbskinsjigsaw.code.tex
+Library (tcolorbox): 'tcbskinsjigsaw.code.tex' version '6.2.0'
+)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbbreakable.code.tex
+Library (tcolorbox): 'tcbbreakable.code.tex' version '6.2.0'
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/pdfcol\pdfcol.sty
+Package: pdfcol 2022-09-21 v1.7 Handle new color stacks for pdfTeX (HO)
+)
+Package pdfcol Info: New color stack `tcb@breakable' = 1 on input line 23.
+\tcb@testbox=\box89
+\tcb@totalupperbox=\box90
+\tcb@totallowerbox=\box91
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbhooks.code.tex
+Library (tcolorbox): 'tcbhooks.code.tex' version '6.2.0'
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbtheorems.code.tex
+Library (tcolorbox): 'tcbtheorems.code.tex' version '6.2.0'
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbfitting.code.tex
+Library (tcolorbox): 'tcbfitting.code.tex' version '6.2.0'
+\tcbfitdim=\dimen326
+\tcb@lowerfitdim=\dimen327
+\tcb@upperfitdim=\dimen328
+\tcb@cur@hbadness=\count342
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcblistingsutf8.code.tex
+Library (tcolorbox): 'tcblistingsutf8.code.tex' version '6.2.0'
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcblistings.code.tex
+Library (tcolorbox): 'tcblistings.code.tex' version '6.2.0'
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.sty
+\lst@mode=\count343
+\lst@gtempboxa=\box92
+\lst@token=\toks41
+\lst@length=\count344
+\lst@currlwidth=\dimen329
+\lst@column=\count345
+\lst@pos=\count346
+\lst@lostspace=\dimen330
+\lst@width=\dimen331
+\lst@newlines=\count347
+\lst@lineno=\count348
+\lst@maxwidth=\dimen332
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstmisc.sty
+File: lstmisc.sty 2023/02/27 1.9 (Carsten Heinz)
+\c@lstnumber=\count349
+\lst@skipnumbers=\count350
+\lst@framebox=\box93
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.cfg
+File: listings.cfg 2023/02/27 1.9 listings configuration
+))
+Package: listings 2023/02/27 1.9 (Carsten Heinz)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcblistingscore.code.tex
+Library (tcolorbox): 'tcblistingscore.code.tex' version '6.2.0'
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbprocessing.code.tex
+Library (tcolorbox): 'tcbprocessing.code.tex' version '6.2.0'
+)
+\c@tcblisting=\count351
+)) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/listingsutf8\listingsutf8.sty
+Package: listingsutf8 2019-12-10 v1.5 Allow UTF-8 in listings input (HO)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.sty
+Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO)
+))) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbexternal.code.tex
+Library (tcolorbox): 'tcbexternal.code.tex' version '6.2.0'
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbmagazine.code.tex
+Library (tcolorbox): 'tcbmagazine.code.tex' version '6.2.0'
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbvignette.code.tex
+Library (tcolorbox): 'tcbvignette.code.tex' version '6.2.0'
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibraryfadings.code.tex
+File: tikzlibraryfadings.code.tex 2023-01-15 v3.1.10 (3.1.10)
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibraryfadings.code.tex
+File: pgflibraryfadings.code.tex 2023-01-15 v3.1.10 (3.1.10)
+))) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbposter.code.tex
+Library (tcolorbox): 'tcbposter.code.tex' version '6.2.0'
+))
+Package translations Info: No language package found. I am going to use `english' as default language. on input line 54.
+LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 54.
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd
+File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdftex.def
+File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count352
+\l__pdf_internal_box=\box94
+) (Thermal_Network_For_Radial_TEC.aux)
+\openout1 = `Thermal_Network_For_Radial_TEC.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: a4paper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(72.26999pt, 452.9679pt, 72.26999pt)
+* v-part:(T,H,B)=(72.26999pt, 700.50687pt, 72.26999pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=452.9679pt
+* \textheight=700.50687pt
+* \oddsidemargin=0.0pt
+* \evensidemargin=0.0pt
+* \topmargin=-37.0pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=10.0pt
+* \footskip=30.0pt
+* \marginparwidth=4.0pt
+* \marginparsep=10.0pt
+* \columnsep=20.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumntrue
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count353
+\scratchdimen=\dimen333
+\scratchbox=\box95
+\nofMPsegments=\count354
+\nofMParguments=\count355
+\everyMPshowfont=\toks42
+\MPscratchCnt=\count356
+\MPscratchDim=\dimen334
+\MPnumerator=\count357
+\makeMPintoPDFobject=\count358
+\everyMPtoPDFconversion=\toks43
+) (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
+))
+Package hyperref Info: Link coloring ON on input line 54.
+ (Thermal_Network_For_Radial_TEC.out) (Thermal_Network_For_Radial_TEC.out)
+\@outlinefile=\write4
+\openout4 = `Thermal_Network_For_Radial_TEC.out'.
+
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/translations/dicts\translations-basic-dictionary-english.trsl
+File: translations-basic-dictionary-english.trsl (english translation file `translations-basic-dictionary')
+)
+Package translations Info: loading dictionary `translations-basic-dictionary' for `english'. on input line 54.
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: listings package is loaded.
+Package caption Info: End \AtBeginDocument code.
+\c@lstlisting=\count359
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty
+Package: inputenc 2021/02/14 v1.3d Input encoding file
+\inpenc@prehook=\toks44
+\inpenc@posthook=\toks45
+)
+Underfull \hbox (badness 1953) in paragraph at lines 63--64
+\OT1/ptm/m/n/10 oc-cu-pies a co-cen-tric ring around the chip, with
+ []
+
+
+Underfull \hbox (badness 3646) in paragraph at lines 63--64
+\OT1/ptm/m/n/10 per-for-mance. This asym-met-ric fea-ture can be
+ []
+
+LaTeX Font Info:    Trying to load font information for U+msa on input line 112.
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 112.
+ (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+Overfull \hbox (11.99998pt too wide) in paragraph at lines 112--112
+[] 
+ []
+
+
+Overfull \hbox (11.99998pt too wide) in paragraph at lines 112--112
+[] 
+ []
+
+
+Underfull \hbox (badness 1178) in paragraph at lines 117--118
+\OT1/ptm/m/n/10 is de-fined by $\OML/cmm/m/it/10 r[]$ \OT1/ptm/m/n/10 such that it cov-ers the en-tire
+ []
+
+
+Underfull \hbox (badness 1796) in paragraph at lines 117--118
+\OT1/ptm/m/n/10 rect-an-gu-lar chip area. The chip is as-sumed to
+ []
+
+
+Underfull \hbox (badness 2644) in paragraph at lines 124--125
+\OT1/ptm/m/n/10 el-e-ment for each stage ar-ranged ra-di-ally. The
+ []
+
+<images/wedge_top_view.png, id=239, 857.00175pt x 440.24475pt>
+File: images/wedge_top_view.png Graphic file (type png)
+<use images/wedge_top_view.png>
+Package pdftex.def Info: images/wedge_top_view.png  used on input line 130.
+(pdftex.def)             Requested size: 205.65909pt x 105.64746pt.
+<images/layers_side_view.png, id=241, 518.53725pt x 289.68225pt>
+File: images/layers_side_view.png Graphic file (type png)
+<use images/layers_side_view.png>
+Package pdftex.def Info: images/layers_side_view.png  used on input line 151.
+(pdftex.def)             Requested size: 205.65909pt x 114.88956pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [1{C:/Users/nuwan/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
+
+
+ <./images/wedge_top_view.png>]
+<images/cylinder_iso.png, id=263, 446.8695pt x 295.1025pt>
+File: images/cylinder_iso.png Graphic file (type png)
+<use images/cylinder_iso.png>
+Package pdftex.def Info: images/cylinder_iso.png  used on input line 173.
+(pdftex.def)             Requested size: 205.65909pt x 135.81183pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 190--191
+\OT1/ptm/m/n/10 TEC el-e-ments are sand-wiched be-tween ra-dial
+ []
+
+<images/TEC_element_iso.png, id=264, 934.99312pt x 583.42969pt>
+File: images/TEC_element_iso.png Graphic file (type png)
+<use images/TEC_element_iso.png>
+Package pdftex.def Info: images/TEC_element_iso.png  used on input line 196.
+(pdftex.def)             Requested size: 205.65909pt x 128.32822pt.
+
+Underfull \hbox (badness 1033) in paragraph at lines 214--215
+\OT1/ptm/m/n/10 the az-imuthal di-rec-tion, one con-sist-ing of p type
+ []
+
+[2 <./images/layers_side_view.png> <./images/cylinder_iso.png> <./images/TEC_element_iso.png>]
+<images/az_and_is_top.png, id=287, 688.82344pt x 593.21625pt>
+File: images/az_and_is_top.png Graphic file (type png)
+<use images/az_and_is_top.png>
+Package pdftex.def Info: images/az_and_is_top.png  used on input line 267.
+(pdftex.def)             Requested size: 205.65909pt x 177.11537pt.
+
+Underfull \hbox (badness 1571) in paragraph at lines 312--313
+\OT1/ptm/m/n/10 Interconnector pro-vides elec-tri-cal con-tact be-tween
+ []
+
+<images/ic_iso.png, id=288, 662.475pt x 544.28343pt>
+File: images/ic_iso.png Graphic file (type png)
+<use images/ic_iso.png>
+Package pdftex.def Info: images/ic_iso.png  used on input line 318.
+(pdftex.def)             Requested size: 205.65909pt x 168.96696pt.
+
+Underfull \hbox (badness 2035) in paragraph at lines 342--343
+[]\OT1/ptm/m/n/10 Interconnector is parametrized by its width $\OML/cmm/m/it/10 W[]$\OT1/ptm/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 4582) in paragraph at lines 342--343
+\OT1/ptm/m/n/10 pur-poses, all the in-ter-con-nec-tor di-men-sions are
+ []
+
+
+Underfull \hbox (badness 5802) in paragraph at lines 357--358
+\OT1/ptm/m/n/10 Outerconnector refeers to the elec-tri-cal con-tact
+ []
+
+<images/oc_iso.png, id=290, 855.94781pt x 606.01407pt>
+File: images/oc_iso.png Graphic file (type png)
+<use images/oc_iso.png>
+Package pdftex.def Info: images/oc_iso.png  used on input line 363.
+(pdftex.def)             Requested size: 205.65909pt x 145.60355pt.
+
+Underfull \hbox (badness 4846) in paragraph at lines 386--387
+[]\OT1/ptm/m/n/10 Outerconnector is parametrized sim-i-larly to the
+ []
+
+
+Underfull \vbox (badness 2591) has occurred while \output is active []
+
+ [3 <./images/az_and_is_top.png> <./images/ic_iso.png> <./images/oc_iso.png>]
+<images/resistor_system_iso_cropped.png, id=308, 814.84425pt x 542.62724pt>
+File: images/resistor_system_iso_cropped.png Graphic file (type png)
+<use images/resistor_system_iso_cropped.png>
+Package pdftex.def Info: images/resistor_system_iso_cropped.png  used on input line 420.
+(pdftex.def)             Requested size: 452.9679pt x 301.65019pt.
+<images/vertical_res_network_side_view.png, id=310, 1078.78032pt x 123.46124pt>
+File: images/vertical_res_network_side_view.png Graphic file (type png)
+<use images/vertical_res_network_side_view.png>
+Package pdftex.def Info: images/vertical_res_network_side_view.png  used on input line 476.
+(pdftex.def)             Requested size: 452.9679pt x 51.84016pt.
+<images/cut_section for vertical_resistance.png, id=311, 977.90344pt x 642.90187pt>
+File: images/cut_section for vertical_resistance.png Graphic file (type png)
+<use images/cut_section for vertical_resistance.png>
+Package pdftex.def Info: images/cut_section for vertical_resistance.png  used on input line 481.
+(pdftex.def)             Requested size: 181.18439pt x 119.11156pt.
+
+Overfull \hbox (11.74542pt too wide) in paragraph at lines 504--505
+ [][] 
+ []
+
+
+Underfull \hbox (badness 1127) in paragraph at lines 512--513
+\OT1/ptm/m/n/10 TEC el-e-ments. How-ever, this will re-sult in the
+ []
+
+
+Underfull \hbox (badness 1515) in paragraph at lines 524--525
+[]\OT1/ptm/m/n/10 For a vari-ables cross sec-tional area, the ther-mal
+ []
+
+[4] [5 <./images/resistor_system_iso_cropped.png> <./images/vertical_res_network_side_view.png> <./images/cut_section for vertical_resistance.png>]
+Underfull \hbox (badness 1701) in paragraph at lines 581--582
+[]\OT1/ptm/b/n/10 Region with-out any other ge-om-e-try shar-ing a
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 628--629
+
+ []
+
+
+Underfull \hbox (badness 1178) in paragraph at lines 630--631
+[]\OT1/ptm/m/n/10 However, this would cre-ate to-tal of 27
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 630--631
+
+ []
+
+
+Underfull \hbox (badness 1418) in paragraph at lines 632--633
+\OT1/ptm/m/n/10 This sim-pli-fi-ca-tion is valid as long as the
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 632--633
+
+ []
+
+
+Underfull \hbox (badness 7203) in paragraph at lines 637--638
+[]\OT1/ptm/m/n/10 Therefore, the to-tal ther-mal re-sis-tance of the
+ []
+
+[6]
+
+LaTeX Font Warning: Command \tiny invalid in math mode on input line 675.
+
+
+Overfull \hbox (17.67482pt too wide) detected at line 681
+[][]
+ []
+
+
+Underfull \hbox (badness 2875) in paragraph at lines 683--684
+[]\OT1/ptm/m/n/10 The term in-side the large brack-ets is purely a
+ []
+
+
+LaTeX Font Warning: Command \tiny invalid in math mode on input line 692.
+
+
+Overfull \hbox (0.9547pt too wide) detected at line 699
+[][][][][]
+ []
+
+LaTeX Font Info:    Calculating math sizes for size <> on input line 699.
+
+LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <> not available
+(Font)              size <5> substituted on input line 699.
+
+
+LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <0.7> not available
+(Font)              size <5> substituted on input line 699.
+
+
+LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <0.5> not available
+(Font)              size <5> substituted on input line 699.
+
+
+LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <> not available
+(Font)              size <5> substituted on input line 699.
+
+
+LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <0.7> not available
+(Font)              size <5> substituted on input line 699.
+
+
+LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <0.5> not available
+(Font)              size <5> substituted on input line 699.
+
+
+LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <> not available
+(Font)              size <5> substituted on input line 699.
+
+
+LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <0.7> not available
+(Font)              size <5> substituted on input line 699.
+
+
+LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <0.5> not available
+(Font)              size <5> substituted on input line 699.
+
+
+Underfull \hbox (badness 1087) in paragraph at lines 720--721
+[]\OT1/ptm/m/n/10 Evaluating the in-te-gral as-sum-ing con-stant ther-mal
+ []
+
+
+Underfull \hbox (badness 1087) in paragraph at lines 752--753
+[]\OT1/ptm/m/n/10 Evaluating the in-te-gral as-sum-ing con-stant ther-mal
+ []
+
+
+Underfull \hbox (badness 1590) in paragraph at lines 761--762
+\OT1/ptm/m/n/10 Since the az-imuthal in-su-la-tor is char-ac-ter-ized by
+ []
+
+
+Underfull \hbox (badness 1072) in paragraph at lines 761--762
+\OT1/ptm/m/n/10 the con-stant by the con-stant arc length $\OML/cmm/m/it/10 W[]$\OT1/ptm/m/n/10 , the
+ []
+
+[7]
+Underfull \hbox (badness 3919) in paragraph at lines 775--776
+\OT1/ptm/m/n/10 Heat gen-er-ated through the chip layer will be
+ []
+
+
+Underfull \hbox (badness 4403) in paragraph at lines 775--776
+\OT1/ptm/m/n/10 trans-ferred ver-ti-cally up-ward to the TEC layer
+ []
+
+
+Underfull \hbox (badness 1102) in paragraph at lines 775--776
+\OT1/ptm/m/n/10 through the in-su-la-tor layer. While this in-su-la-tor
+ []
+
+
+Underfull \hbox (badness 2057) in paragraph at lines 775--776
+\OT1/ptm/m/n/10 ther-mally con-duc-tive, the con-duc-tiv-ity can-not be
+ []
+
+
+Underfull \hbox (badness 1490) in paragraph at lines 839--840
+\OT1/ptm/m/n/10 Now we need to lump all the re-sis-tors be-tween
+ []
+
+
+Underfull \hbox (badness 4181) in paragraph at lines 875--875
+[]\OT1/ptm/b/n/9 Figure 10: |\OT1/ptm/m/n/9 Re-sis-tor net-work be-tween two ad-ja-cent
+ []
+
+
+Underfull \vbox (badness 5475) has occurred while \output is active []
+
+ [8]
+Underfull \hbox (badness 1132) in paragraph at lines 901--902
+\OT1/ptm/m/n/10 in-su-la-tor re-sis-tor, and the to-tal lumped re-sis-tance
+ []
+
+
+Underfull \hbox (badness 1622) in paragraph at lines 924--925
+\OT1/ptm/m/n/10 the elec-tri-cal re-sis-tance of the ther-mo-elec-tric leg
+ []
+
+
+Underfull \hbox (badness 5787) in paragraph at lines 934--935
+\OT1/ptm/m/n/10 The in-ter-con-nects trans-fer elec-tric-ity mainly in
+ []
+
+
+Underfull \hbox (badness 1540) in paragraph at lines 947--948
+[]\OT1/ptm/m/n/10 Assuming con-stant re-sis-tiv-ity $\OML/cmm/m/it/10 ^^Z[]$\OT1/ptm/m/n/10 , and us-ing the
+ []
+
+[9]
+Underfull \hbox (badness 2401) in paragraph at lines 971--972
+\OT1/ptm/m/n/10 re-sis-tance of the out-er-con-nect can be cal-cu-lated
+ []
+
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 994.
+
+
+Underfull \hbox (badness 3590) in paragraph at lines 1008--1009
+\OT1/ptm/m/n/10 The nodes in the TEC layer are gov-erned by
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1015--1016
+[]\OT1/ptm/m/n/10 The terms rep-re-sents heat pump through
+ []
+
+
+Underfull \hbox (badness 1648) in paragraph at lines 1015--1016
+\OT1/ptm/m/n/10 of con-duc-tance val-ues, so we need to use their
+ []
+
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1023.
+(C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ptm.fd
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
+)
+Underfull \hbox (badness 2951) in paragraph at lines 1024--1025
+[]$\OML/cmm/m/it/10 R[]$ \OT1/ptm/m/n/10 and $\OML/cmm/m/it/10 R[]$ \OT1/ptm/m/n/10 (TE Legs): The
+ []
+
+
+Underfull \hbox (badness 5908) in paragraph at lines 1028--1029
+[]\OT1/ptm/m/n/10 We as-sign Joule heat-ing based on where the
+ []
+
+[10]
+Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
+[]\OT1/ptm/m/n/10 Contribution: 100% of $\OML/cmm/m/it/10 I[]R[]$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
+\OT1/ptm/m/n/10 (Out-er-con-nect of prev stage) + 50% of
+ []
+
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 1057.
+
+
+Overfull \hbox (3.10242pt too wide) detected at line 1062
+[][][][][]
+ []
+
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 1067.
+
+
+Underfull \hbox (badness 2486) in paragraph at lines 1074--1076
+[]\OT1/ptm/m/n/10 Note that we sub-tracted the Joule heat-ing term
+ []
+
+
+Underfull \hbox (badness 1132) in paragraph at lines 1074--1076
+\OT1/ptm/m/n/10 we are sub-tract-ing the $\OML/cmm/m/it/10 Q[]$ \OT1/ptm/m/n/10 term, the sign of the
+ []
+
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 1078.
+
+
+Overfull \hbox (58.00906pt too wide) detected at line 1084
+[][][][][]
+ []
+
+
+Underfull \hbox (badness 5288) in paragraph at lines 1090--1091
+\OT1/ptm/m/n/10 at the outer edge of the TEC layer to ease
+ []
+
+
+Underfull \hbox (badness 1102) in paragraph at lines 1090--1091
+\OT1/ptm/m/n/10 the mod-elling pro-cess. Since the mi-cro chan-nel
+ []
+
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 1093.
+
+
+Overfull \hbox (68.85565pt too wide) detected at line 1099
+[][]
+ []
+
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 1104.
+
+
+Overfull \hbox (27.39995pt too wide) detected at line 1109
+[][][][][]
+ []
+
+
+Underfull \hbox (badness 1005) in paragraph at lines 1113--1114
+\OT1/ptm/m/n/10 At the ex-act cen-ter ($\OML/cmm/m/it/10 r \OT1/cmr/m/n/10 = 0$ \OT1/ptm/m/n/10 to $\OML/cmm/m/it/10 r \OT1/cmr/m/n/10 = \OML/cmm/m/it/10 r[]$\OT1/ptm/m/n/10 ), the
+ []
+
+[11]
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 1144.
+
+
+LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <> not available
+(Font)              size <5> substituted on input line 1150.
+
+
+LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <0.7> not available
+(Font)              size <5> substituted on input line 1150.
+
+
+LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <0.5> not available
+(Font)              size <5> substituted on input line 1150.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1209.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 1209.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1209.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1213.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 1213.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\to' on input line 1213.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1213.
+
+[12]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1217.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 1217.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\to' on input line 1217.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1217.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1221.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 1221.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\to' on input line 1221.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1221.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1225.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 1225.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1225.
+
+
+Underfull \hbox (badness 4120) in paragraph at lines 1229--1230
+[]\OT1/ptm/b/n/10 Diagonal $\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 i; i\OT1/cmr/m/n/10 )$\OT1/ptm/b/n/10 : \OT1/ptm/m/n/10 The neg-a-tive sum of all
+ []
+
+
+Overfull \hbox (8.04544pt too wide) detected at line 1236
+[] \OT1/cmr/m/n/10 = [][]
+ []
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1241.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 1241.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1241.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1248.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 1248.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\to' on input line 1248.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1248.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1252.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 1252.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1252.
+
+
+Underfull \hbox (badness 1502) in paragraph at lines 1258--1259
+[]\OT1/ptm/b/n/10 Upper Off-Diagonal $\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 i; i \OT1/cmr/m/n/10 + 1)$\OT1/ptm/b/n/10 : \OT1/ptm/m/n/10 Only back
+ []
+
+
+Overfull \hbox (61.28485pt too wide) detected at line 1264
+[] \OT1/cmr/m/n/5 = [][]
+ []
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1271.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1271.
+
+
+Underfull \hbox (badness 1881) in paragraph at lines 1276--1277
+[]$[]$\OT1/ptm/m/n/10 : Heat gen-er-a-tion in the Sil-i-con rings
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1279--1280
+[]\OT1/ptm/m/n/10 Previous Stage heat-ing: $\OML/cmm/m/it/10 I[]R[]$
+ []
+
+[13] [14] (Thermal_Network_For_Radial_TEC.aux)
+ ***********
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-04>
+ ***********
+
+
+LaTeX Font Warning: Size substitutions with differences
+(Font)              up to 4.5pt have occurred.
+
+Package rerunfilecheck Info: File `Thermal_Network_For_Radial_TEC.out' has not changed.
+(rerunfilecheck)             Checksum: 07D5C94F40C0E21468D9ED41914C8879;7768.
+ ) 
+Here is how much of TeX's memory you used:
+ 55445 strings out of 474486
+ 1369462 string characters out of 5743755
+ 1967542 words of memory out of 5000000
+ 77003 multiletter control sequences out of 15000+600000
+ 593380 words of font info for 110 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 84i,19n,96p,921b,1216s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx6.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx9.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmex7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmex9.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi9.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr9.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy9.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
+Output written on Thermal_Network_For_Radial_TEC.pdf (14 pages, 1246084 bytes).
+PDF statistics:
+ 612 PDF objects out of 1000 (max. 8388607)
+ 134 named destinations out of 1000 (max. 500000)
+ 599 words of extra memory for PDF output out of 10000 (max. 10000000)
+
