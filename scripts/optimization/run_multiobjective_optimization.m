@@ -45,8 +45,9 @@ for i = 1:nvars
     fprintf('  %-35s  %10.4f  %10.4f  %10.4f\n', var_names{i}, lb(i), ub(i), x0(i));
 end
 fprintf('═══════════════════════════════════════════════════════════════\n');
-fprintf('\nFixed Parameters (from optimization_variables.m):\n');
-fprintf('  N_stages:     %d\n', CONFIG.N_stages);
+fprintf('\nFixed/Integer Parameters (Paper Notation - Thermal_Network_For_Radial_TEC.tex):\n');
+fprintf('  N (stages):   %d\n', CONFIG.N);
+fprintf('  M (wedges):   %d  →  θ = %.1f°\n', CONFIG.M, CONFIG.theta_deg);
 fprintf('  T_target:     %.0f °C\n', CONFIG.T_target_C);
 fprintf('  q_flux:       %.2e W/m² (%.0f kW/m²)\n', CONFIG.q_flux_W_m2, CONFIG.q_flux_W_m2/1e3);
 fprintf('  h_conv:       %.2e W/m²K\n', CONFIG.h_conv_W_m2K);
@@ -100,7 +101,7 @@ Power_pareto = fval_pareto(:,2);
 % Find knee point (balanced solution) using distance to utopia point
 utopia = [min(T_max_pareto), min(Power_pareto)];
 distances = sqrt(((T_max_pareto - utopia(1))/range(T_max_pareto)).^2 + ...
-                 ((Power_pareto - utopia(2))/range(Power_pareto)).^2);
+    ((Power_pareto - utopia(2))/range(Power_pareto)).^2);
 [~, idx_knee] = min(distances);
 
 fprintf('Key Solutions on Pareto Front:\n');
@@ -250,176 +251,183 @@ fprintf('\n✓ Multi-objective optimization complete!\n');
 %% ==================== HELPER FUNCTIONS ====================
 
 function config = create_base_config(CONFIG)
-    % Create base config from centralized CONFIG struct
-    config = struct();
-    
-    % Geometry from CONFIG
-    config.geometry.N_stages = CONFIG.N_stages;
-    config.geometry.N_tsv_limit = CONFIG.N_tsv_limit;
-    config.geometry.w_chip_um = CONFIG.w_chip_um;
-    config.geometry.t_chip_um = CONFIG.t_chip_um;
-    
-    % TSV parameters from CONFIG
-    config.geometry.tsv.R_TSV_um = CONFIG.tsv.R_TSV_um;
-    config.geometry.tsv.P_TSV_um = CONFIG.tsv.P_TSV_um;
-    config.geometry.tsv.g_rad_um = CONFIG.tsv.g_rad_um;
-    config.geometry.tsv.t_SOI_um = 100;  % Default, can be optimized
-    
-    % Defaults for optimizable parameters (will be overwritten by optimizer)
-    config.geometry.R_cyl_um = 1000;
-    config.geometry.wedge_angle_deg = 30;
-    config.geometry.thickness_um = 200;
-    config.geometry.radial_expansion_factor = 1.15;
-    config.geometry.fill_factor = 0.95;
-    config.geometry.interconnect_ratio = 0.15;
-    config.geometry.outerconnect_ratio = 0.15;
-    config.geometry.insulation_width_ratio = 0.04;
-    config.geometry.interconnect_angle_ratio = 0.16;
-    config.geometry.outerconnect_angle_ratio = 0.16;
-    config.geometry.interconnect_thickness_ratio = 1.0;
-    config.geometry.outerconnect_thickness_ratio = 1.0;
-    
-    % Boundary conditions from CONFIG
-    config.boundary_conditions.q_flux_W_m2 = CONFIG.q_flux_W_m2;
-    config.boundary_conditions.T_water_K = CONFIG.T_water_K;
-    config.boundary_conditions.h_conv_W_m2K = CONFIG.h_conv_W_m2K;
-    
-    % Operating conditions (default, will be optimized)
-    config.operating_conditions.I_current_A = 0.025;
-    
-    % Materials from CONFIG
-    config.materials = CONFIG.materials;
+% Create base config from centralized CONFIG struct
+% Uses notation from: Thermal_Network_For_Radial_TEC.tex
+%
+% IMPORTANT: θ (wedge_angle_deg) is derived from M (number of wedges)
+%   θ = 360°/M, where M is an integer parameter
+config = struct();
+
+% Geometry from CONFIG - using paper notation
+config.geometry.N_stages = CONFIG.N;              % N: Number of stages
+config.geometry.M_wedges = CONFIG.M;              % M: Number of wedges (integer)
+config.geometry.w_chip_um = CONFIG.W_chip_um;     % W_chip
+config.geometry.t_chip_um = CONFIG.t_chip_um;     % t_chip
+
+% CRITICAL: θ is derived from M, NOT a continuous variable
+config.geometry.wedge_angle_deg = CONFIG.theta_deg;  % θ = 360°/M
+
+% Defaults for optimizable parameters (paper notation)
+config.geometry.R_cyl_um = 1000;                  % r_cyl
+config.geometry.thickness_um = 200;               % t_TEC
+config.geometry.t_ins_um = 10;                    % t_ins
+config.geometry.radial_expansion_factor = 1.15;   % f_L
+config.geometry.azimuthal_gap_um = 20;            % W_az
+config.geometry.insulation_width_ratio = 0.05;    % W_is/L
+
+% Interconnector: f_{ic,W}, f_{ic,t}, f_{ic,β}
+config.geometry.interconnect_ratio = 0.15;
+config.geometry.interconnect_thickness_ratio = 1.0;
+config.geometry.interconnect_angle_ratio = 0.16;
+
+% Outerconnector: f_{oc,W}, f_{oc,t}, f_{oc,β}
+config.geometry.outerconnect_ratio = 0.15;
+config.geometry.outerconnect_thickness_ratio = 1.0;
+config.geometry.outerconnect_angle_ratio = 0.16;
+
+% Boundary conditions from CONFIG
+config.boundary_conditions.q_flux_W_m2 = CONFIG.q_flux_W_m2;
+config.boundary_conditions.T_water_K = CONFIG.T_water_K;
+config.boundary_conditions.h_conv_W_m2K = CONFIG.h_conv_W_m2K;
+
+% Operating conditions (default, will be optimized)
+config.operating_conditions.I_current_A = 0.025;  % I
+
+% Materials from CONFIG
+config.materials = CONFIG.materials;
 end
 
 function f = tec_multiobjective(x, base_config, CONFIG)
-    % Multi-objective function
-    % Returns: [T_max (°C), Power (W)]
-    %
-    % Uses same variable names as optimization_variables.m
-    % CRITICAL: Uses same solver approach as TECOptimizer:
-    % 1. Warm initial guess (T_water + 50)
-    % 2. Relaxation iteration (0.5 blend)
-    % 3. Proper error handling
-    
-    persistent call_count;
-    if isempty(call_count)
-        call_count = 0;
+% Multi-objective function
+% Returns: [T_max (°C), Power (W)]
+%
+% Uses same variable names as optimization_variables.m
+% CRITICAL: Uses same solver approach as TECOptimizer:
+% 1. Warm initial guess (T_water + 50)
+% 2. Relaxation iteration (0.5 blend)
+% 3. Proper error handling
+
+persistent call_count;
+if isempty(call_count)
+    call_count = 0;
+end
+call_count = call_count + 1;
+
+try
+    % IMPORTANT: Create a FRESH config copy to avoid cross-contamination
+    config = struct();
+    config.geometry = base_config.geometry;
+    config.boundary_conditions = base_config.boundary_conditions;
+    config.operating_conditions = base_config.operating_conditions;
+    config.materials = base_config.materials;
+
+    % Get variable names from CONFIG
+    all_vars = CONFIG.all_vars;
+    enabled_mask = [all_vars{:, 5}];
+
+    % Create a map of variable values
+    var_map = containers.Map();
+    x_idx = 1;
+    for i = 1:size(all_vars, 1)
+        name = all_vars{i, 1};
+        if enabled_mask(i)  % enabled
+            var_map(name) = x(x_idx);
+            x_idx = x_idx + 1;
+        else  % disabled - use initial value
+            var_map(name) = all_vars{i, 4};
+        end
     end
-    call_count = call_count + 1;
-    
-    try
-        % IMPORTANT: Create a FRESH config copy to avoid cross-contamination
-        config = struct();
-        config.geometry = base_config.geometry;
-        config.boundary_conditions = base_config.boundary_conditions;
-        config.operating_conditions = base_config.operating_conditions;
-        config.materials = base_config.materials;
-        
-        % Get variable names from CONFIG
-        all_vars = CONFIG.all_vars;
-        enabled_mask = [all_vars{:, 5}];
-        
-        % Create a map of variable values
-        var_map = containers.Map();
-        x_idx = 1;
-        for i = 1:size(all_vars, 1)
-            name = all_vars{i, 1};
-            if enabled_mask(i)  % enabled
-                var_map(name) = x(x_idx);
-                x_idx = x_idx + 1;
-            else  % disabled - use initial value
-                var_map(name) = all_vars{i, 4};
+
+    % Helper function
+    get_val = @(name, default) get_var_or_default(var_map, name, default);
+
+    % Apply variables to config (paper notation)
+    % NOTE: θ (wedge_angle_deg) comes from base_config (derived from M)
+    config.operating_conditions.I_current_A = get_val('I', 0.025);
+    config.geometry.thickness_um = get_val('t_TEC_um', 200);           % t_TEC
+    config.geometry.R_cyl_um = get_val('r_cyl_um', 1000);              % r_cyl
+    config.geometry.t_ins_um = get_val('t_ins_um', 10);                % t_ins
+    config.geometry.radial_expansion_factor = get_val('f_L', 1.15);    % f_L
+    config.geometry.azimuthal_gap_um = get_val('W_az_um', 20);         % W_az
+    config.geometry.insulation_width_ratio = get_val('W_is_ratio', 0.05);  % W_is/L
+
+    % Interconnector (ic)
+    config.geometry.interconnect_ratio = get_val('f_ic_W', 0.15);
+    config.geometry.interconnect_thickness_ratio = get_val('f_ic_t', 1.0);
+    config.geometry.interconnect_angle_ratio = get_val('f_ic_beta', 0.16);
+
+    % Outerconnector (oc)
+    config.geometry.outerconnect_ratio = get_val('f_oc_W', 0.15);
+    config.geometry.outerconnect_thickness_ratio = get_val('f_oc_t', 1.0);
+    config.geometry.outerconnect_angle_ratio = get_val('f_oc_beta', 0.16);
+
+    materials = MaterialProperties(config);
+    geometry = TECGeometry(config);
+    network = ThermalNetwork(geometry, materials, config);
+
+    N = geometry.N_stages;
+    T_water = config.boundary_conditions.T_water_K;
+
+    % CRITICAL: Warm initial guess (like TECOptimizer)
+    T = ones(2*N + 1, 1) * (T_water + 50);
+
+    for iter = 1:100
+        T_old = T;
+        try
+            [T_new, Q_out, Q_in] = network.solve(T);
+        catch ME
+            if mod(call_count, 1000) == 1
+                fprintf('  [MO Debug] Solver exception at call %d: %s\n', call_count, ME.message);
             end
-        end
-        
-        % Helper function
-        get_val = @(name, default) get_var_or_default(var_map, name, default);
-        
-        % Apply variables to config (same names as optimization_variables.m)
-        config.operating_conditions.I_current_A = get_val('current', 0.025);
-        config.geometry.thickness_um = get_val('thickness_um', 200);
-        config.geometry.wedge_angle_deg = get_val('wedge_angle_deg', 30);
-        config.geometry.R_cyl_um = get_val('R_cyl_um', 1000);
-        config.geometry.radial_expansion_factor = get_val('k_r', 1.15);
-        config.geometry.fill_factor = get_val('fill_factor', 0.95);
-        config.geometry.insulation_width_ratio = get_val('insulation_width_ratio', 0.04);
-        config.geometry.interconnect_ratio = get_val('interconnect_ratio', 0.15);
-        config.geometry.outerconnect_ratio = get_val('outerconnect_ratio', 0.15);
-        config.geometry.interconnect_angle_ratio = get_val('interconnect_angle_ratio', 0.16);
-        config.geometry.outerconnect_angle_ratio = get_val('outerconnect_angle_ratio', 0.16);
-        config.geometry.interconnect_thickness_ratio = get_val('interconnect_thickness_ratio', 1.0);
-        config.geometry.outerconnect_thickness_ratio = get_val('outerconnect_thickness_ratio', 1.0);
-        if isfield(config.geometry, 'tsv')
-            config.geometry.tsv.t_SOI_um = get_val('t_SOI_um', 100);
-        end
-        
-        materials = MaterialProperties(config);
-        geometry = TECGeometry(config);
-        network = ThermalNetwork(geometry, materials, config);
-        
-        N = geometry.N_stages;
-        T_water = config.boundary_conditions.T_water_K;
-        
-        % CRITICAL: Warm initial guess (like TECOptimizer)
-        T = ones(2*N + 1, 1) * (T_water + 50);
-        
-        for iter = 1:100
-            T_old = T;
-            try
-                [T_new, Q_out, Q_in] = network.solve(T);
-            catch ME
-                if mod(call_count, 1000) == 1
-                    fprintf('  [MO Debug] Solver exception at call %d: %s\n', call_count, ME.message);
-                end
-                f = [1e6, 1e6];
-                return;
-            end
-            
-            % Check for invalid values
-            if any(isnan(T_new)) || any(isinf(T_new)) || any(T_new < 0)
-                if mod(call_count, 1000) == 1
-                    fprintf('  [MO Debug] Invalid T values at call %d\n', call_count);
-                end
-                f = [1e6, 1e6];
-                return;
-            end
-            
-            % CRITICAL: Relaxation (like TECOptimizer)
-            T = 0.5 * T_new + 0.5 * T;
-            
-            if max(abs(T - T_old)) < 1e-6
-                break;
-            end
-        end
-        
-        T_max_C = max(T) - 273.15;
-        Power_W = Q_out - Q_in;  % Electrical power input
-        
-        % Debug output for first few calls
-        if call_count <= 5
-            fprintf('  [MO Debug] Call %d: T_max=%.1f°C, Power=%.4fW, q_flux=%.0e\n', ...
-                call_count, T_max_C, Power_W, config.boundary_conditions.q_flux_W_m2);
-        end
-        
-        % Penalize invalid solutions
-        if T_max_C < 0 || T_max_C > 500 || Power_W < 0
             f = [1e6, 1e6];
-        else
-            f = [T_max_C, Power_W];
+            return;
         end
-        
-    catch ME
-        if mod(call_count, 1000) == 1
-            fprintf('  [MO Debug] Outer exception at call %d: %s\n', call_count, ME.message);
+
+        % Check for invalid values
+        if any(isnan(T_new)) || any(isinf(T_new)) || any(T_new < 0)
+            if mod(call_count, 1000) == 1
+                fprintf('  [MO Debug] Invalid T values at call %d\n', call_count);
+            end
+            f = [1e6, 1e6];
+            return;
         end
-        f = [1e6, 1e6];  % Penalty for failed simulations
+
+        % CRITICAL: Relaxation (like TECOptimizer)
+        T = 0.5 * T_new + 0.5 * T;
+
+        if max(abs(T - T_old)) < 1e-6
+            break;
+        end
     end
+
+    T_max_C = max(T) - 273.15;
+    Power_W = Q_out - Q_in;  % Electrical power input
+
+    % Debug output for first few calls
+    if call_count <= 5
+        fprintf('  [MO Debug] Call %d: T_max=%.1f°C, Power=%.4fW, q_flux=%.0e\n', ...
+            call_count, T_max_C, Power_W, config.boundary_conditions.q_flux_W_m2);
+    end
+
+    % Penalize invalid solutions
+    if T_max_C < 0 || T_max_C > 500 || Power_W < 0
+        f = [1e6, 1e6];
+    else
+        f = [T_max_C, Power_W];
+    end
+
+catch ME
+    if mod(call_count, 1000) == 1
+        fprintf('  [MO Debug] Outer exception at call %d: %s\n', call_count, ME.message);
+    end
+    f = [1e6, 1e6];  % Penalty for failed simulations
+end
 end
 
 function val = get_var_or_default(var_map, name, default)
-    if var_map.isKey(name)
-        val = var_map(name);
-    else
-        val = default;
-    end
+if var_map.isKey(name)
+    val = var_map(name);
+else
+    val = default;
+end
 end

@@ -1,4 +1,5 @@
 {
+    "_comment": "Notation follows: Thermal_Network_For_Radial_TEC.tex. Keep field names consistent with ThermalNetwork.m",
     "simulation": {
         "max_iterations": 100,
         "tolerance": 1E-6,
@@ -7,21 +8,22 @@
     },
     "geometry": {
         "N_stages": 3,
+        "M_wedges": 12,
         "wedge_angle_deg": 30,
         "w_chip_um": 10000,
-        "thickness_um": 50,
         "t_chip_um": 50,
+        "thickness_um": 50,
         "t_ins_um": 10,
         "R_cyl_um": 1000,
-        "interconnect_ratio": 0.2,
-        "outerconnect_ratio": 0.2,
-        "interconnect_angle_ratio": 0.16,
-        "outerconnect_angle_ratio": 0.16,
-        "interconnect_thickness_ratio": 1,
-        "outerconnect_thickness_ratio": 1,
-        "fill_factor": 0.9,
+        "radial_expansion_factor": 1.2,
+        "azimuthal_gap_um": 20,
         "insulation_width_ratio": 0.05,
-        "radial_expansion_factor": 1.2
+        "interconnect_ratio": 0.2,
+        "interconnect_thickness_ratio": 1.0,
+        "interconnect_angle_ratio": 0.16,
+        "outerconnect_ratio": 0.2,
+        "outerconnect_thickness_ratio": 1.0,
+        "outerconnect_angle_ratio": 0.16
     },
     "materials": {
         "Bi2Te3": {
