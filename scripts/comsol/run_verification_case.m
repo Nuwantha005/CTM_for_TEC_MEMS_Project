@@ -32,7 +32,7 @@ addpath(genpath(fullfile(PROJECT_ROOT, 'src')));
 addpath('F:\EngineeringSoftware\COMSOL\COMSOL63\Multiphysics\mli');
 
 COMSOL_PORT = 2036;
-COMSOL_MODEL_PATH = 'E:\Semester 7\ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology\Project\COMSOL\Test_Wedge\asym.mph';
+COMSOL_MODEL_PATH = 'E:\Semester 7\ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology\Project\COMSOL\Test_Wedge\asym2.mph';
 
 % Save model after simulation for inspection
 SAVE_MODEL = true;  % Set to true to save .mph file for review
@@ -158,13 +158,9 @@ try
     config.geometry.interconnect_thickness_ratio = test.ic_t_r;
     config.geometry.outerconnect_thickness_ratio = test.oc_t_r;
     
-    % Azimuthal gap from fill factor
-    theta_rad = deg2rad(test.theta_deg);
-    w_chip = 10000e-6;
-    r_avg = w_chip / sqrt(2) / 2;
-    arc_length = r_avg * theta_rad;
-    w_az = (1 - test.fill_factor) * arc_length;
-    config.geometry.azimuthal_gap_um = w_az * 1e6;
+    % Let TECGeometry calculate W_az correctly for each stage using fill_factor
+    % Don't manually override - the geometry class uses r_mid of each stage
+    config.geometry.fill_factor = test.fill_factor;
     
     config.operating_conditions.I_current_A = test.I_A;
     config.boundary_conditions.q_flux_W_m2 = test.q_Wm2;
@@ -247,6 +243,21 @@ if ~exist(COMSOL_MODEL_PATH, 'file')
     return;
 end
 
+% IMPORTANT: Clear any existing models from COMSOL to force fresh load
+fprintf('  Clearing any cached models...\n');
+try
+    existing_tags = ModelUtil.tags();
+    if ~isempty(existing_tags)
+        for i = 1:length(existing_tags)
+            tag = char(existing_tags(i));
+            fprintf('    Removing cached model: %s\n', tag);
+            ModelUtil.remove(tag);
+        end
+    end
+catch
+    % ModelUtil may not be available yet
+end
+
 fprintf('  Calling mphload (this may take a while with LiveLink)...\n');
 
 % Flush output before potentially crashing call
@@ -277,7 +288,7 @@ catch ME
     fprintf('========================================================================\n');
     fprintf('\nPossible causes:\n');
     fprintf('  1. SolidWorks is not running or needs user interaction\n');
-    fprintf('  2. The SolidWorks file linked to asym.mph is not open\n');
+    fprintf('  2. The SolidWorks file linked to asym2.mph is not open\n');
     fprintf('  3. COMSOL-SolidWorks connection timed out\n');
     fprintf('  4. License issues with LiveLink for SolidWorks\n\n');
 end
@@ -361,10 +372,27 @@ fprintf('  (Watch SolidWorks - it should update to t_TEC = %d um)\n', test.t_TEC
 
 geom_start = tic;
 try
-    % Build geometry (this triggers SolidWorks update)
-    model.component('comp1').geom('geom1').run();
+    % First, try to clear/invalidate the geometry to force rebuild
+    % This ensures SolidWorks gets called even if geometry was cached
+    fprintf('  Clearing cached geometry...\n');
+    try
+        model.component('comp1').geom('geom1').clearMesh();  % Clear dependent mesh
+    catch
+        % Ignore - may not have mesh yet
+    end
+    
+    % Run 'buildAll' with 'rerun' action to force complete rebuild
+    fprintf('  Triggering SolidWorks rebuild (buildAll)...\n');
+    model.component('comp1').geom('geom1').runPre('fin');
+    model.component('comp1').geom('geom1').run('fin');
     geom_time = toc(geom_start);
     fprintf('  Geometry rebuilt in %.1f seconds.\n', geom_time);
+    
+    if geom_time < 1.0
+        fprintf('  WARNING: Geometry rebuilt suspiciously fast (%.1f s).\n', geom_time);
+        fprintf('           SolidWorks may not have been called.\n');
+        fprintf('           Check that SolidWorks shows the file as modified.\n');
+    end
 catch ME
     geom_time = toc(geom_start);
     fprintf('  Geometry rebuild FAILED after %.1f s: %s\n', geom_time, ME.message);

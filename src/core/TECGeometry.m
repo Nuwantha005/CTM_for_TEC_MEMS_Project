@@ -212,44 +212,130 @@ classdef TECGeometry < handle
             end
         end
 
-        function G = calculate_G(obj, r1, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is, ~)
+        function R_TE_I = calculate_R_TE_I(obj, r_in, w_ic, t_ic, beta_ic, w_az, k_TE)
+            % Thermal resistance of TE material in IC region (Region I)
+            % Paper Eq: R_t,TE,I
+            % NOTE: w_az parameter kept for interface compatibility but not used
+            % Azimuthal gap is handled via fill_factor which scales with radius
             t = obj.Thickness;
             theta = obj.WedgeAngle;
-
-            C1 = t*theta/2 - t_ic*beta_ic/2;
-            D = t*w_az;
-
-            r_start = r1;
-            r_limit_1 = r1 + w_ic;
-
-            term1 = (1/C1) * log( abs( ( C1*r_limit_1 - D ) / ( C1*r_start - D ) ) );
-
-            C2 = t*theta/2;
-            r_limit_2 = r1 + L - w_oc;
-
-            term2 = (1/C2) * log( abs( ( C2*r_limit_2 - D ) / ( C2*r_limit_1 - D ) ) );
-
-            C3 = t*theta/2 - t_oc*beta_oc/2;
-            r_end = r1 + L;
-
-            term3 = (1/C3) * log( abs( ( C3*r_end - D ) / ( C3*r_limit_2 - D ) ) );
-
-            G = term1 + term2 + term3;
+            
+            % Get fill factor
+            if isfield(obj.Params, 'fill_factor')
+                f = obj.Params.fill_factor;
+            else
+                f = 1.0;  % No azimuthal correction if not specified
+            end
+            
+            % Coefficient for A(r) = f*a*r (azimuthal gap scales with r)
+            a = (theta * t - beta_ic * t_ic) / 2;
+            
+            % Integration limits
+            r1 = r_in;
+            r2 = r_in + w_ic;
+            
+            % R = integral(dr/(k*f*a*r)) = (1/(k*f*a)) * ln(r2/r1)
+            if abs(a) < 1e-15 || abs(r2 - r1) < 1e-15
+                R_TE_I = 0;
+            else
+                R_TE_I = (1 / (k_TE * f * a)) * log(r2 / r1);
+            end
+        end
+        
+        function R_TE_II = calculate_R_TE_II(obj, r_in, L, w_ic, w_oc, w_az, k_TE)
+            % Thermal resistance of TE material in middle region (Region II)
+            % Paper Eq: R_t,TE,II
+            % NOTE: w_az parameter kept for interface compatibility but not used
+            % Azimuthal gap is handled via fill_factor which scales with radius
+            t = obj.Thickness;
+            theta = obj.WedgeAngle;
+            
+            % Get fill factor
+            if isfield(obj.Params, 'fill_factor')
+                f = obj.Params.fill_factor;
+            else
+                f = 1.0;  % No azimuthal correction if not specified
+            end
+            
+            % Coefficient for A(r) = f*a*r (azimuthal gap scales with r)
+            a = theta * t / 2;
+            
+            % Integration limits
+            r1 = r_in + w_ic;
+            r2 = r_in + L - w_oc;
+            
+            % R = integral(dr/(k*f*a*r)) = (1/(k*f*a)) * ln(r2/r1)
+            if abs(a) < 1e-15 || abs(r2 - r1) < 1e-15
+                R_TE_II = 0;
+            else
+                R_TE_II = (1 / (k_TE * f * a)) * log(r2 / r1);
+            end
+        end
+        
+        function R_TE_III = calculate_R_TE_III(obj, r_in, L, w_oc, t_oc, beta_oc, w_az, k_TE)
+            % Thermal resistance of TE material in OC region (Region III)
+            % Paper Eq: R_t,TE,III
+            % NOTE: w_az parameter kept for interface compatibility but not used
+            % Azimuthal gap is handled via fill_factor which scales with radius
+            t = obj.Thickness;
+            theta = obj.WedgeAngle;
+            
+            % Get fill factor
+            if isfield(obj.Params, 'fill_factor')
+                f = obj.Params.fill_factor;
+            else
+                f = 1.0;  % No azimuthal correction if not specified
+            end
+            
+            % Coefficient for A(r) = f*a*r (azimuthal gap scales with r)
+            a = (theta * t - beta_oc * t_oc) / 2;
+            
+            % Integration limits
+            r1 = r_in + L - w_oc;
+            r2 = r_in + L;
+            
+            % R = integral(dr/(k*f*a*r)) = (1/(k*f*a)) * ln(r2/r1)
+            if abs(a) < 1e-15 || abs(r2 - r1) < 1e-15
+                R_TE_III = 0;
+            else
+                R_TE_III = (1 / (k_TE * f * a)) * log(r2 / r1);
+            end
         end
 
-        function [R_ic, R_oc] = calculate_R_electrical_interconnects(obj, r1, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, rho_c)
+        function [R_e_ic, R_e_oc] = calculate_R_electrical_interconnects(obj, r1, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, rho_c)
+            % Electrical resistance of IC and OC
             term_ic = log((r1 + w_ic) / r1);
             if term_ic == 0
-                R_ic = 0;
+                R_e_ic = 0;
             else
-                R_ic = (rho_c * beta_ic) / (t_ic * term_ic);
+                R_e_ic = (rho_c * beta_ic) / (t_ic * term_ic);
             end
 
             term_oc = log((r1 + L) / (r1 + L - w_oc));
             if term_oc == 0
-                R_oc = 0;
+                R_e_oc = 0;
             else
-                R_oc = (rho_c * beta_oc) / (2 * t_oc * term_oc);
+                R_e_oc = (rho_c * beta_oc) / (2 * t_oc * term_oc);
+            end
+        end
+        
+        function [R_t_ic, R_t_oc] = calculate_R_thermal_interconnects(obj, r1, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, k_ic, k_oc)
+            % Thermal resistance of IC and OC (radial heat conduction through copper)
+            % Paper: R_t,ic = (1/(k*beta*t)) * ln((r_in+W_ic)/r_in)
+            
+            term_ic = log((r1 + w_ic) / r1);
+            if term_ic == 0 || abs(beta_ic) < 1e-15 || abs(t_ic) < 1e-15
+                R_t_ic = inf;  % No IC area
+            else
+                R_t_ic = 1 / (k_ic * beta_ic * t_ic * term_ic);
+            end
+
+            term_oc = log((r1 + L) / (r1 + L - w_oc));
+            if term_oc == 0 || abs(beta_oc) < 1e-15 || abs(t_oc) < 1e-15
+                R_t_oc = inf;  % No OC area
+            else
+                % Factor of 2 in denominator because there are 2 OCs (one on each side)
+                R_t_oc = 1 / (k_oc * beta_oc * t_oc * term_oc);
             end
         end
 

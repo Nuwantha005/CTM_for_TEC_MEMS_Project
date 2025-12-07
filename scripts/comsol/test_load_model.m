@@ -12,7 +12,7 @@ clear; clc;
 addpath('F:\EngineeringSoftware\COMSOL\COMSOL63\Multiphysics\mli');
 
 COMSOL_PORT = 2036;
-COMSOL_MODEL_PATH = 'E:\Semester 7\ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology\Project\COMSOL\Test_Wedge\asym.mph';
+COMSOL_MODEL_PATH = 'E:\Semester 7\ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology\Project\COMSOL\Test_Wedge\asym2.mph';
 
 %% Check prerequisites
 fprintf('=== COMSOL Model Load Test ===\n\n');

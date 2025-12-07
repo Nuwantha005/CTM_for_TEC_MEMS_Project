@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.8.13)  6 DEC 2025 16:02
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.8.13)  7 DEC 2025 13:50
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -950,469 +950,450 @@ Package pdftex.def Info: images/resistor_system_iso_cropped.png  used on input l
 <images/vertical_res_network_side_view.png, id=310, 1078.78032pt x 123.46124pt>
 File: images/vertical_res_network_side_view.png Graphic file (type png)
 <use images/vertical_res_network_side_view.png>
-Package pdftex.def Info: images/vertical_res_network_side_view.png  used on input line 476.
+Package pdftex.def Info: images/vertical_res_network_side_view.png  used on input line 519.
 (pdftex.def)             Requested size: 452.9679pt x 51.84016pt.
 <images/cut_section for vertical_resistance.png, id=311, 977.90344pt x 642.90187pt>
 File: images/cut_section for vertical_resistance.png Graphic file (type png)
 <use images/cut_section for vertical_resistance.png>
-Package pdftex.def Info: images/cut_section for vertical_resistance.png  used on input line 481.
+Package pdftex.def Info: images/cut_section for vertical_resistance.png  used on input line 524.
 (pdftex.def)             Requested size: 181.18439pt x 119.11156pt.
 
-Overfull \hbox (11.74542pt too wide) in paragraph at lines 504--505
+Overfull \hbox (11.74542pt too wide) in paragraph at lines 547--548
  [][] 
  []
 
 
-Underfull \hbox (badness 1127) in paragraph at lines 512--513
+Underfull \hbox (badness 1127) in paragraph at lines 555--556
 \OT1/ptm/m/n/10 TEC el-e-ments. How-ever, this will re-sult in the
  []
 
 
-Underfull \hbox (badness 1515) in paragraph at lines 524--525
+Underfull \hbox (badness 1515) in paragraph at lines 567--568
 []\OT1/ptm/m/n/10 For a vari-ables cross sec-tional area, the ther-mal
  []
 
 [4] [5 <./images/resistor_system_iso_cropped.png> <./images/vertical_res_network_side_view.png> <./images/cut_section for vertical_resistance.png>]
-Underfull \hbox (badness 1701) in paragraph at lines 581--582
+Overfull \hbox (1.25423pt too wide) detected at line 628
+\OML/cmm/m/it/10 R[] \OT1/cmr/m/n/10 = [][] []
+ []
+
+
+Underfull \hbox (badness 1701) in paragraph at lines 650--651
 []\OT1/ptm/b/n/10 Region with-out any other ge-om-e-try shar-ing a
  []
 
+[6]
+Overfull \hbox (7.413pt too wide) detected at line 715
+\OML/cmm/m/it/10 R[] \OT1/cmr/m/n/10 = [][] []
+ []
 
-Underfull \hbox (badness 10000) in paragraph at lines 628--629
+
+Underfull \hbox (badness 10000) in paragraph at lines 727--728
 
  []
 
 
-Underfull \hbox (badness 1178) in paragraph at lines 630--631
+Underfull \hbox (badness 1178) in paragraph at lines 729--730
 []\OT1/ptm/m/n/10 However, this would cre-ate to-tal of 27
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 630--631
+Underfull \hbox (badness 10000) in paragraph at lines 729--730
 
  []
 
 
-Underfull \hbox (badness 1418) in paragraph at lines 632--633
+Underfull \hbox (badness 1418) in paragraph at lines 731--732
 \OT1/ptm/m/n/10 This sim-pli-fi-ca-tion is valid as long as the
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 632--633
+Underfull \hbox (badness 10000) in paragraph at lines 731--732
 
  []
 
 
-Underfull \hbox (badness 7203) in paragraph at lines 637--638
-[]\OT1/ptm/m/n/10 Therefore, the to-tal ther-mal re-sis-tance of the
- []
-
-[6]
-
-LaTeX Font Warning: Command \tiny invalid in math mode on input line 675.
-
-
-Overfull \hbox (17.67482pt too wide) detected at line 681
-[][]
- []
-
-
-Underfull \hbox (badness 2875) in paragraph at lines 683--684
-[]\OT1/ptm/m/n/10 The term in-side the large brack-ets is purely a
- []
-
-
-LaTeX Font Warning: Command \tiny invalid in math mode on input line 692.
-
-
-Overfull \hbox (0.9547pt too wide) detected at line 699
-[][][][][]
- []
-
-LaTeX Font Info:    Calculating math sizes for size <> on input line 699.
-
-LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <> not available
-(Font)              size <5> substituted on input line 699.
-
-
-LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <0.7> not available
-(Font)              size <5> substituted on input line 699.
-
-
-LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <0.5> not available
-(Font)              size <5> substituted on input line 699.
-
-
-LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <> not available
-(Font)              size <5> substituted on input line 699.
-
-
-LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <0.7> not available
-(Font)              size <5> substituted on input line 699.
-
-
-LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <0.5> not available
-(Font)              size <5> substituted on input line 699.
-
-
-LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <> not available
-(Font)              size <5> substituted on input line 699.
-
-
-LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <0.7> not available
-(Font)              size <5> substituted on input line 699.
-
-
-LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <0.5> not available
-(Font)              size <5> substituted on input line 699.
-
-
-Underfull \hbox (badness 1087) in paragraph at lines 720--721
+Underfull \hbox (badness 1087) in paragraph at lines 751--752
 []\OT1/ptm/m/n/10 Evaluating the in-te-gral as-sum-ing con-stant ther-mal
  []
 
 
-Underfull \hbox (badness 1087) in paragraph at lines 752--753
+Underfull \hbox (badness 1087) in paragraph at lines 783--784
 []\OT1/ptm/m/n/10 Evaluating the in-te-gral as-sum-ing con-stant ther-mal
  []
 
 
-Underfull \hbox (badness 1590) in paragraph at lines 761--762
+Underfull \hbox (badness 1590) in paragraph at lines 792--793
 \OT1/ptm/m/n/10 Since the az-imuthal in-su-la-tor is char-ac-ter-ized by
  []
 
 
-Underfull \hbox (badness 1072) in paragraph at lines 761--762
+Underfull \hbox (badness 1072) in paragraph at lines 792--793
 \OT1/ptm/m/n/10 the con-stant by the con-stant arc length $\OML/cmm/m/it/10 W[]$\OT1/ptm/m/n/10 , the
  []
 
-[7]
-Underfull \hbox (badness 3919) in paragraph at lines 775--776
+
+Underfull \hbox (badness 3919) in paragraph at lines 806--807
 \OT1/ptm/m/n/10 Heat gen-er-ated through the chip layer will be
  []
 
 
-Underfull \hbox (badness 4403) in paragraph at lines 775--776
+Underfull \hbox (badness 4403) in paragraph at lines 806--807
 \OT1/ptm/m/n/10 trans-ferred ver-ti-cally up-ward to the TEC layer
  []
 
 
-Underfull \hbox (badness 1102) in paragraph at lines 775--776
+Underfull \hbox (badness 1102) in paragraph at lines 806--807
 \OT1/ptm/m/n/10 through the in-su-la-tor layer. While this in-su-la-tor
  []
 
 
-Underfull \hbox (badness 2057) in paragraph at lines 775--776
+Underfull \hbox (badness 2057) in paragraph at lines 806--807
 \OT1/ptm/m/n/10 ther-mally con-duc-tive, the con-duc-tiv-ity can-not be
  []
 
-
-Underfull \hbox (badness 1490) in paragraph at lines 839--840
+[7]
+Underfull \hbox (badness 1490) in paragraph at lines 870--871
 \OT1/ptm/m/n/10 Now we need to lump all the re-sis-tors be-tween
  []
 
 
-Underfull \hbox (badness 4181) in paragraph at lines 875--875
+Underfull \hbox (badness 4181) in paragraph at lines 910--910
 []\OT1/ptm/b/n/9 Figure 10: |\OT1/ptm/m/n/9 Re-sis-tor net-work be-tween two ad-ja-cent
  []
 
-
-Underfull \vbox (badness 5475) has occurred while \output is active []
-
- [8]
-Underfull \hbox (badness 1132) in paragraph at lines 901--902
+[8]
+Underfull \hbox (badness 1132) in paragraph at lines 956--957
 \OT1/ptm/m/n/10 in-su-la-tor re-sis-tor, and the to-tal lumped re-sis-tance
  []
 
 
-Underfull \hbox (badness 1622) in paragraph at lines 924--925
-\OT1/ptm/m/n/10 the elec-tri-cal re-sis-tance of the ther-mo-elec-tric leg
- []
-
-
-Underfull \hbox (badness 5787) in paragraph at lines 934--935
+Underfull \hbox (badness 5787) in paragraph at lines 990--991
 \OT1/ptm/m/n/10 The in-ter-con-nects trans-fer elec-tric-ity mainly in
  []
 
 
-Underfull \hbox (badness 1540) in paragraph at lines 947--948
+Underfull \hbox (badness 1540) in paragraph at lines 1003--1004
 []\OT1/ptm/m/n/10 Assuming con-stant re-sis-tiv-ity $\OML/cmm/m/it/10 ^^Z[]$\OT1/ptm/m/n/10 , and us-ing the
  []
 
 [9]
-Underfull \hbox (badness 2401) in paragraph at lines 971--972
+Underfull \hbox (badness 2401) in paragraph at lines 1027--1028
 \OT1/ptm/m/n/10 re-sis-tance of the out-er-con-nect can be cal-cu-lated
  []
 
 
-LaTeX Font Warning: Command \small invalid in math mode on input line 994.
+Underfull \vbox (badness 1092) has occurred while \output is active []
 
 
-Underfull \hbox (badness 3590) in paragraph at lines 1008--1009
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 1050.
+
+LaTeX Font Info:    Calculating math sizes for size <> on input line 1058.
+
+LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <> not available
+(Font)              size <5> substituted on input line 1058.
+
+
+LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <0.7> not available
+(Font)              size <5> substituted on input line 1058.
+
+
+LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <0.5> not available
+(Font)              size <5> substituted on input line 1058.
+
+
+LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <> not available
+(Font)              size <5> substituted on input line 1058.
+
+
+LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <0.7> not available
+(Font)              size <5> substituted on input line 1058.
+
+
+LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <0.5> not available
+(Font)              size <5> substituted on input line 1058.
+
+
+LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <> not available
+(Font)              size <5> substituted on input line 1058.
+
+
+LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <0.7> not available
+(Font)              size <5> substituted on input line 1058.
+
+
+LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <0.5> not available
+(Font)              size <5> substituted on input line 1058.
+
+
+Underfull \hbox (badness 3590) in paragraph at lines 1064--1065
 \OT1/ptm/m/n/10 The nodes in the TEC layer are gov-erned by
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1015--1016
+Underfull \hbox (badness 10000) in paragraph at lines 1071--1072
 []\OT1/ptm/m/n/10 The terms rep-re-sents heat pump through
  []
 
 
-Underfull \hbox (badness 1648) in paragraph at lines 1015--1016
+Underfull \hbox (badness 1648) in paragraph at lines 1071--1072
 \OT1/ptm/m/n/10 of con-duc-tance val-ues, so we need to use their
  []
 
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1023.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1079.
 (C:\Users\nuwan\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 )
-Underfull \hbox (badness 2951) in paragraph at lines 1024--1025
+Underfull \hbox (badness 2951) in paragraph at lines 1080--1081
 []$\OML/cmm/m/it/10 R[]$ \OT1/ptm/m/n/10 and $\OML/cmm/m/it/10 R[]$ \OT1/ptm/m/n/10 (TE Legs): The
  []
 
-
-Underfull \hbox (badness 5908) in paragraph at lines 1028--1029
+[10]
+Underfull \hbox (badness 5908) in paragraph at lines 1084--1085
 []\OT1/ptm/m/n/10 We as-sign Joule heat-ing based on where the
  []
 
-[10]
-Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
+
+Underfull \hbox (badness 10000) in paragraph at lines 1096--1097
 []\OT1/ptm/m/n/10 Contribution: 100% of $\OML/cmm/m/it/10 I[]R[]$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
+Underfull \hbox (badness 10000) in paragraph at lines 1096--1097
 \OT1/ptm/m/n/10 (Out-er-con-nect of prev stage) + 50% of
  []
 
 
-LaTeX Font Warning: Command \small invalid in math mode on input line 1057.
+LaTeX Font Warning: Command \small invalid in math mode on input line 1113.
 
 
-Overfull \hbox (3.10242pt too wide) detected at line 1062
+Overfull \hbox (3.10242pt too wide) detected at line 1118
 [][][][][]
  []
 
 
-LaTeX Font Warning: Command \small invalid in math mode on input line 1067.
+LaTeX Font Warning: Command \small invalid in math mode on input line 1123.
 
 
-Underfull \hbox (badness 2486) in paragraph at lines 1074--1076
+Underfull \hbox (badness 2486) in paragraph at lines 1130--1132
 []\OT1/ptm/m/n/10 Note that we sub-tracted the Joule heat-ing term
  []
 
 
-Underfull \hbox (badness 1132) in paragraph at lines 1074--1076
+Underfull \hbox (badness 1132) in paragraph at lines 1130--1132
 \OT1/ptm/m/n/10 we are sub-tract-ing the $\OML/cmm/m/it/10 Q[]$ \OT1/ptm/m/n/10 term, the sign of the
  []
 
 
-LaTeX Font Warning: Command \small invalid in math mode on input line 1078.
+LaTeX Font Warning: Command \small invalid in math mode on input line 1134.
 
 
-Overfull \hbox (58.00906pt too wide) detected at line 1084
+Overfull \hbox (58.00906pt too wide) detected at line 1140
 [][][][][]
  []
 
 
-Underfull \hbox (badness 5288) in paragraph at lines 1090--1091
+Underfull \hbox (badness 5288) in paragraph at lines 1146--1147
 \OT1/ptm/m/n/10 at the outer edge of the TEC layer to ease
  []
 
 
-Underfull \hbox (badness 1102) in paragraph at lines 1090--1091
+Underfull \hbox (badness 1102) in paragraph at lines 1146--1147
 \OT1/ptm/m/n/10 the mod-elling pro-cess. Since the mi-cro chan-nel
  []
 
 
-LaTeX Font Warning: Command \small invalid in math mode on input line 1093.
+LaTeX Font Warning: Command \small invalid in math mode on input line 1149.
 
 
-Overfull \hbox (68.85565pt too wide) detected at line 1099
+Overfull \hbox (68.85565pt too wide) detected at line 1155
 [][]
- []
-
-
-LaTeX Font Warning: Command \small invalid in math mode on input line 1104.
-
-
-Overfull \hbox (27.39995pt too wide) detected at line 1109
-[][][][][]
- []
-
-
-Underfull \hbox (badness 1005) in paragraph at lines 1113--1114
-\OT1/ptm/m/n/10 At the ex-act cen-ter ($\OML/cmm/m/it/10 r \OT1/cmr/m/n/10 = 0$ \OT1/ptm/m/n/10 to $\OML/cmm/m/it/10 r \OT1/cmr/m/n/10 = \OML/cmm/m/it/10 r[]$\OT1/ptm/m/n/10 ), the
  []
 
 [11]
 
-LaTeX Font Warning: Command \small invalid in math mode on input line 1144.
+LaTeX Font Warning: Command \small invalid in math mode on input line 1160.
+
+
+Overfull \hbox (27.39995pt too wide) detected at line 1165
+[][][][][]
+ []
+
+
+Underfull \hbox (badness 1005) in paragraph at lines 1169--1170
+\OT1/ptm/m/n/10 At the ex-act cen-ter ($\OML/cmm/m/it/10 r \OT1/cmr/m/n/10 = 0$ \OT1/ptm/m/n/10 to $\OML/cmm/m/it/10 r \OT1/cmr/m/n/10 = \OML/cmm/m/it/10 r[]$\OT1/ptm/m/n/10 ), the
+ []
+
+
+LaTeX Font Warning: Command \small invalid in math mode on input line 1200.
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <> not available
-(Font)              size <5> substituted on input line 1150.
+(Font)              size <5> substituted on input line 1206.
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <0.7> not available
-(Font)              size <5> substituted on input line 1150.
+(Font)              size <5> substituted on input line 1206.
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <0.5> not available
-(Font)              size <5> substituted on input line 1150.
+(Font)              size <5> substituted on input line 1206.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1209.
+(hyperref)                removing `math shift' on input line 1265.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 1209.
+(hyperref)                removing `subscript' on input line 1265.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1209.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1213.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 1213.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\to' on input line 1213.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1213.
+(hyperref)                removing `math shift' on input line 1265.
 
 [12]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1217.
+(hyperref)                removing `math shift' on input line 1269.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 1217.
+(hyperref)                removing `subscript' on input line 1269.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\to' on input line 1217.
+(hyperref)                removing `\to' on input line 1269.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1217.
+(hyperref)                removing `math shift' on input line 1269.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1221.
+(hyperref)                removing `math shift' on input line 1273.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 1221.
+(hyperref)                removing `subscript' on input line 1273.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\to' on input line 1221.
+(hyperref)                removing `\to' on input line 1273.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1221.
+(hyperref)                removing `math shift' on input line 1273.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1225.
+(hyperref)                removing `math shift' on input line 1277.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 1225.
+(hyperref)                removing `subscript' on input line 1277.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1225.
+(hyperref)                removing `\to' on input line 1277.
 
 
-Underfull \hbox (badness 4120) in paragraph at lines 1229--1230
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1277.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1281.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `subscript' on input line 1281.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 1281.
+
+
+Underfull \hbox (badness 4120) in paragraph at lines 1285--1286
 []\OT1/ptm/b/n/10 Diagonal $\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 i; i\OT1/cmr/m/n/10 )$\OT1/ptm/b/n/10 : \OT1/ptm/m/n/10 The neg-a-tive sum of all
  []
 
 
-Overfull \hbox (8.04544pt too wide) detected at line 1236
+Overfull \hbox (8.04544pt too wide) detected at line 1292
 [] \OT1/cmr/m/n/10 = [][]
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1241.
+(hyperref)                removing `math shift' on input line 1297.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 1241.
+(hyperref)                removing `subscript' on input line 1297.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1241.
+(hyperref)                removing `math shift' on input line 1297.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1248.
+(hyperref)                removing `math shift' on input line 1304.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 1248.
+(hyperref)                removing `subscript' on input line 1304.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\to' on input line 1248.
+(hyperref)                removing `\to' on input line 1304.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1248.
+(hyperref)                removing `math shift' on input line 1304.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1252.
+(hyperref)                removing `math shift' on input line 1308.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 1252.
+(hyperref)                removing `subscript' on input line 1308.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1252.
+(hyperref)                removing `math shift' on input line 1308.
 
 
-Underfull \hbox (badness 1502) in paragraph at lines 1258--1259
+Underfull \hbox (badness 1502) in paragraph at lines 1314--1315
 []\OT1/ptm/b/n/10 Upper Off-Diagonal $\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 i; i \OT1/cmr/m/n/10 + 1)$\OT1/ptm/b/n/10 : \OT1/ptm/m/n/10 Only back
  []
 
 
-Overfull \hbox (61.28485pt too wide) detected at line 1264
+Overfull \hbox (61.28485pt too wide) detected at line 1320
 [] \OT1/cmr/m/n/5 = [][]
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1271.
+(hyperref)                removing `math shift' on input line 1327.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1271.
+(hyperref)                removing `math shift' on input line 1327.
 
 
-Underfull \hbox (badness 1881) in paragraph at lines 1276--1277
+Underfull \hbox (badness 1881) in paragraph at lines 1332--1333
 []$[]$\OT1/ptm/m/n/10 : Heat gen-er-a-tion in the Sil-i-con rings
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1279--1280
+Underfull \hbox (badness 10000) in paragraph at lines 1335--1336
 []\OT1/ptm/m/n/10 Previous Stage heat-ing: $\OML/cmm/m/it/10 I[]R[]$
  []
 
-[13] [14] (Thermal_Network_For_Radial_TEC.aux)
+[13] [14
+
+] [15] (Thermal_Network_For_Radial_TEC.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
@@ -1426,17 +1407,17 @@ Package rerunfilecheck Info: File `Thermal_Network_For_Radial_TEC.out' has not c
 (rerunfilecheck)             Checksum: 07D5C94F40C0E21468D9ED41914C8879;7768.
  ) 
 Here is how much of TeX's memory you used:
- 55445 strings out of 474486
- 1369462 string characters out of 5743755
- 1967542 words of memory out of 5000000
- 77003 multiletter control sequences out of 15000+600000
+ 55775 strings out of 474486
+ 1378417 string characters out of 5743755
+ 1990694 words of memory out of 5000000
+ 77323 multiletter control sequences out of 15000+600000
  593380 words of font info for 110 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,19n,96p,921b,1216s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx6.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx9.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmex7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cmextra/cmex9.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi9.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr9.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy5.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy9.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Thermal_Network_For_Radial_TEC.pdf (14 pages, 1246084 bytes).
+Output written on Thermal_Network_For_Radial_TEC.pdf (15 pages, 1248954 bytes).
 PDF statistics:
- 612 PDF objects out of 1000 (max. 8388607)
- 134 named destinations out of 1000 (max. 500000)
+ 629 PDF objects out of 1000 (max. 8388607)
+ 144 named destinations out of 1000 (max. 500000)
  599 words of extra memory for PDF output out of 10000 (max. 10000000)
 

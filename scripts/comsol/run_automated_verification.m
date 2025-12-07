@@ -19,7 +19,7 @@ addpath(genpath('src'));
 addpath('F:\EngineeringSoftware\COMSOL\COMSOL63\Multiphysics\mli');
 
 COMSOL_PORT = 2036;
-COMSOL_MODEL_PATH = 'E:\Semester 7\ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology\Project\COMSOL\Test_Wedge\asym.mph';
+COMSOL_MODEL_PATH = 'E:\Semester 7\ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology\Project\COMSOL\Test_Wedge\asym2.mph';
 COMSOL_SERVER_EXE = 'F:\EngineeringSoftware\COMSOL\COMSOL63\Multiphysics\bin\win64\comsolmphserver.exe';
 SERVER_STARTUP_DELAY = 15;  % seconds to wait for server startup
 

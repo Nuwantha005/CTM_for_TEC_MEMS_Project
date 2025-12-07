@@ -421,41 +421,84 @@ Since there are many components, we need to pick a point to be used as a node in
     };
 
     % help lines
-    % \draw[help lines, step=0.5cm, opacity=0.95] (0,0) grid (\textwidth,10);S
+    % \draw[help lines, step=0.5cm, opacity=0.95] (0,0) grid (\textwidth,10);
 
     \node[circ, label={left:$T_{\text{TEC},i}$}](ic_1) at (2.75,7.25){};
-    \node[circ, label=right:$T_{\text{TEC},i+1}$](ic_2) at (12.25,4.25){};
+    \node[circ, label=right:$T_{\text{TEC},i+1}$](ic_2) at (13.75,3.5){};
 
-    % Top branch - Thermoelectric leg (p-type)
-    \draw (ic_1) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] ++(3.25,0.75)
-    to[R, l={ $R_{\text{t,TE-p}}$},*-*] ++(6.8,-0.5)
-    to [R, l={\footnotesize $R_{\text{t,oc}}/2$},*-*] ++(0.5,-1.5)
-    to[R, l={\footnotesize $R_{\text{is}}/2$}] (ic_2);
+    \node[circ] (ic_t_s) at (3.25,7.75){};
+    \node[circ] (ic_b_s) at (2.0,6.5){};
+
+    \node[circ] (ic_t_e) at (5.25,7.0){};
+    \node[circ] (ic_b_e) at (4.0,5.5){};
+
+    \node[circ] (TE_t_1_s) at (3.75,9.0){};
+    \node[circ] (TE_b_1_s) at (1.0, 5.5){};
+
+    \node[circ] (TE_t_1_e) at (6.25,8.5){};
+    \node[circ] (TE_b_1_e) at (3.0, 4.5){};
+
+    \draw (ic_t_s) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] (ic_t_e);
+    \draw (ic_b_s) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] (ic_b_e);
+
+    \draw (TE_t_1_s) to[R, l={ $R_{\text{t,TE-p,I}}$},*-*] (TE_t_1_e);
+    \draw (TE_b_1_s) to[R, l={ $R_{\text{t,TE-n,I}}$}, *-*] (TE_b_1_e);
+
+    \draw (ic_t_e) to (TE_t_1_e);
+    \draw (ic_b_e) to (TE_b_1_e);
+
+    \node[circ] (TE_t_2_s) at (5.7,7.75){};
+    \node[circ] (TE_b_2_s) at (3.5,5.0){};
+
+    \node[circ] (TE_t_2_e) at (12.0,6.0){};
+    \node[circ] (TE_b_2_e) at (9.0,2.5){};
+
+    \draw (TE_t_2_s) to[R, l={ $R_{\text{t,TE-p,II}}$},*-*] (TE_t_2_e);
+    \draw (TE_b_2_s) to[R, l={ $R_{\text{t,TE-n,II}}$}, *-*] (TE_b_2_e);
+
+    \node[circ] (oc_t_s) at (13.0,7.5){};
+    \node[circ] (oc_b_s) at (8.0,1.5){};
+
+    \node[circ] (oc_t_e) at (14.0,7.25){};
+    \node[circ] (oc_b_e) at (8.5,1.0){};
+
+    \node[circ] (TE_t_3_s) at (11.25,4.75){};
+    \node[circ] (TE_b_3_s) at (10.8,4.25){};
+
+    \node[circ] (TE_t_3_e) at (12.5,4.5){};
+    \node[circ] (TE_b_3_e) at (11.7,3.8){};
+
+    \draw (oc_t_s) to[R, l={\footnotesize $R_{\text{t,oc}}/2$}, *-*] (oc_t_e);
+    \draw (oc_b_s) to[R, l={\footnotesize $R_{\text{t,oc}}/2$}, *-*] (oc_b_e);
+
+    \draw (TE_t_3_s) to[R, l={ $R_{\text{t,TE-p,III}}$},*-*] (TE_t_3_e);
+    \draw (TE_b_3_s) to[R, l={ $R_{\text{t,TE-n,III}}$}, *-*] (TE_b_3_e);
+
+    \draw (oc_t_s) to (TE_t_2_e) to (TE_t_3_s);
+    \draw (oc_b_s) to (TE_b_2_e) to (TE_b_3_s);
+
+    \node[circ] (before_ic_2) at (12.0,4.25){};
 
     % Middle branch - Azimuthal insulator
-    \draw (ic_1) to[R, l=$R_{\text{az}}$] (ic_2);
-
-    % Bottom branch - Thermoelectric leg (n-type)
-    \draw (ic_1) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] ++(1,-2.25)
-    to[R, l={ $R_{\text{t,TE-n}}$}, *-*] ++(4.5,-3.5)
-    to[R, l={\footnotesize $R_{\text{t,oc}}/2$}, *-*] ++(1.75,0.5)
-    to[R, l={\footnotesize $R_{\text{is}}/2$}] (ic_2);
+    \draw (ic_1) to[R, l=$R_{\text{az}}$] (before_ic_2);
 
     \node[circ](t_az_start) at (4,9.5){};
     \node[circ](t_az_end) at (14.5,8.25){};
 
     % top azimuthal insulator
-    \draw[dashed] (ic_1) to (t_az_start);
+    \draw (ic_1) to (ic_t_s) to (TE_t_1_s) to (t_az_start);
     \draw (t_az_start) to [R, l=$R_{\text{az}}/2$] (t_az_end);
-    \draw[dashed] (t_az_end) to (ic_2);
+    \draw (t_az_end) to (oc_t_e) to (TE_t_3_e) to (before_ic_2);
 
     \node[circ](b_az_start) at (0.5,5){};
     \node[circ](b_az_end) at (8.5,0.5){};
 
     % bottom azimuthal insulator
-    \draw[dashed] (ic_1) to (b_az_start);
+    \draw (ic_1) to (ic_b_s) to (TE_b_1_s) to (b_az_start);
     \draw (b_az_start) to [R, l=$R_{\text{az}}/2$] (b_az_end);
-    \draw[dashed] (b_az_end) to (ic_2);
+    \draw (b_az_end) to (oc_b_e) to (TE_b_3_e) to (before_ic_2);
+
+    \draw (before_ic_2) to[R, l=\footnotesize $R_{\text{is}}$] (ic_2);
 
   \end{circuitikz}
   \caption{Thermal resistance network between two adjacent interconnector nodes showing parallel paths through p-type leg, n-type leg, and radial insulator.}
@@ -578,6 +621,32 @@ Since $r$ is the variable of integration, let's write in $ax+b$ form.
   \label{eq:area_TE_ic}
 \end{equation}
 
+Then the integration in the \cref{eq:resistance_r_int} becomes,
+
+\begin{equation*}
+  R_{\text{t,TE,I}} = \int_{r_{\text{in}}}^{r_{\text{in}}+W_{\text{ic}}} \frac{dr}{\kappa_{\text{TE}} \left( \frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}}}{2} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}} \right)}
+\end{equation*}
+
+Since a solution to a integral in the form of $\int_{x_1}^{x_2} \frac{dx}{ax+b}$ is given by,
+
+\begin{equation}
+  \begin{aligned}
+    \int_{x_1}^{x_2} \frac{dx}{ax+b} & = \frac{1}{a} \int_{x_1}^{x_2} \frac{d(ax+b)}{ax+b}                  \\
+                                     & = \frac{1}{a} \left[ \ln|ax+b| \right]_{x_1}^{x_2}                   \\
+                                     & = \frac{1}{a} \left[ \ln\left| \frac{ax_2+b}{ax_1+b} \right| \right]
+  \end{aligned}
+  \label{eq:ax_b_integral_result}
+\end{equation}
+
+Applying the definite integral limits gives:
+
+\begin{equation}
+  \begin{aligned}
+  &R_{\text{t,TE,I}} = \frac{2}{\kappa_{\text{TE}} (\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}})} \cdot \\ & \ln \left| \frac{(\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}})(r_{\text{in}}+W_{\text{ic}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}}{(\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}})r_{\text{in}} - 2 W_{\text{az}} \cdot t_{\text{TEC}}} \right|
+  \end{aligned}
+  \label{eq:R_TE_I}
+\end{equation}
+
 \textbf{Region without any other geometry sharing  a fraction of cross section area}
 
 This region spans from $r=(r_{\text{in}}+W_{\text{ic}})$ to $r=(r_{\text{out}}-W_{\text{oc}})$. In this region, the cross section area remains the same as \cref{eq:cross_section_area_radial_dir}.
@@ -596,6 +665,21 @@ Rearranging into $ax+b$ form gives:
 \begin{equation}
   A(r) = \frac{1}{2}\theta \cdot t_{\text{TEC}} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}}
   \label{eq:area_TE_full}
+\end{equation}
+
+Then the integration in the \cref{eq:resistance_r_int} becomes,
+
+\begin{equation*}
+  R_{\text{t,TE,II}} = \int_{r_{\text{in}}+W_{\text{ic}}}^{r_{\text{out}}-W_{\text{oc}}} \frac{dr}{\kappa_{\text{TE}} \left( \frac{1}{2}\theta \cdot t_{\text{TEC}} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}} \right)}
+\end{equation*}
+
+According to \cref{eq:ax_b_integral_result}, applying the definite integral limits gives:
+
+\begin{equation}
+  \begin{aligned}
+    R_{\text{t,TE,II}} = & \frac{2}{\kappa_{\text{TE}} \theta \cdot t_{\text{TEC}}} \cdot \\ & \ln \left| \frac{\theta \cdot t_{\text{TEC}} (r_{\text{out}}-W_{\text{oc}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}}{\theta \cdot t_{\text{TEC}} (r_{\text{in}}+W_{\text{ic}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}} \right|
+    \label{eq:TE_II_t_res}
+  \end{aligned}
 \end{equation}
 
 \textbf{Region with outerconnect sharing  a fraction of cross section area}
@@ -624,6 +708,21 @@ Rearranging into $ax+b$ form gives:
   \label{eq:area_TE_oc}
 \end{equation}
 
+Then the integration in the \cref{eq:resistance_r_int} becomes,
+
+\begin{equation*}
+  R_{\text{t,TE,III}} = \int_{r_{\text{out}}-W_{\text{oc}}}^{r_{\text{out}}} \frac{dr}{\kappa_{\text{TE}} \left( \frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}}}{2} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}} \right)}
+\end{equation*}
+
+According to \cref{eq:ax_b_integral_result}, applying the definite integral limits gives:
+
+\begin{equation}
+  \begin{aligned}
+  &R_{\text{t,TE,III}} = \frac{2}{\kappa_{\text{TE}} (\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}})} \cdot \\ & \ln \left| \frac{(\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}})r_{\text{out}} - 2 W_{\text{az}} \cdot t_{\text{TEC}}}{(\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}})(r_{\text{out}}-W_{\text{oc}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}} \right|
+  \end{aligned}
+  \label{eq:R_TE_III}
+\end{equation}
+
 \begin{customnote}
   The same way we divided the TEC element into 3 regions in the radial direction, we can perform division based integrals for azimuthal and vertical directions as well.\\
 
@@ -631,74 +730,6 @@ Rearranging into $ax+b$ form gives:
 
   Therefore, we make the assumption that the heat flow is uniform across the entire cross sectional area of the TEC leg, and we apply area correction only in the radial direction. This simplification is valid as long as the azimuthal and vertical dimensions of the TEC leg are small compared to the radial dimension, Which is the case in our design.\\
 \end{customnote}
-
-\textbf{Combined Thermal Resistance of the TE Leg}
-
-Therefore, the total thermal resistance of the thermoelectric leg can be expressed as:
-\begin{equation*}
-  \begin{aligned}
-    R_{\text{t,TE}} = \int_{r_{\text{in}}}^{r_{\text{in}}+W_{\text{ic}}} & \frac{dr}{\kappa_{\text{TE}} A_{1}(r)} + \int_{r_{\text{in}}+W_{\text{ic}}}^{r_{\text{out}}-W_{\text{oc}}} \frac{dr}{\kappa_{\text{TE}} A_{2}(r)} \\
-                                                                         & + \int_{r_{\text{out}}-W_{\text{oc}}}^{r_{\text{out}}} \frac{dr}{\kappa_{\text{TE}} A_{3}(r)}
-  \end{aligned}
-\end{equation*}
-
-Assuming constant thermal conductivity $\kappa_{\text{TE}}$, it can be taken outside the integral:
-
-\begin{equation*}
-  \begin{aligned}
-    R_{\text{t,TE}} & = \frac{1}{\kappa_{\text{TE}}} \left( \int_{r_{\text{in}}}^{r_{\text{in}}+W_{\text{ic}}} \frac{dr}{ A_{1}(r)} + \int_{r_{\text{in}}+W_{\text{ic}}}^{r_{\text{out}}-W_{\text{oc}}} \frac{dr}{ A_{2}(r)} \right. \\ &+ \left. \int_{r_{\text{out}}-W_{\text{oc}}}^{r_{\text{out}}} \frac{dr}{ A_{3}(r)} \right)
-  \end{aligned}
-\end{equation*}
-
-Substituting \cref{eq:area_TE_ic,eq:area_TE_full,eq:area_TE_oc} into the above equation gives:
-\begin{equation*}
-  \begin{aligned}
-    R_{\text{t,TE}} = \frac{1}{\kappa_{\text{TE}}} \left( \int_{r_{\text{in}}}^{r_{\text{in}}+W_{\text{ic}}} \frac{dr}{\frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}}}{2} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}}} \right. \\
-    + \int_{r_{\text{in}}+W_{\text{ic}}}^{r_{\text{out}}-W_{\text{oc}}} \frac{dr}{\frac{1}{2}\theta \cdot t_{\text{TEC}} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}}}                                                                                               \\
-    + \left. \int_{r_{\text{out}}-W_{\text{oc}}}^{r_{\text{out}}} \frac{dr}{\frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}}}{2} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}}} \right)
-  \end{aligned}
-\end{equation*}
-
-Since a solution to a integral in the form of $\int_{x_1}^{x_2} \frac{dx}{ax+b}$ is given by,
-
-\begin{equation*}
-  \begin{aligned}
-    \int_{x_1}^{x_2} \frac{dx}{ax+b} & = \frac{1}{a} \int_{x_1}^{x_2} \frac{d(ax+b)}{ax+b}                  \\
-                                     & = \frac{1}{a} \left[ \ln|ax+b| \right]_{x_1}^{x_2}                   \\
-                                     & = \frac{1}{a} \left[ \ln\left| \frac{ax_2+b}{ax_1+b} \right| \right]
-  \end{aligned}
-\end{equation*}
-
-Applying the definite integral limits gives:
-
-\begin{equation*}
-  \tiny
-  \begin{aligned}
-    R_{\text{t,TE}} = \frac{1}{\kappa_{\text{TE}}} \left[ \frac{2}{\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}}} \left[ \ln\left| \frac{\frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{oc}}}{2} (r_{\text{in}}+W_{\text{ic}}) - W_{\text{az}} \cdot t_{\text{TEC}}}{\frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{oc}}}{2} r_{\text{in}} - W_{\text{az}} \cdot t_{\text{TEC}}} \right| \right] \right. \\
-    + \frac{2}{\theta \cdot t_{\text{TEC}}} \left[ \ln\left| \frac{\theta \cdot t_{\text{TEC}} (r_{\text{out}}-W_{\text{oc}}) - W_{\text{az}} \cdot t_{\text{TEC}}}{\theta \cdot t_{\text{TEC}} (r_{\text{in}}+W_{\text{ic}}) - W_{\text{az}} \cdot t_{\text{TEC}}} \right| \right]                                                                                                                                                                                     \\
-      \left. + \frac{2}{\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}}} \left[ \ln\left| \frac{\frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}}}{2} r_{\text{out}} - W_{\text{az}} \cdot t_{\text{TEC}}}{\frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}}}{2} (r_{\text{out}}-W_{\text{oc}}) - W_{\text{az}} \cdot t_{\text{TEC}}} \right| \right] \right]
-  \end{aligned}
-\end{equation*}
-
-The term inside the large brackets is purely a geometric factor, so we can define it as $G_{\text{TE}}$ such that:
-
-\begin{equation}
-  R_{\text{t,TE}} = \frac{G_{\text{TE}}}{\kappa_{\text{TE}}}
-\end{equation}
-
-With,
-
-\begin{equation}
-  \tiny
-  \begin{aligned}
-    G_{\text{TE}} = & \frac{2}{\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}}} \left[ \ln\left| \frac{\frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{oc}}}{2} (r_{\text{in}}+W_{\text{ic}}) - W_{\text{az}} \cdot t_{\text{TEC}}}{\frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{oc}}}{2} r_{\text{in}} - W_{\text{az}} \cdot t_{\text{TEC}}} \right| \right]   \\
-    +               & \frac{2}{\theta \cdot t_{\text{TEC}}} \left[ \ln\left| \frac{\theta \cdot t_{\text{TEC}} (r_{\text{out}}-W_{\text{oc}}) - W_{\text{az}} \cdot t_{\text{TEC}}}{\theta \cdot t_{\text{TEC}} (r_{\text{in}}+W_{\text{ic}}) - W_{\text{az}} \cdot t_{\text{TEC}}} \right| \right]                                                                                                                           \\
-    +               & \frac{2}{\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}}} \left[ \ln\left| \frac{\frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}}}{2} r_{\text{out}} - W_{\text{az}} \cdot t_{\text{TEC}}}{\frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}}}{2} (r_{\text{out}}-W_{\text{oc}}) - W_{\text{az}} \cdot t_{\text{TEC}}} \right| \right]
-  \end{aligned}
-  \label{eq:geometric_factor}
-\end{equation}
-
-Since the current flow through the thermoelectric leg is also in the radial direction, this geometric factor $G_{\text{TE}}$ will also be used in the calculation of electrical resistance.
 
 \subsubsection{Interconnect}
 
@@ -851,23 +882,27 @@ Now we need to lump all the resistors between two adjacent interconnect nodes to
       \node[circ](oc) at (6,0){};
 
       % Top Azimuthal Insulator Path
-      \draw(ic_1) to ++(0,2) to [R, l=$R_{\text{az}}/2$] ++(6,0) to (oc);
+      \draw(ic_1) to ++(0,3) to [R, l=$R_{\text{az}}/2$] ++(6,0) to (oc);
 
       % Top branch - Thermoelectric leg (p-type)
-      \draw (ic_1) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] ++(1.5,1)
-      to[R, l={ $R_{\text{t,TE-p}}$},*-*] ++(3,0)
-      to [R, l={\footnotesize $R_{\text{t,oc}}/2$},*-*] (oc);
+      \draw (0,1) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] ++(1.5,0) to ++(0,0.5) to[R, l={ $R_{\text{t,TE-p,II}}$},*-*] ++(3,0) to ++(0,-0.5)
+      to [R, l={\footnotesize $R_{\text{t,oc}}/2$},*-*] ++(1.5,0);
+
+      \draw (0,2) to[R, l={\footnotesize $R_{\text{t,TE-p,I}}$}, *-*] ++(1.5,0) to ++(0,-0.5);
+      \draw (4.5,1.5) to ++(0,+0.5) to[R, l={\footnotesize $R_{\text{t,TE-p,III}}$}, *-*] ++(+1.5,0) ;
 
       % Middle branch - Azimuthal insulator
       \draw (ic_1) to[R, l=$R_{\text{az}}$] (oc);
 
       % Bottom branch - Thermoelectric leg (n-type)
-      \draw (ic_1) to[R, l_={\footnotesize $R_{\text{t,ic}}/2$}, *-*] ++(1.5,-1)
-      to[R, l={ $R_{\text{t,TE-n}}$}, *-*] ++(3,0)
-      to[R, l_={\footnotesize $R_{\text{t,oc}}/2$}, *-*] (oc);
+      \draw (0,-1) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] ++(1.5,0) to ++(0,-0.5) to[R, l={ $R_{\text{t,TE-n,II}}$},*-*] ++(3,0) to ++(0,+0.5)
+      to [R, l={\footnotesize $R_{\text{t,oc}}/2$},*-*] ++(1.5,0);
+
+      \draw (0,-2) to[R, l={\footnotesize $R_{\text{t,TE-n,I}}$}, *-*] ++(1.5,0) to ++(0,+0.5);
+      \draw (4.5,-1.5) to ++(0,-0.5) to[R, l={\footnotesize $R_{\text{t,TE-n,III}}$}, *-*] ++(+1.5,0) ;
 
       % Bottom Azimuthal Insulator Path
-      \draw(ic_1) to ++(0,-2) to [R, l=$R_{\text{az}}/2$] ++(6,0) to (oc);
+      \draw(ic_1) to ++(0,-3) to [R, l=$R_{\text{az}}/2$] ++(6,0) to (oc);
 
       \draw (oc) to[R, l={\footnotesize $R_{\text{is}}$}] (ic_2);
     \end{circuitikz}%
@@ -876,27 +911,47 @@ Now we need to lump all the resistors between two adjacent interconnect nodes to
   \label{fig:lumped_resistor_network}
 \end{figure}
 
-Now all the resistors can be lumped together to a single resistor. First, 3 series resistors going through p and n TE legs can be lumped together as,
+Now all the resistors can be lumped together to a single resistor. First, let's lump together the parallel resistors in the regions I and III together.
 
-\begin{equation*}
-  R_{\text{TE-p, Combined}} = \frac{1}{2}R_{\text{t,ic}} + R_{\text{t,TE-p}} + \frac{1}{2}R_{\text{t,oc}}
-\end{equation*}
+\begin{equation}
+  \frac{1}{R_{\text{t,TE-p,I,combined}}} = \frac{1}{R_{\text{t,TE-p,I}}} + \frac{1}{R_{\text{t,ic}}/2}
+\end{equation}
 
-\begin{equation*}
-  R_{\text{TE-n, Combined}} = \frac{1}{2}R_{\text{t,ic}} + R_{\text{t,TE-n}} + \frac{1}{2}R_{\text{t,oc}}
-\end{equation*}
+\begin{equation}
+  \frac{1}{R_{\text{t,TE-p,III,combined}}} = \frac{1}{R_{\text{t,TE-p,III}}} + \frac{1}{R_{\text{t,oc}}/2}
+\end{equation}
 
-Above 2 resistors and the azimuthal resistors are in parallel, and they can be lumped as,
+Similarly for n-TE side,
 
-\begin{align*}
-  \frac{1}{R_{\text{TE,combined}}} & = \frac{1}{R_{\text{az}}/2} + \frac{1}{R_{\text{TE-p, Combined}}} + \frac{1}{R_{\text{az}}} \\ &+ \frac{1}{R_{\text{TE-n, Combined}}} + \frac{1}{R_{\text{az}}/2}
-\end{align*}
+\begin{equation}
+  \frac{1}{R_{\text{t,TE-n,I,combined}}} = \frac{1}{R_{\text{t,TE-n,I}}} + \frac{1}{R_{\text{t,ic}}/2}
+\end{equation}
 
-After adding all the Azimuthal resistances into a one term,
+\begin{equation}
+  \frac{1}{R_{\text{t,TE-n,III,combined}}} = \frac{1}{R_{\text{t,TE-n,III}}} + \frac{1}{R_{\text{t,oc}}/2}
+\end{equation}
 
-\begin{equation*}
-  \frac{1}{R_{\text{TE,combined}}} = \frac{1}{R_{\text{TE-p, Combined}}} + \frac{1}{R_{\text{TE-n, Combined}}} + \frac{5}{R_{\text{az}}}
-\end{equation*}
+These combined resistors are in series with the region II resistors. Therefore, the total thermoelectric leg resistors for both p-type and n-type legs become:
+
+\begin{equation}
+  \begin{aligned}
+    R_{\text{t,TE-p,combined}} &= R_{\text{t,TE-p,I,combined}} + R_{\text{t,TE-p,II}}\\ &+ R_{\text{t,TE-p,III,combined}}
+  \end{aligned}
+\end{equation}
+
+\begin{equation}
+  \begin{aligned}
+    R_{\text{t,TE-n,combined}} &= R_{\text{t,TE-n,I,combined}} + R_{\text{t,TE-n,II}}\\ & + R_{\text{t,TE-n,III,combined}}
+  \end{aligned}
+\end{equation}
+
+These combined resistances are in parallel with the azimuthal resistances. Therefore,
+
+\begin{equation}
+  \begin{aligned}
+    R_{\text{TE,combined}} &= \frac{1}{R_{\text{az}}/2} + \frac{1}{R_{\text{t,TE-p,combined}}} \\ &+ \frac{1}{R_{\text{az}}} + \frac{1}{R_{\text{t,TE-n,combined}}} +  \frac{1}{R_{\text{az}}/2}
+  \end{aligned}
+\end{equation}
 
 Finally, the above resistor is in series with the radial insulator resistor, and the total lumped resistance between two adjacent interconnect nodes becomes,
 
@@ -921,13 +976,14 @@ For a variables cross sectional area, the electrical resistance can be calculate
 
 \subsubsection{Thermoelectric Legs}
 
-The electrical resistance of the thermoelectric leg can be calculated similarly to the thermal resistance, using the same cross sectional area calculations. Therefore, the electrical resistance of the thermoelectric leg becomes:
+The electrical resistance of the thermoelectric leg can be calculated similarly to the thermal resistance, using the same cross sectional area calculations. However, the effect of considering areas such as I and III similar to thermal resistance is negligable because electricity flows from interconnect to the outerconnect directly through the region II only. There is no lateral / azimuthal charge transfer. Therefore, the electrical resistance of the thermoelectric leg for a single TEC element is given by the same expression from \cref{eq:TE_II_t_res}, wtih $\kappa_{\text{TE}}$ replaced by $\frac{1}{\rho_{\text{TE}}}$. Therefore, the electrical resistance of a single thermoelectric leg becomes:
 
 \begin{equation}
-  R_{\text{e,TE}} = \rho_{\text{TE}} \cdot G_{\text{TE}}
+  \begin{aligned}
+    R_{\text{t,TE,II}} = & \frac{2\rho_{\text{TE}}}{ \theta \cdot t_{\text{TEC}}} \cdot \\ & \ln \left| \frac{\theta \cdot t_{\text{TEC}} (r_{\text{out}}-W_{\text{oc}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}}{\theta \cdot t_{\text{TEC}} (r_{\text{in}}+W_{\text{ic}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}} \right|
+    \label{eq:TE_e_res}
+  \end{aligned}
 \end{equation}
-
-Where $G_{\text{TE}}$ is the same geometric factor used in the thermal resistance calculation and is given by \cref{eq:geometric_factor}.
 
 \subsubsection{Interconnects}
 

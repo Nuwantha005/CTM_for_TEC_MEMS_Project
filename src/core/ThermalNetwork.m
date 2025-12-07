@@ -31,12 +31,32 @@ classdef ThermalNetwork
             S_n = obj.Materials.get_S('Bi2Te3', T_avg);
 
             [r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is] = obj.Geometry.get_stage_geometry(N);
-            G = obj.Geometry.calculate_G(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is);
 
-            K_legs = (k_p + k_n) / G;
-
+            % Calculate thermal resistance using new approach (same as in assemble_system)
             k_is = obj.Materials.get_k('AlN', T_avg);
             k_az = obj.Materials.get_k('SiO2', T_avg);
+            k_Cu = obj.Materials.get_k('Cu', T_avg);
+            
+            % Calculate TE region resistances
+            R_TE_I_p = obj.Geometry.calculate_R_TE_I(r_in, w_ic, t_ic, beta_ic, w_az, k_p);
+            R_TE_I_n = obj.Geometry.calculate_R_TE_I(r_in, w_ic, t_ic, beta_ic, w_az, k_n);
+            R_TE_II_p = obj.Geometry.calculate_R_TE_II(r_in, L, w_ic, w_oc, w_az, k_p);
+            R_TE_II_n = obj.Geometry.calculate_R_TE_II(r_in, L, w_ic, w_oc, w_az, k_n);
+            R_TE_III_p = obj.Geometry.calculate_R_TE_III(r_in, L, w_oc, t_oc, beta_oc, w_az, k_p);
+            R_TE_III_n = obj.Geometry.calculate_R_TE_III(r_in, L, w_oc, t_oc, beta_oc, w_az, k_n);
+            
+            % IC/OC thermal resistances
+            [R_t_ic, R_t_oc] = obj.Geometry.calculate_R_thermal_interconnects(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, k_Cu, k_Cu);
+            
+            % Combine regions
+            R_I_p_combined = 1 / (1/R_TE_I_p + 2/R_t_ic);
+            R_I_n_combined = 1 / (1/R_TE_I_n + 2/R_t_ic);
+            R_III_p_combined = 1 / (1/R_TE_III_p + 2/R_t_oc);
+            R_III_n_combined = 1 / (1/R_TE_III_n + 2/R_t_oc);
+            
+            R_leg_p = R_I_p_combined + R_TE_II_p + R_III_p_combined;
+            R_leg_n = R_I_n_combined + R_TE_II_n + R_III_n_combined;
+            K_legs = 1/R_leg_p + 1/R_leg_n;
 
             r_out = r_in + L;
             r_end_leg = r_out;
@@ -47,9 +67,13 @@ classdef ThermalNetwork
 
             K_az_val = obj.Geometry.calculate_K_azimuthal(r_in, L, w_az, obj.Geometry.Thickness, k_az, obj.Geometry.WedgeAngle);
 
-            K_N = K_eff_series + K_az_val;
+            K_N = K_eff_series + 5 * K_az_val;
 
-            Re_N = (rho_p + rho_n) * G;
+            % Electrical resistance (Region II only)
+            Re_leg_p = R_TE_II_p * (k_p * rho_p);
+            Re_leg_n = R_TE_II_n * (k_n * rho_n);
+            Re_N = Re_leg_p + Re_leg_n;
+            
             rho_c = obj.Materials.get_rho('Cu', T_avg);
             [R_ic, R_oc] = obj.Geometry.calculate_R_electrical_interconnects(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, rho_c);
 
@@ -163,25 +187,65 @@ classdef ThermalNetwork
                 rho_c = obj.Materials.get_rho('Cu', T_avg);
                 k_is = obj.Materials.get_k('AlN', T_avg);
                 k_az = obj.Materials.get_k('SiO2', T_avg);
+                k_Cu = obj.Materials.get_k('Cu', T_avg);  % IC/OC thermal conductivity
 
-                G = obj.Geometry.calculate_G(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, w_az, w_is, w_is_stage);
+                % Calculate thermal resistances for the three TE regions
+                % Region I: IC region (IC and TE in parallel)
+                R_TE_I_p = obj.Geometry.calculate_R_TE_I(r_in, w_ic, t_ic, beta_ic, w_az, k_p);
+                R_TE_I_n = obj.Geometry.calculate_R_TE_I(r_in, w_ic, t_ic, beta_ic, w_az, k_n);
+                
+                % Region II: Middle region (no IC/OC)
+                R_TE_II_p = obj.Geometry.calculate_R_TE_II(r_in, L, w_ic, w_oc, w_az, k_p);
+                R_TE_II_n = obj.Geometry.calculate_R_TE_II(r_in, L, w_ic, w_oc, w_az, k_n);
+                
+                % Region III: OC region (OC and TE in parallel)
+                R_TE_III_p = obj.Geometry.calculate_R_TE_III(r_in, L, w_oc, t_oc, beta_oc, w_az, k_p);
+                R_TE_III_n = obj.Geometry.calculate_R_TE_III(r_in, L, w_oc, t_oc, beta_oc, w_az, k_n);
+                
+                % Calculate IC/OC thermal resistances (radial conduction through Cu)
+                [R_t_ic, R_t_oc] = obj.Geometry.calculate_R_thermal_interconnects(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, k_Cu, k_Cu);
+                
+                % Combine Region I: TE and IC in parallel (IC serves both P and N legs)
+                % 1/R_I_combined = 1/R_TE_I + 1/(R_t_ic/2) where R_t_ic/2 for each leg
+                R_I_p_combined = 1 / (1/R_TE_I_p + 2/R_t_ic);
+                R_I_n_combined = 1 / (1/R_TE_I_n + 2/R_t_ic);
+                
+                % Combine Region III: TE and OC in parallel
+                R_III_p_combined = 1 / (1/R_TE_III_p + 2/R_t_oc);
+                R_III_n_combined = 1 / (1/R_TE_III_n + 2/R_t_oc);
+                
+                % Total resistance for each leg: series combination of three regions
+                R_leg_p = R_I_p_combined + R_TE_II_p + R_III_p_combined;
+                R_leg_n = R_I_n_combined + R_TE_II_n + R_III_n_combined;
+                
+                % Two legs in parallel
+                K_legs = 1/R_leg_p + 1/R_leg_n;
+                
+                % Electrical resistance (only through Region II, no lateral conduction)
+                % Re = rho * G_II where G_II is the geometric factor for Region II
+                % For region II: Use same formula as R_TE_II but with 1/rho instead of k
+                Re_leg_p = R_TE_II_p * (k_p * rho_p);  % Re = (rho/k) * R_thermal
+                Re_leg_n = R_TE_II_n * (k_n * rho_n);
+                Re_stages_leg(i) = Re_leg_p + Re_leg_n;  % P and N in series electrically
 
-                K_legs = (k_p + k_n) / G; % Thermal
-                Re_stages_leg(i) = (rho_p + rho_n) * G; %% Electrical
+                % Electrical resistances of IC/OC
+                [R_e_ic, R_e_oc] = obj.Geometry.calculate_R_electrical_interconnects(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, rho_c);
+                R_ic_stages(i) = R_e_ic;
+                R_oc_stages(i) = R_e_oc;
 
-                [R_ic, R_oc] = obj.Geometry.calculate_R_electrical_interconnects(r_in, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, rho_c);
-                R_ic_stages(i) = R_ic;
-                R_oc_stages(i) = R_oc;
-
-                r_end_leg = r_out; % End of TEC material is start of insulator
+                % Radial insulator thermal resistance
+                r_end_leg = r_out;
                 R_is = obj.Geometry.calculate_R_thermal_insulator(r_end_leg, w_is_stage, t_tec, theta, k_is);
 
-                R_eff_series = R_is + 1/K_legs; % Thermal
-                K_eff_series = 1 / R_eff_series; % Thermal
+                % Combine with radial insulator (series)
+                R_eff_series = R_is + 1/K_legs;
+                K_eff_series = 1 / R_eff_series;
 
+                % Azimuthal conductance (5 parallel paths)
                 K_az_val = obj.Geometry.calculate_K_azimuthal(r_in, L, w_az, t_tec, k_az, theta);
 
-                K_stages(i) = K_eff_series + K_az_val; % Thermal
+                % Total stage conductance: TE legs + 5 azimuthal paths in parallel
+                K_stages(i) = K_eff_series + 5 * K_az_val;
                 S_stages(i) = S_p - (-abs(S_n));
 
                 k_Si = obj.Materials.get_k('Si', T_current(idx_Si_start + i - 1));
