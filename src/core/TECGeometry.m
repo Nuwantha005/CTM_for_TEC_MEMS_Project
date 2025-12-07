@@ -304,18 +304,25 @@ classdef TECGeometry < handle
 
         function [R_e_ic, R_e_oc] = calculate_R_electrical_interconnects(obj, r1, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, rho_c)
             % Electrical resistance of IC and OC
-            term_ic = log((r1 + w_ic) / r1);
-            if term_ic == 0
+            % Paper: Current flows AZIMUTHALLY (not radially) through IC/OC
+            % R_e,ic = (rho * r_avg * beta) / (W_ic * t_ic)
+            
+            % IC: r_avg = r1 + W_ic/2
+            r_avg_ic = r1 + w_ic / 2;
+            if abs(w_ic) < 1e-15 || abs(t_ic) < 1e-15
                 R_e_ic = 0;
             else
-                R_e_ic = (rho_c * beta_ic) / (t_ic * term_ic);
+                R_e_ic = (rho_c * r_avg_ic * beta_ic) / (w_ic * t_ic);
             end
-
-            term_oc = log((r1 + L) / (r1 + L - w_oc));
-            if term_oc == 0
+            
+            % OC: r_avg = r_out - W_oc/2 = (r1 + L) - W_oc/2
+            r_out = r1 + L;
+            r_avg_oc = r_out - w_oc / 2;
+            if abs(w_oc) < 1e-15 || abs(t_oc) < 1e-15
                 R_e_oc = 0;
             else
-                R_e_oc = (rho_c * beta_oc) / (2 * t_oc * term_oc);
+                % Note: Two OC at half angle each, so combined resistance = single IC equivalent
+                R_e_oc = (rho_c * r_avg_oc * beta_oc) / (w_oc * t_oc);
             end
         end
         
@@ -327,15 +334,16 @@ classdef TECGeometry < handle
             if term_ic == 0 || abs(beta_ic) < 1e-15 || abs(t_ic) < 1e-15
                 R_t_ic = inf;  % No IC area
             else
-                R_t_ic = 1 / (k_ic * beta_ic * t_ic * term_ic);
+                % FIXED: log term is in NUMERATOR, not denominator!
+                R_t_ic = term_ic / (k_ic * beta_ic * t_ic);
             end
 
             term_oc = log((r1 + L) / (r1 + L - w_oc));
             if term_oc == 0 || abs(beta_oc) < 1e-15 || abs(t_oc) < 1e-15
                 R_t_oc = inf;  % No OC area
             else
-                % Factor of 2 in denominator because there are 2 OCs (one on each side)
-                R_t_oc = 1 / (k_oc * beta_oc * t_oc * term_oc);
+                % FIXED: log term is in NUMERATOR, not denominator!
+                R_t_oc = term_oc / (k_oc * beta_oc * t_oc);
             end
         end
 

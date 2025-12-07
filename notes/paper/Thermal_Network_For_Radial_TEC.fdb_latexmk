@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1765113728.11173 "e:/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/paper/Thermal_Network_For_Radial_TEC.tex" "Thermal_Network_For_Radial_TEC.pdf" "Thermal_Network_For_Radial_TEC" 1765113733.77273 0
+["pdflatex"] 1765114801.22064 "e:/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/paper/Thermal_Network_For_Radial_TEC.tex" "Thermal_Network_For_Radial_TEC.pdf" "Thermal_Network_For_Radial_TEC" 1765114805.00772 0
   "C:/Users/nuwan/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1764995343 82507 a9eef8696c92627b87e9975edea03b2a ""
   "C:/Users/nuwan/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1755101668 24225046 56680bb7f88bd5735246d94cedf3bd88 ""
   "C:/Users/nuwan/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc" 1458473887 4993 80dc9bab7f31fb78a000ccfed0e27cab ""
@@ -263,10 +263,10 @@
   "C:/Users/nuwan/AppData/Local/Programs/MiKTeX/tex/latex/trimspaces/trimspaces.sty" 1253169183 1380 971a51b00a14503ddf754cab24c3f209 ""
   "C:/Users/nuwan/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "C:/Users/nuwan/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1700127522 55487 80a65caedd3722f4c20a14a69e785d8f ""
-  "Thermal_Network_For_Radial_TEC.aux" 1765113733 15222 032737c0a1aca5955aec629046a967c0 "pdflatex"
-  "Thermal_Network_For_Radial_TEC.out" 1765113733 7768 07d5c94f40c0e21468d9ed41914c8879 "pdflatex"
-  "Thermal_Network_For_Radial_TEC.tex" 1765095662 72081 d87a0e38f5ca2f128f0cd86be80186ae ""
-  "e:/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/paper/Thermal_Network_For_Radial_TEC.tex" 1765095662 72081 d87a0e38f5ca2f128f0cd86be80186ae ""
+  "Thermal_Network_For_Radial_TEC.aux" 1765114804 15222 032737c0a1aca5955aec629046a967c0 "pdflatex"
+  "Thermal_Network_For_Radial_TEC.out" 1765114804 7768 07d5c94f40c0e21468d9ed41914c8879 "pdflatex"
+  "Thermal_Network_For_Radial_TEC.tex" 1765114536 72093 7433a3e7e3eb70af5a112b91c184969a ""
+  "e:/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/paper/Thermal_Network_For_Radial_TEC.tex" 1765114536 72093 7433a3e7e3eb70af5a112b91c184969a ""
   "images/TEC_element_iso.png" 1764398700 136751 a25d218db93344b8359ed88d4b6c86c4 ""
   "images/az_and_is_top.png" 1764399076 139227 30486f244b7a2c48d380f159bff98aa2 ""
   "images/cut_section for vertical_resistance.png" 1764927893 223721 0374f1223e1ba15dc6888c3857090f07 ""

@@ -861,7 +861,7 @@ For the chip layer, this can be directly used as the resistance between node 0 a
 For the TEC layer, $t\to t_{\text{TEC}}$ and $\kappa \to \kappa_{\text{TEC}}$. However, between the central cylinder and the first node on the TEC layer, there is a radial insulator layer which wasn't accounted for during the TEC layer resistance calculation because its position is before the first node. Therefore, the radial insulator resistance must be added to the above resistance, which is given by \cref{eq:radial_ins_resistance}. Since the resistors are in series, the thermal resistance between node 0 and node 1 in the TEC layer becomes:
 
 \begin{equation}
-  R_{\text{TEC},0 \to 1} = \frac{1}{2\theta \kappa_{\text{TEC}} t_{\text{TEC}}} + R_{\text{is},0}
+  R_{\text{TEC},0 \to 1} = \frac{1}{2\theta \kappa_{\text{chip}} t_{\text{TEC}}} + R_{\text{is},0}
   \label{eq:R_TEC_0_to_1}
 \end{equation}
 
@@ -949,7 +949,7 @@ These combined resistances are in parallel with the azimuthal resistances. There
 
 \begin{equation}
   \begin{aligned}
-    R_{\text{TE,combined}} &= \frac{1}{R_{\text{az}}/2} + \frac{1}{R_{\text{t,TE-p,combined}}} \\ &+ \frac{1}{R_{\text{az}}} + \frac{1}{R_{\text{t,TE-n,combined}}} +  \frac{1}{R_{\text{az}}/2}
+    \frac{1}{R_{\text{TE,combined}}}  &= \frac{1}{R_{\text{az}}/2} + \frac{1}{R_{\text{t,TE-p,combined}}} \\ &+ \frac{1}{R_{\text{az}}} + \frac{1}{R_{\text{t,TE-n,combined}}} +  \frac{1}{R_{\text{az}}/2}
   \end{aligned}
 \end{equation}
 
@@ -980,7 +980,7 @@ The electrical resistance of the thermoelectric leg can be calculated similarly 
 
 \begin{equation}
   \begin{aligned}
-    R_{\text{t,TE,II}} = & \frac{2\rho_{\text{TE}}}{ \theta \cdot t_{\text{TEC}}} \cdot \\ & \ln \left| \frac{\theta \cdot t_{\text{TEC}} (r_{\text{out}}-W_{\text{oc}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}}{\theta \cdot t_{\text{TEC}} (r_{\text{in}}+W_{\text{ic}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}} \right|
+    R_{\text{e,TE,II}} = & \frac{2\rho_{\text{TE}}}{ \theta \cdot t_{\text{TEC}}} \cdot \\ & \ln \left| \frac{\theta \cdot t_{\text{TEC}} (r_{\text{out}}-W_{\text{oc}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}}{\theta \cdot t_{\text{TEC}} (r_{\text{in}}+W_{\text{ic}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}} \right|
     \label{eq:TE_e_res}
   \end{aligned}
 \end{equation}
