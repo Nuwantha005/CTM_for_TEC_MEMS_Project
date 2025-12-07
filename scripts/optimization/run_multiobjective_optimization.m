@@ -130,6 +130,16 @@ fprintf('%-15s | %8.1f | %8.0f | %8.3f | %8.3f | %8.2f | %8.4f\n', ...
 
 fprintf('─────────────────────────────────────────────────────────────────────────────────\n\n');
 
+% Plot temperature profile for balanced solution using ResultsManager
+try
+    best_metrics = evaluate_solution_mo(x_pareto(idx_knee, :), base_config, CONFIG);
+    rm = ResultsManager(best_metrics.config);
+    rm.plot_temperature_profile(best_metrics.T_profile, best_metrics.config.geometry, ...
+        'temp_profile_best.png', 'Balanced Pareto', '', best_metrics.config.boundary_conditions.T_water_K);
+catch ME
+    fprintf('⚠ Could not plot temperature profile: %s\n', ME.message);
+end
+
 %% Plot Pareto Front
 figure('Position', [100, 100, 1200, 500], 'Name', 'Pareto Front Analysis');
 
@@ -421,6 +431,78 @@ catch ME
         fprintf('  [MO Debug] Outer exception at call %d: %s\n', call_count, ME.message);
     end
     f = [1e6, 1e6];  % Penalty for failed simulations
+end
+end
+
+function metrics = evaluate_solution_mo(x, base_config, CONFIG)
+% Evaluate a design to extract full temperature profile and config for plotting
+metrics = struct('T_profile', [], 'config', [], 'valid', false);
+
+try
+    config = struct();
+    config.geometry = base_config.geometry;
+    config.boundary_conditions = base_config.boundary_conditions;
+    config.operating_conditions = base_config.operating_conditions;
+    config.materials = base_config.materials;
+
+    all_vars = CONFIG.all_vars;
+    enabled_mask = [all_vars{:, 5}];
+
+    var_map = containers.Map();
+    x_idx = 1;
+    for i = 1:size(all_vars, 1)
+        name = all_vars{i, 1};
+        if enabled_mask(i)
+            var_map(name) = x(x_idx);
+            x_idx = x_idx + 1;
+        else
+            var_map(name) = all_vars{i, 4};
+        end
+    end
+
+    get_val = @(name, default) get_var_or_default(var_map, name, default);
+
+    config.operating_conditions.I_current_A = get_val('I', 0.025);
+    config.geometry.thickness_um = get_val('t_TEC_um', 200);
+    config.geometry.R_cyl_um = get_val('r_cyl_um', 1000);
+    config.geometry.t_ins_um = get_val('t_ins_um', 10);
+    config.geometry.radial_expansion_factor = get_val('f_L', 1.15);
+    config.geometry.azimuthal_gap_um = get_val('W_az_um', 20);
+    config.geometry.insulation_width_ratio = get_val('W_is_ratio', 0.05);
+    config.geometry.interconnect_ratio = get_val('f_ic_W', 0.15);
+    config.geometry.interconnect_thickness_ratio = get_val('f_ic_t', 1.0);
+    config.geometry.interconnect_angle_ratio = get_val('f_ic_beta', 0.16);
+    config.geometry.outerconnect_ratio = get_val('f_oc_W', 0.15);
+    config.geometry.outerconnect_thickness_ratio = get_val('f_oc_t', 1.0);
+    config.geometry.outerconnect_angle_ratio = get_val('f_oc_beta', 0.16);
+
+    materials = MaterialProperties(config);
+    geometry = TECGeometry(config);
+    network = ThermalNetwork(geometry, materials, config);
+
+    N = geometry.N_stages;
+    T_water = config.boundary_conditions.T_water_K;
+    T = ones(2*N + 1, 1) * (T_water + 50);
+
+    for iter = 1:120
+        T_old = T;
+        [T_new, ~, ~] = network.solve(T);
+        if any(isnan(T_new)) || any(isinf(T_new)) || any(T_new < 0)
+            metrics.valid = false;
+            return;
+        end
+        T = 0.5 * T_new + 0.5 * T;
+        if max(abs(T - T_old)) < 1e-6
+            break;
+        end
+    end
+
+    metrics.T_profile = T;
+    metrics.config = config;
+    metrics.valid = true;
+
+catch
+    metrics.valid = false;
 end
 end
 

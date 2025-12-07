@@ -215,7 +215,7 @@ if isempty(valid_solutions)
     x_best = x_local;
     fval_best = fval_local;
     method_best = 'Local Refinement (unvalidated)';
-    [T_max, T_profile, Q_in, Q_out, COP] = evaluate_design(x_best, base_config, CONFIG);
+    [T_max, T_profile, Q_in, Q_out, COP, config_best] = evaluate_design(x_best, base_config, CONFIG);
 else
     % Find best among valid solutions
     best_idx = 1;
@@ -235,7 +235,7 @@ else
     COP = valid_solutions{best_idx}.COP;
 
     % Recalculate Q values for the best solution
-    [~, ~, Q_in, Q_out, ~] = evaluate_design(x_best, base_config, CONFIG);
+    [~, ~, Q_in, Q_out, ~, ~] = evaluate_design(x_best, base_config, CONFIG);
 
     fprintf('\n✓ Selected best VALID solution from: %s\n', method_best);
 end
@@ -248,6 +248,15 @@ fprintf('  ΔT:       %.2f K\n', T_profile(1) - T_profile(end));
 fprintf('  Q_in:     %.4f W\n', Q_in);
 fprintf('  Q_out:    %.4f W\n', Q_out);
 fprintf('  COP:      %.3f\n', COP);
+
+% Plot temperature profile for best solution
+try
+    rm = ResultsManager(config_best);
+    rm.plot_temperature_profile(T_profile, config_best.geometry, ...
+        'temp_profile_best.png', sprintf('Best (%s)', method_best), '', config_best.boundary_conditions.T_water_K);
+catch ME
+    fprintf('⚠ Could not plot temperature profile: %s\n', ME.message);
+end
 
 % Temperature profile sanity check
 fprintf('\nTemperature Profile (should decrease from center to edge):\n');
@@ -587,7 +596,7 @@ catch ME
 end
 end
 
-function [T_max, T_profile, Q_in, Q_out, COP] = evaluate_design(x, base_config, CONFIG)
+function [T_max, T_profile, Q_in, Q_out, COP, config_out] = evaluate_design(x, base_config, CONFIG)
 % Evaluate a TEC design with dynamically configured optimization parameters
 % Uses CONFIG.all_vars to map x vector to parameter names
 % Uses same variable names as optimization_variables.m
@@ -705,6 +714,10 @@ if P_elec > 0
     COP = Q_in / P_elec;
 else
     COP = 0;
+end
+
+if nargout > 5
+    config_out = config;
 end
 end
 

@@ -152,24 +152,26 @@ for i = 1:N_cases
         config.geometry.outerconnect_angle_ratio = test.oc_angle_r;
         config.geometry.interconnect_thickness_ratio = test.ic_t_r;
         config.geometry.outerconnect_thickness_ratio = test.oc_t_r;
-        
-        theta_rad = deg2rad(test.theta_deg);
-        r_avg = (10000e-6 / sqrt(2)) / 2;
-        arc_length = r_avg * theta_rad;
-        w_az = (1 - test.fill_factor) * arc_length;
-        config.geometry.azimuthal_gap_um = w_az * 1e6;
+        config.geometry.fill_factor = test.fill_factor;  % For R_TE calculations
         
         config.operating_conditions.I_current_A = test.I_A;
         config.boundary_conditions.q_flux_W_m2 = test.q_Wm2;
         config.boundary_conditions.T_water_K = 300;
         config.boundary_conditions.h_conv_W_m2K = 1e6;
         
-        config.materials.Bi2Te3 = struct('k', 1.2, 'rho', 1e-5, 'S', 0.0002);
-        config.materials.Cu = struct('k', 400, 'rho', 1.7e-8);
-        config.materials.Si = struct('k', 150, 'rho', 0.01);
+        % Material properties from COMSOL database (data/material_props/COMSOL.xml)
+        % Bi2Te3: Temperature-dependent from data files, fallback values at ~300K
+        config.materials.Bi2Te3 = struct('k', 1.6, 'rho', 1.15e-5, 'S', 210e-6);
+        % Cu: k=400 W/mK, rho=1.667e-8 Ohm*m (from linearized resistivity at 293K)
+        config.materials.Cu = struct('k', 400, 'rho', 1.667e-8);
+        % Si: k=130 W/mK (single-crystal, isotropic)
+        config.materials.Si = struct('k', 130, 'rho', 0.01);
+        % AlN: Not in COMSOL.xml, keep existing value
         config.materials.AlN = struct('k', 170, 'rho', 1e10);
+        % SiO2: k=1.4 W/mK
         config.materials.SiO2 = struct('k', 1.4, 'rho', 1e14);
-        config.materials.Al2O3 = struct('k', 30, 'rho', 1e12);
+        % Al2O3: k=35 W/mK
+        config.materials.Al2O3 = struct('k', 35, 'rho', 1e12);
         
         materials = MaterialProperties(config);
         geometry = TECGeometry(config);
@@ -399,18 +401,18 @@ bar_data = [matlab_T; comsol_T]';
 b = bar(bar_data);
 b(1).FaceColor = [0.2 0.4 0.8];
 b(2).FaceColor = [0.8 0.3 0.2];
-set(gca, 'XTickLabel', {tc.name});
+set(gca, 'XTickLabel', strrep({tc.name}, '_', ' '));
 xtickangle(30);
 ylabel('Maximum Temperature [°C]');
 title('Temperature Comparison');
-legend('MATLAB CTM', 'COMSOL FEM', 'Location', 'best');
+legend('MATLAB CTM', 'COMSOL FEM', 'Location', 'northwest');
 grid on;
 
 % Error plot
 subplot(1, 2, 2);
 errors = comsol_T - matlab_T;
 bar(errors, 'FaceColor', [0.4 0.7 0.4]);
-set(gca, 'XTickLabel', {tc.name});
+set(gca, 'XTickLabel', strrep({tc.name}, '_', ' '));
 xtickangle(30);
 ylabel('Error (COMSOL - MATLAB) [°C]');
 title('Prediction Error');

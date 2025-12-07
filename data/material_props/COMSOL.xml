@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archive>
+  <model>
+    <material tag="Copper" type="Common" component="">
+      <propertyGroup tag="Enu" type="Enu" descr="Young's modulus and Poisson's ratio">
+        <set name="E" value="126e9[Pa]"/>
+        <set name="nu" value="0.34"/>
+      </propertyGroup>
+      <propertyGroup tag="linzRes" type="linzRes" descr="Linearized resistivity">
+        <set name="rho0" value="1.667e-8[ohm*m]"/>
+        <set name="alpha" value="3.862e-3[1/K]"/>
+        <set name="Tref" value="293.15[K]"/>
+        <addInput quantity="temperature"/>
+      </propertyGroup>
+      <label label="Copper"/>
+      <set name="family" value="copper"/>
+      <propertyGroup tag="def">
+        <set name="relpermeability" value="{'1','0','0','0','1','0','0','0','1'}"/>
+        <set name="electricconductivity" value="{'5.998e7[S/m]','0','0','0','5.998e7[S/m]','0','0','0','5.998e7[S/m]'}"/>
+        <set name="heatcapacity" value="385[J/(kg*K)]"/>
+        <set name="relpermittivity" value="{'1','0','0','0','1','0','0','0','1'}"/>
+        <set name="emissivity" value="0.5"/>
+        <set name="density" value="8940[kg/m^3]"/>
+        <set name="thermalconductivity" value="{'400[W/(m*K)]','0','0','0','400[W/(m*K)]','0','0','0','400[W/(m*K)]'}"/>
+      </propertyGroup>
+    </material>
+    <material tag="Bi2Te3_n" type="Common" component="">
+      <propertyGroup tag="def">
+        <func tag="int1" oper="Interpolation">
+          <label label="Seebeck coefficient"/>
+          <set name="funcname" value="S"/>
+          <set name="table" value="{{'200','168e-6'},{'250','192e-6'},{'300','210e-6'},{'350','225e-6'},{'400','237e-6'}}"/>
+          <set name="interp" value="cubicspline"/>
+          <set name="fununit" value="{'V/K'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int2" oper="Interpolation">
+          <label label="Thermal conductivity"/>
+          <set name="funcnametable" value="{{'int1','1'}}"/>
+          <set name="funcname" value="k"/>
+          <set name="table" value="{{'200','24e-1'},{'250','19e-1'},{'300','16e-1'},{'350','16e-1'},{'400','17.5e-1'}}"/>
+          <set name="interp" value="cubicspline"/>
+          <set name="fununit" value="{'W/m/K'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int3" oper="Interpolation">
+          <label label="Electrical conductivity"/>
+          <set name="funcnametable" value="{{'int1','1'}}"/>
+          <set name="funcname" value="sigma"/>
+          <set name="table" value="{{'200','1.4286e5'},{'250','1.1111e5'},{'300','0.86957e5'},{'350','0.71429e5'},{'400','0.58824e5'}}"/>
+          <set name="interp" value="cubicspline"/>
+          <set name="fununit" value="{'S/m'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <set name="heatcapacity" value="154[J/(kg*K)]"/>
+        <set name="density" value="7700[kg/m^3]"/>
+        <set name="seebeckcoefficient" value="{'-S(T)','0','0','0','-S(T)','0','0','0','-S(T)'}"/>
+        <set name="electricconductivity" value="{'sigma(T)','0','0','0','sigma(T)','0','0','0','sigma(T)'}"/>
+        <set name="thermalconductivity" value="{'k(T)','0','0','0','k(T)','0','0','0','k(T)'}"/>
+        <set name="relpermittivity" value="{'1','0','0','0','1','0','0','0','1'}"/>
+        <addInput quantity="temperature"/>
+      </propertyGroup>
+      <label label="Bismuth Telluride - Bi2Te3 (N)"/>
+    </material>
+    <material tag="Bi2Te3_p" type="Common" component="">
+      <propertyGroup tag="def">
+        <func tag="int1" oper="Interpolation">
+          <label label="Seebeck coefficient"/>
+          <set name="funcname" value="S"/>
+          <set name="table" value="{{'200','168e-6'},{'250','192e-6'},{'300','210e-6'},{'350','225e-6'},{'400','237e-6'}}"/>
+          <set name="interp" value="cubicspline"/>
+          <set name="fununit" value="{'V/K'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int2" oper="Interpolation">
+          <label label="Thermal conductivity"/>
+          <set name="funcnametable" value="{{'int1','1'}}"/>
+          <set name="funcname" value="k"/>
+          <set name="table" value="{{'200','24e-1'},{'250','19e-1'},{'300','16e-1'},{'350','16e-1'},{'400','17.5e-1'}}"/>
+          <set name="interp" value="cubicspline"/>
+          <set name="fununit" value="{'W/m/K'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int3" oper="Interpolation">
+          <label label="Electrical conductivity"/>
+          <set name="funcnametable" value="{{'int1','1'}}"/>
+          <set name="funcname" value="sigma"/>
+          <set name="table" value="{{'200','1.4286e5'},{'250','1.1111e5'},{'300','0.86957e5'},{'350','0.71429e5'},{'400','0.58824e5'}}"/>
+          <set name="interp" value="cubicspline"/>
+          <set name="fununit" value="{'S/m'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <set name="heatcapacity" value="154[J/(kg*K)]"/>
+        <set name="density" value="7700[kg/m^3]"/>
+        <set name="seebeckcoefficient" value="{'S(T)','0','0','0','S(T)','0','0','0','S(T)'}"/>
+        <set name="electricconductivity" value="{'sigma(T)','0','0','0','sigma(T)','0','0','0','sigma(T)'}"/>
+        <set name="thermalconductivity" value="{'k(T)','0','0','0','k(T)','0','0','0','k(T)'}"/>
+        <set name="relpermittivity" value="{'1','0','0','0','1','0','0','0','1'}"/>
+        <addInput quantity="temperature"/>
+      </propertyGroup>
+      <label label="Bismuth Telluride - Bi2Te3 (P)"/>
+    </material>
+    <material tag="Si" type="Common" component="">
+      <propertyGroup tag="Enu" type="Enu" descr="Young's modulus and Poisson's ratio">
+        <set name="E" value="170e9[Pa]"/>
+        <set name="nu" value="0.28"/>
+      </propertyGroup>
+      <label label="Si - Silicon (single-crystal, isotropic)"/>
+      <set name="family" value="custom"/>
+      <set name="customspecular" valueDouble="{0.7843137254901961,1,1}"/>
+      <set name="diffuse" value="custom"/>
+      <set name="customdiffuse" valueDouble="{0.6666666666666666,0.6666666666666666,0.7058823529411765}"/>
+      <set name="ambient" value="custom"/>
+      <set name="customambient" valueDouble="{0.6666666666666666,0.6666666666666666,0.7058823529411765}"/>
+      <set name="noise" valueBoolean="true"/>
+      <set name="fresnel" valueDouble="0.7"/>
+      <set name="roughness" valueDouble="0.5"/>
+      <set name="diffusewrap" valueInt="0"/>
+      <set name="reflectance" valueInt="0"/>
+      <propertyGroup tag="def">
+        <set name="thermalexpansioncoefficient" value="{'2.6e-6[1/K]','0','0','0','2.6e-6[1/K]','0','0','0','2.6e-6[1/K]'}"/>
+        <set name="heatcapacity" value="700[J/(kg*K)]"/>
+        <set name="relpermittivity" value="{'11.7','0','0','0','11.7','0','0','0','11.7'}"/>
+        <set name="density" value="2329[kg/m^3]"/>
+        <set name="thermalconductivity" value="{'130[W/(m*K)]','0','0','0','130[W/(m*K)]','0','0','0','130[W/(m*K)]'}"/>
+      </propertyGroup>
+    </material>
+    <material tag="SiO2" type="Common" component="">
+      <propertyGroup tag="Enu" type="Enu" descr="Young's modulus and Poisson's ratio">
+        <set name="E" value="70e9[Pa]"/>
+        <set name="nu" value="0.17"/>
+      </propertyGroup>
+      <label label="SiO2 - Silicon oxide"/>
+      <propertyGroup tag="def">
+        <set name="electricconductivity" value="{'0[S/m]','0','0','0','0[S/m]','0','0','0','0[S/m]'}"/>
+        <set name="thermalexpansioncoefficient" value="{'0.5e-6[1/K]','0','0','0','0.5e-6[1/K]','0','0','0','0.5e-6[1/K]'}"/>
+        <set name="heatcapacity" value="730[J/(kg*K)]"/>
+        <set name="relpermittivity" value="{'4.2','0','0','0','4.2','0','0','0','4.2'}"/>
+        <set name="density" value="2200[kg/m^3]"/>
+        <set name="thermalconductivity" value="{'1.4[W/(m*K)]','0','0','0','1.4[W/(m*K)]','0','0','0','1.4[W/(m*K)]'}"/>
+      </propertyGroup>
+    </material>
+    <material tag="Al2O3" type="Common" component="">
+      <propertyGroup tag="Enu" type="Enu" descr="Young's modulus and Poisson's ratio">
+        <set name="E" value="400e9[Pa]"/>
+        <set name="nu" value="0.22"/>
+      </propertyGroup>
+      <label label="Al2O3 - Aluminum oxide"/>
+      <propertyGroup tag="def">
+        <set name="electricconductivity" value="{'0[S/m]','0','0','0','0[S/m]','0','0','0','0[S/m]'}"/>
+        <set name="thermalexpansioncoefficient" value="{'6.5e-6[1/K]','0','0','0','6.5e-6[1/K]','0','0','0','6.5e-6[1/K]'}"/>
+        <set name="heatcapacity" value="730[J/(kg*K)]"/>
+        <set name="relpermittivity" value="{'5.7','0','0','0','5.7','0','0','0','5.7'}"/>
+        <set name="density" value="3965[kg/m^3]"/>
+        <set name="thermalconductivity" value="{'35[W/(m*K)]','0','0','0','35[W/(m*K)]','0','0','0','35[W/(m*K)]'}"/>
+      </propertyGroup>
+    </material>
+  </model>
+</archive>
+

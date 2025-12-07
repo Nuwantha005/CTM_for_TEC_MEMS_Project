@@ -1,6 +1,7 @@
-classdef MaterialProperties
+classdef MaterialProperties < handle
     % MATERIALPROPERTIES Handles material property lookups and temperature dependencies.
-    %   Currently implements constant properties but designed for expansion.
+    %   Uses temperature-dependent tables from data/material_props/ when available.
+    %   Falls back to constant values from config.materials if tables not found.
     
     properties
         Library
@@ -15,11 +16,11 @@ classdef MaterialProperties
             else
                 error('Config must contain a "materials" field.');
             end
+            obj.Tables = struct();
             obj.load_tables();
         end
 
         function load_tables(obj)
-            obj.Tables = struct();
             % Define paths - assuming data is in project root/data
             % Get the directory of this file (src/core)
             [current_path, ~, ~] = fileparts(mfilename('fullpath'));
@@ -28,9 +29,10 @@ classdef MaterialProperties
             base_path = fullfile(project_root, 'data', 'material_props');
             
             % Map folder names to property keys
+            % Note: electrical_conductivity files contain sigma (S/m), convert to rho (Ohm*m)
             prop_map = containers.Map(...
-                {'thermal_conductivity', 'seebeck_coefficient', 'electrical_resistivity'}, ...
-                {'k', 'S', 'rho'});
+                {'thermal_conductivity', 'seebeck_coefficient', 'electrical_conductivity'}, ...
+                {'k', 'S', 'sigma'});
             
             folders = prop_map.keys;
             for i = 1:length(folders)
@@ -51,7 +53,14 @@ classdef MaterialProperties
                             if ~isfield(obj.Tables, mat_name)
                                 obj.Tables.(mat_name) = struct();
                             end
-                            obj.Tables.(mat_name).(prop_key) = data;
+                            
+                            % Convert conductivity to resistivity: rho = 1/sigma
+                            if strcmp(prop_key, 'sigma')
+                                data(:,2) = 1 ./ data(:,2);  % Convert S/m to Ohm*m
+                                obj.Tables.(mat_name).rho = data;
+                            else
+                                obj.Tables.(mat_name).(prop_key) = data;
+                            end
                             % Suppress verbose output for faster optimization
                             % fprintf('Loaded %s for %s\n', prop_key, mat_name);
                         catch ME

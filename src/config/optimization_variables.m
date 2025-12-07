@@ -50,7 +50,7 @@ CONFIG.theta_rad = 2*pi / CONFIG.M;  % θ = 2π/M
 CONFIG.M_valid = [4, 6, 8, 9, 10, 12, 15, 18, 20, 24, 30, 36, 40, 45, 60, 72, 90, 120, 180, 360];
 
 % --- Boundary Conditions ---
-CONFIG.q_flux_W_m2 = 50000;          % Heat flux at chip (W/m²)
+CONFIG.q_flux_W_m2 = 200000;          % Heat flux at chip (W/m²)
 CONFIG.h_conv_W_m2K = 1e6;           % Convection coefficient (W/m²K)
 CONFIG.T_water_K = 300;              % T_water: Coolant temperature (K)
 
@@ -60,18 +60,22 @@ CONFIG.W_chip_um = 10000;            % W_chip: Chip width (µm)
 CONFIG.t_chip_um = 50;               % t_chip: Chip thickness (µm)
 
 % --- Material Properties ---
-% Thermoelectric: Bi2Te3
-CONFIG.materials.Bi2Te3 = struct('k', 1.2, 'rho', 1e-5, 'S', 0.0002);
-% Interconnects: Cu
-CONFIG.materials.Cu = struct('k', 400, 'rho', 1.7e-8);
-% Chip/Substrate: Si
-CONFIG.materials.Si = struct('k', 150, 'rho', 0.01);
-% Radial Insulator: AlN
+% Values from COMSOL database (data/material_props/COMSOL.xml)
+% Bi2Te3 uses temperature-dependent tables from data/material_props/ folders
+% Fallback values below are for ~300K
+
+% Thermoelectric: Bi2Te3 (at 300K: k=1.6, sigma=0.86957e5 S/m -> rho=1.15e-5)
+CONFIG.materials.Bi2Te3 = struct('k', 1.6, 'rho', 1.15e-5, 'S', 210e-6);
+% Interconnects: Cu (k=400, rho=1.667e-8 from linearized resistivity)
+CONFIG.materials.Cu = struct('k', 400, 'rho', 1.667e-8);
+% Chip/Substrate: Si (k=130 from COMSOL single-crystal isotropic)
+CONFIG.materials.Si = struct('k', 130, 'rho', 0.01);
+% Radial Insulator: AlN (not in COMSOL.xml, using typical value)
 CONFIG.materials.AlN = struct('k', 170, 'rho', 1e10);
-% Azimuthal Insulator: SiO2
+% Azimuthal Insulator: SiO2 (k=1.4 from COMSOL)
 CONFIG.materials.SiO2 = struct('k', 1.4, 'rho', 1e14);
-% Vertical Insulator: Al2O3 or SiO2
-CONFIG.materials.Al2O3 = struct('k', 30, 'rho', 1e12);
+% Vertical Insulator: Al2O3 (k=35 from COMSOL)
+CONFIG.materials.Al2O3 = struct('k', 35, 'rho', 1e12);
 
 % ═══════════════════════════════════════════════════════════════════════════
 % CONTINUOUS OPTIMIZATION VARIABLES

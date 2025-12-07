@@ -48,7 +48,7 @@ end
 % Test Case 1: Baseline - Moderate heat flux, low current
 tc(1).name = 'Baseline_Moderate_Flux';
 tc(1).desc = 'Baseline validation with q=100 kW/m^2';
-tc(1).M = 12; tc(1).t_TEC_um = 150; tc(1).t_chip_um = 50; tc(1).t_SOI_um = 20;
+tc(1).M = 12; tc(1).t_TEC_um = 500; tc(1).t_chip_um = 50; tc(1).t_SOI_um = 20;
 tc(1).R_cyl_um = 1000; tc(1).f_L = 1.15; tc(1).fill_factor = 0.9; tc(1).w_is_um = 50;
 tc(1).I_A = 0.10; tc(1).q_Wm2 = 1e5;  % 100 kW/m²
 tc(1).ic_w_r = 0.1; tc(1).ic_t_r = 0.6; tc(1).ic_angle_r = 0.5;
