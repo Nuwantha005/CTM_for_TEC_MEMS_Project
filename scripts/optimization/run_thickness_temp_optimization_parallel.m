@@ -29,7 +29,7 @@ nvars = length(var_names);
 
 %% Integer parameter grid - FINER GRID
 % Expanded ranges for more comprehensive search
-N_values = 2:1:12;                          % Stages: 2 to 12
+N_values = 2:1:12;                          % Stages: 2 to 6
 M_values = [4, 6, 8, 10, 12, 14, 16, 18, 20, 24];  % Wedges (more options)
 
 fprintf('Integer Parameter Grid (FINE):\n');
@@ -567,8 +567,8 @@ function config = create_base_config_local(CONFIG, N, M)
     config.geometry.thickness_um = 200;
     config.geometry.t_ins_um = 10;
     config.geometry.radial_expansion_factor = 1.15;
-    config.geometry.azimuthal_gap_um = 20;
-    config.geometry.insulation_width_ratio = 0.05;
+    config.geometry.azimuthal_gap_um = 50;
+    config.geometry.insulation_width_um = 50;  % Fixed width for entire array [µm]
     config.geometry.interconnect_ratio = 0.15;
     config.geometry.interconnect_thickness_ratio = 1.0;
     config.geometry.interconnect_angle_ratio = 0.16;
@@ -623,14 +623,72 @@ function f = objective_temp_thickness_local(x, base_config, CONFIG)
         config.geometry.R_cyl_um = get_val('r_cyl_um', 1000);
         config.geometry.t_ins_um = get_val('t_ins_um', 10);
         config.geometry.radial_expansion_factor = get_val('f_L', 1.15);
-        config.geometry.azimuthal_gap_um = get_val('W_az_um', 20);
-        config.geometry.insulation_width_ratio = get_val('W_is_ratio', 0.05);
+        config.geometry.fill_factor = get_val('fill_factor', 0.7);  % Fill factor for azimuthal gap
+        config.geometry.insulation_width_um = get_val('W_is_um', 50);  % Now absolute, not ratio
         config.geometry.interconnect_ratio = get_val('f_ic_W', 0.15);
-        config.geometry.interconnect_thickness_ratio = get_val('f_ic_t', 1.0);
+        config.geometry.interconnect_thickness_ratio = get_val('f_ic_t', 0.8);
         config.geometry.interconnect_angle_ratio = get_val('f_ic_beta', 0.16);
         config.geometry.outerconnect_ratio = get_val('f_oc_W', 0.15);
-        config.geometry.outerconnect_thickness_ratio = get_val('f_oc_t', 1.0);
+        config.geometry.outerconnect_thickness_ratio = get_val('f_oc_t', 0.8);
         config.geometry.outerconnect_angle_ratio = get_val('f_oc_beta', 0.16);
+        
+        % ═══════════════════════════════════════════════════════════════════
+        % MANUFACTURABILITY CONSTRAINT CHECK
+        % Reject designs with any dimension below MIN_LENGTH_UM
+        % ═══════════════════════════════════════════════════════════════════
+        MIN_LEN = CONFIG.MIN_LENGTH_UM;  % 50 µm default
+        N = config.geometry.N_stages;
+        M = config.geometry.M_wedges;
+        t_TEC = config.geometry.thickness_um;
+        f_L = config.geometry.radial_expansion_factor;
+        r_cyl = config.geometry.R_cyl_um;  % in µm
+        fill_factor = config.geometry.fill_factor;
+        theta = 2 * pi / M;  % wedge angle in radians
+        
+        % Check azimuthal gap at innermost radius (r_cyl) - this is the minimum W_az
+        % W_az = (1 - fill_factor) * arc_length, arc_length = r * theta
+        % At r_cyl: W_az_min = (1 - fill_factor) * r_cyl * theta
+        W_az_at_r_cyl = (1 - fill_factor) * r_cyl * theta;  % in µm
+        if W_az_at_r_cyl < MIN_LEN
+            f = [1e6, 1e6];  % Penalize - azimuthal gap too small at inner radius
+            return;
+        end
+        
+        % Check all stage leg lengths: L_i = t_TEC * f_L^(i-1)
+        for i = 1:N
+            L_i = t_TEC * f_L^(i-1);
+            if L_i < MIN_LEN
+                f = [1e6, 1e6];  % Penalize non-manufacturable design
+                return;
+            end
+        end
+        
+        % Check interconnector widths: W_ic = f_ic_W * L_i
+        f_ic_W = config.geometry.interconnect_ratio;
+        for i = 1:N
+            L_i = t_TEC * f_L^(i-1);
+            W_ic = f_ic_W * L_i;
+            if W_ic < MIN_LEN
+                f = [1e6, 1e6];
+                return;
+            end
+        end
+        
+        % Check outerconnector widths: W_oc = f_oc_W * L_i
+        f_oc_W = config.geometry.outerconnect_ratio;
+        for i = 1:N
+            L_i = t_TEC * f_L^(i-1);
+            W_oc = f_oc_W * L_i;
+            if W_oc < MIN_LEN
+                f = [1e6, 1e6];
+                return;
+            end
+        end
+        
+        % W_is has bounds >= MIN_LEN in optimization_variables.m
+        % W_az is now derived from fill_factor, constrained above at r_cyl
+        
+        % ═══════════════════════════════════════════════════════════════════
         
         % Solve thermal network
         materials = MaterialProperties(config);

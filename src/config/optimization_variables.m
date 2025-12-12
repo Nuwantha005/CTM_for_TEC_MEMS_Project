@@ -50,7 +50,7 @@ CONFIG.theta_rad = 2*pi / CONFIG.M;  % θ = 2π/M
 CONFIG.M_valid = [4, 6, 8, 9, 10, 12, 15, 18, 20, 24, 30, 36, 40, 45, 60, 72, 90, 120, 180, 360];
 
 % --- Boundary Conditions ---
-CONFIG.q_flux_W_m2 = 200000;          % Heat flux at chip (W/m²)
+CONFIG.q_flux_W_m2 = 50000;          % Heat flux at chip (W/m²)
 CONFIG.h_conv_W_m2K = 1e6;           % Convection coefficient (W/m²K)
 CONFIG.T_water_K = 300;              % T_water: Coolant temperature (K)
 
@@ -58,6 +58,11 @@ CONFIG.T_water_K = 300;              % T_water: Coolant temperature (K)
 CONFIG.L_chip_um = 10000;            % L_chip: Chip length (µm)
 CONFIG.W_chip_um = 10000;            % W_chip: Chip width (µm)
 CONFIG.t_chip_um = 50;               % t_chip: Chip thickness (µm)
+
+% --- Manufacturability Constraints ---
+% Minimum feature size for fabrication (applies to lengths, widths, NOT thicknesses)
+CONFIG.MIN_LENGTH_UM = 50;           % Minimum manufacturable length/width [µm]
+% This applies to: leg lengths L_i, W_az, W_is, W_ic, W_oc
 
 % --- Material Properties ---
 % Values from COMSOL database (data/material_props/COMSOL.xml)
@@ -102,18 +107,18 @@ all_vars = {
     't_ins_um',                     5,      100,   10,     true,   't_ins: Insulator layer thickness [µm]';
 
     % ═══════════════════════════════════════════════════════════════════════
-    % GEOMETRY - DIMENSIONAL REDUCTION FACTORS
+    % GEOMETRY - DIMENSIONAL PARAMETERS
     % ═══════════════════════════════════════════════════════════════════════
-    'f_L',                          0.2,    3.0,   1.15,   true,   'f_L: Length ratio L_{i+1}/L_i';
-    'W_az_um',                      5,      100,   20,     true,   'W_az: Azimuthal insulator width [µm]';
-    'W_is_ratio',                   0.02,   0.15,  0.05,   true,   'W_is/L: Radial insulator width ratio';
+    'f_L',                          0.5,    2.0,   1.5,   true,   'f_L: Length ratio L_{i+1}/L_i (constrained for manufacturability)';
+    'fill_factor',                  0.3,    0.9,   0.7,    true,   'Fill factor: W_leg/(W_leg+W_az) at each radius (W_az derived from this)';
+    'W_is_um',                      50,     70,   60,     true,   'W_is: Radial insulator width [µm] (fixed for entire array, min 50µm)';
 
     % ═══════════════════════════════════════════════════════════════════════
     % INTERCONNECTOR (ic) - Cold side electrical contact
     % W_ic = f_{ic,W} · L, t_ic = f_{ic,t} · t_TEC, β_ic = f_{ic,β} · θ
     % ═══════════════════════════════════════════════════════════════════════
     'f_ic_W',                       0.1,    0.35,  0.15,   true,   'f_{ic,W}: Interconnector width ratio W_ic/L';
-    'f_ic_t',                       0.5,    2.0,   1.0,    true,   'f_{ic,t}: Interconnector thickness ratio t_ic/t_TEC';
+    'f_ic_t',                       0.2,    1.0,   0.8,    true,   'f_{ic,t}: Interconnector thickness ratio t_ic/t_TEC (must be ≤1.0)';
     'f_ic_beta',                    0.1,    0.4,   0.16,   true,   'f_{ic,β}: Interconnector angle ratio β_ic/θ';
 
     % ═══════════════════════════════════════════════════════════════════════
@@ -121,7 +126,7 @@ all_vars = {
     % W_oc = f_{oc,W} · L, t_oc = f_{oc,t} · t_TEC, β_oc = f_{oc,β} · θ
     % ═══════════════════════════════════════════════════════════════════════
     'f_oc_W',                       0.1,    0.35,  0.15,   true,   'f_{oc,W}: Outerconnector width ratio W_oc/L';
-    'f_oc_t',                       0.5,    2.0,   1.0,    true,   'f_{oc,t}: Outerconnector thickness ratio t_oc/t_TEC';
+    'f_oc_t',                       0.2,    1.0,   0.8,    true,   'f_{oc,t}: Outerconnector thickness ratio t_oc/t_TEC (must be ≤1.0)';
     'f_oc_beta',                    0.1,    0.4,   0.16,   true,   'f_{oc,β}: Outerconnector angle ratio β_oc/θ';
     };
 
