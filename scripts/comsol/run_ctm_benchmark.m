@@ -87,7 +87,7 @@ for i = 1:length(tc)
     
     config.operating_conditions.I_current_A = test.I_A;
     config.boundary_conditions.q_flux_W_m2 = test.q_Wm2;
-    config.boundary_conditions.T_water_K = 300;
+    config.boundary_conditions.T_water_K = 293.15;
     config.boundary_conditions.h_conv_W_m2K = 1e6;
     
     config.materials.Bi2Te3 = struct('k', 1.6, 'rho', 1.15e-5, 'S', 210e-6);

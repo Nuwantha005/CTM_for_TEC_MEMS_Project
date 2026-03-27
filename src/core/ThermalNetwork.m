@@ -268,6 +268,26 @@ classdef ThermalNetwork
                 Q_gen_nodes(i) = q_flux * A_top;
             end
 
+            % --- Precompute 50/50 splits for vertical nodes ---
+            G_vert_node = zeros(N, 1);
+            Q_gen_Si = zeros(N, 1);
+            G_vert_hot = 0;
+            for i = 1:N
+                G_v_half = 0.5 / R_vert(i);
+                Q_g_half = 0.5 * Q_gen_nodes(i);
+                
+                G_vert_node(i) = G_vert_node(i) + G_v_half;
+                Q_gen_Si(i) = Q_gen_Si(i) + Q_g_half;
+                
+                if i < N
+                    G_vert_node(i+1) = G_vert_node(i+1) + G_v_half;
+                    Q_gen_Si(i+1) = Q_gen_Si(i+1) + Q_g_half;
+                else
+                    Q_gen_Si(N) = Q_gen_Si(N) + Q_g_half;
+                    G_vert_hot = G_v_half;
+                end
+            end
+
             A_cyl = 0.5 * theta * R_cyl^2;
             Q_gen_0 = q_flux * A_cyl;
 
@@ -305,12 +325,20 @@ classdef ThermalNetwork
                     G_right = 1/R_lat_Si(i);
                 end
 
-                G_vert = 1/R_vert(i);
+                G_vert = G_vert_node(i);
                 % FIXED: Was -G_vert, should be +G_vert
                 M(idx_Si, idx_c) = G_vert;
+                
+                % Handle stage N extra coupling to hot node
+                G_vert_extra = 0;
+                if i == N
+                    M(idx_Si, idx_hot_N) = G_vert_hot;
+                    G_vert_extra = G_vert_hot;
+                end
+                
                 % FIXED: Added negative sign
-                M(idx_Si, idx_Si) = -(G_left + G_right + G_vert);
-                B(idx_Si) = B(idx_Si) - Q_gen_nodes(i);
+                M(idx_Si, idx_Si) = -(G_left + G_right + G_vert + G_vert_extra);
+                B(idx_Si) = B(idx_Si) - Q_gen_Si(i);
 
                 M(idx_c, idx_Si) = G_vert;
 
@@ -320,7 +348,7 @@ classdef ThermalNetwork
 
                 if i > 1
                     idx_c_prev = idx_c - 1;
-                    M(idx_c, idx_c_prev) = (S_stages(i-1)*I + K_stages(i-1));
+                    M(idx_c, idx_c_prev) = K_stages(i-1);
                 end
 
                 if i < N
@@ -342,7 +370,7 @@ classdef ThermalNetwork
                 end
                 
                 if i > 1
-                    sum_diag = sum_diag + K_stages(i-1);
+                    sum_diag = sum_diag + K_stages(i-1) - S_stages(i-1)*I;
                 end
                 if i == 1
                     sum_diag = sum_diag + 1/R_TEC_01;
@@ -353,7 +381,8 @@ classdef ThermalNetwork
             
             % Add hot node equation
             M(idx_hot_N, idx_c_start + N - 1) = K_TE_N;
-            M(idx_hot_N, idx_hot_N) = S_stages(N)*I - K_TE_N - 1/R_is_N;
+            M(idx_hot_N, idx_Si_start + N - 1) = G_vert_hot;
+            M(idx_hot_N, idx_hot_N) = S_stages(N)*I - K_TE_N - 1/R_is_N - G_vert_hot;
             
             Q_joule_hot_N = I^2 * R_oc_stages(N) + 0.5 * I^2 * Re_stages_leg(N);
             B(idx_hot_N) = - (1/R_is_N) * T_water - Q_joule_hot_N;
