@@ -13,15 +13,24 @@ classdef ThermalNetwork
         end
 
         function [T_new, Q_out, Q_in] = solve(obj, T_current)
+            N = obj.Geometry.N_stages;
+            dim = 2*N + 2; % extra node
+            if length(T_current) < dim
+                T_current_new = ones(dim, 1) * T_current(1);
+                T_current_new(1:length(T_current)) = T_current;
+                T_current = T_current_new;
+            end
+            
             [M, B] = obj.assemble_system(T_current);
             T_new = M \ B;
-
-            N = obj.Geometry.N_stages;
+            
             idx_c_N = 2*N + 1;
+            idx_hot_N = 2*N + 2;
             T_water = obj.Params.boundary_conditions.T_water_K;
 
             T_cold = T_new(idx_c_N);
-            T_avg = (T_cold + T_water) / 2;
+            T_hot = T_new(idx_hot_N);
+            T_avg = (T_cold + T_hot) / 2;
 
             k_p = obj.Materials.get_k('Bi2Te3', T_avg);
             k_n = obj.Materials.get_k('Bi2Te3', T_avg);
@@ -88,20 +97,8 @@ classdef ThermalNetwork
             % Note: Check directions. K*(T_c - T_h) flows TO water.
 
             % Correct Q_out calculation:
-            % S term: Carries heat to hot side
-            % K term: Conducts heat from hot to cold (backflow). We want net flow OUT.
-            % Net flow OUT = Peltier_at_hot - Back_Conduction + Joule_Heating
-
-            Q_Peltier_hot = S_N * I * T_water;
-            Q_Back_Cond = K_N * (T_water - T_cold); % Heat flowing flowing from Water to Cold
-            % If T_cold > T_water, this term is negative, meaning heat flows TO water.
-            % But usually formulated as: Q_cond = K(dT).
-            % Let's use: Q_out = S*I*T_h + K*(T_c - T_h) + Joule
-
-            Q_Conduction_to_Water = K_N * (T_cold - T_water);
-            Q_Joule_Hot = 0.5 * I^2 * Re_N + I^2 * R_oc;
-
-            Q_out = Q_Peltier_hot + Q_Conduction_to_Water + Q_Joule_Hot;
+            % Heat rejected to the water boundary is simply the conduction through the final radial insulator
+            Q_out = (1/R_is) * (T_hot - T_water);
 
 
             % n_wedges = 2*pi / obj.Geometry.WedgeAngle;
@@ -135,13 +132,14 @@ classdef ThermalNetwork
 
         function [M, B] = assemble_system(obj, T_current)
             N = obj.Geometry.N_stages;
-            dim = 2*N + 1;
+            dim = 2*N + 2; % Extra node for hot junction
             M = zeros(dim, dim); % spalloc(dim, dim, 5*dim);
             B = zeros(dim, 1);
 
             idx_0 = 1;
             idx_Si_start = 2;
             idx_c_start = N + 2;
+            idx_hot_N = 2*N + 2;
 
             I = obj.Params.operating_conditions.I_current_A;
             T_water = obj.Params.boundary_conditions.T_water_K;
@@ -244,6 +242,11 @@ classdef ThermalNetwork
                 % Azimuthal conductance (5 parallel paths)
                 K_az_val = obj.Geometry.calculate_K_azimuthal(r_in, L, w_az, t_tec, k_az, theta);
 
+                if i == N
+                    K_TE_N = K_legs + 5 * K_az_val;
+                    R_is_N = R_is;
+                end
+
                 % Total stage conductance: TE legs + 5 azimuthal paths in parallel
                 K_stages(i) = K_eff_series + 5 * K_az_val;
                 S_stages(i) = S_p - (-abs(S_n));
@@ -324,7 +327,7 @@ classdef ThermalNetwork
                     idx_c_next = idx_c + 1;
                     M(idx_c, idx_c_next) = K_stages(i); %+K
                 else
-                    B(idx_c) = B(idx_c) - K_stages(i) * T_water; %-K
+                    M(idx_c, idx_hot_N) = K_TE_N;
                 end
 
                 B(idx_c) = B(idx_c) - I^2 * (Re_stages_leg(i)/2 + R_ic_stages(i));
@@ -332,7 +335,12 @@ classdef ThermalNetwork
                     B(idx_c) = B(idx_c) - I^2 * (Re_stages_leg(i-1)/2 + R_oc_stages(i-1));
                 end
 
-                sum_diag = G_vert + S_stages(i)*I + K_stages(i); % -K
+                if i < N
+                    sum_diag = G_vert + S_stages(i)*I + K_stages(i); % -K
+                else
+                    sum_diag = G_vert + S_stages(i)*I + K_TE_N;
+                end
+                
                 if i > 1
                     sum_diag = sum_diag + K_stages(i-1);
                 end
@@ -342,6 +350,13 @@ classdef ThermalNetwork
 
                 M(idx_c, idx_c) = -sum_diag;
             end
+            
+            % Add hot node equation
+            M(idx_hot_N, idx_c_start + N - 1) = K_TE_N;
+            M(idx_hot_N, idx_hot_N) = S_stages(N)*I - K_TE_N - 1/R_is_N;
+            
+            Q_joule_hot_N = I^2 * R_oc_stages(N) + 0.5 * I^2 * Re_stages_leg(N);
+            B(idx_hot_N) = - (1/R_is_N) * T_water - Q_joule_hot_N;
 
             % DEBUG: Display full matrix for N=3
             % if N == 3

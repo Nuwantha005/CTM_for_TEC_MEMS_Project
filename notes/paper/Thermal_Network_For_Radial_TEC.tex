@@ -16,6 +16,12 @@
 \usepackage{cleveref}
 \usepackage{siunitx}
 \usepackage[font=small, labelfont=bf]{caption}
+% Center captions across columns
+\captionsetup{justification=centering,singlelinecheck=false}
+\captionsetup[figure]{justification=centering,singlelinecheck=false}
+\captionsetup[table]{justification=centering,singlelinecheck=false}
+
+\pagenumbering{Roman} % For uppercase Roman numerals (I, II, III)
 
 \usepackage{xcolor}
 \usepackage[most]{tcolorbox}
@@ -1279,20 +1285,12 @@ $$ \mathbf{Link_{Si \to 0}} = \begin{bmatrix} \frac{1}{R_{\text{chip}, 0\to 1}} 
 \textbf{Description:} A column vector of size $N \times 1$. This is the transpose of Region 2.
 
 \subsubsection{$\mathbf{A_{chip}}$ - Lateral Conduction Matrix}
-The matrix $\mathbf{A_{chip}}$ is shown in \cref{fig:A_chip}.
 \textbf{Description:} A symmetric \textbf{Tridiagonal} matrix representing passive heat spreading.
 \begin{itemize}
     \item \textbf{Diagonal $(i,i)$:} The negative sum of all conductances leaving the node.
     \item \textit{Boundary:} Note that at $i=1$, the term connects to $T_0$. At $i=N$, the term assumes an adiabatic edge (no $R_{\text{chip},N}$).
     \item \textbf{Off-Diagonals:} Represents the lateral resistance $R_{\text{chip}}$ between rings.
 \end{itemize}
-
-\begin{figure*}
-    \centering
-    $$ \mathbf{A_{chip}} = \begin{bmatrix} -\left( \frac{1}{R_{\text{chip},0\to 1}} + \frac{1}{R_{\text{chip},1}} + \frac{1}{R_{\text{ve},1}} \right) & \frac{1}{R_{\text{chip},1}} & 0 & \dots \\ \frac{1}{R_{\text{chip},1}} & -\left( \frac{1}{R_{\text{chip},1}} + \frac{1}{R_{\text{chip},2}} + \frac{1}{R_{\text{ve},2}} \right) & \frac{1}{R_{\text{chip},2}} & \dots \\ \vdots & \ddots & \ddots & \vdots \\ 0 & \dots & \frac{1}{R_{\text{chip},N-1}} & -\left( \frac{1}{R_{\text{chip},N-1}} + \frac{1}{R_{\text{ve},N}} \right) \end{bmatrix}_{N \times N} $$
-    \caption{Lateral Conduction Matrix $\mathbf{A_{chip}}$}
-    \label{fig:A_chip}
-\end{figure*}
 
 \subsubsection{$\mathbf{A_{ve}}$ - Vertical Coupling}
 $$ \mathbf{A_{ve}} = \begin{bmatrix} \frac{1}{R_{\text{ve},1}} & 0 & \dots & 0 \\ 0 & \frac{1}{R_{\text{ve},2}} & \dots & 0 \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \dots & \frac{1}{R_{\text{ve},N}} \end{bmatrix}_{N \times N} $$
@@ -1306,7 +1304,6 @@ $$ \mathbf{Link_{TEC \to 0}} = \begin{bmatrix} \frac{1}{R_{\text{TEC}, 0\to 1}} 
 \textbf{Description:} A column vector of size $N \times 1$. This is the transpose of Region 3.
 
 \subsubsection{$\mathbf{A_{TEC}}$ - Active Pumping Matrix}
-The matrix $\mathbf{A_{TEC}}$ is shown in \cref{fig:A_TEC}.
 \textbf{Description:} An \textbf{Asymmetric Tridiagonal} matrix.
 \begin{itemize}
     \item \textbf{Diagonal $(i,i)$:} Negative sum of Vertical Loss + Back conduction IN + Peltier OUT + Back conduction OUT.
@@ -1314,18 +1311,8 @@ The matrix $\mathbf{A_{TEC}}$ is shown in \cref{fig:A_TEC}.
     \item \textbf{Upper Off-Diagonal $(i, i+1)$:} Only back conduction $K_{t,i}$ comes from the hotter stage. The Peltier term does not flow "backwards".
 \end{itemize}
 
-\begin{figure*}
-    \centering
-    \tiny
-    $$ \mathbf{A_{TEC}} = \begin{bmatrix} -\left(\frac{1}{R_{\text{ve},1}} + \frac{1}{R_{\text{TEC},0\to 1}} + S_1 I_1 + K_{t,1} \right) & K_{t,1} & 0 & \dots \\ (S_1 I_1 + K_{t,1}) & -\left(\frac{1}{R_{\text{ve},2}} + K_{t,1} + S_2 I_2 + K_{t,2} \right) & K_{t,2} & \dots \\ \vdots & \ddots & \ddots & \vdots \\ 0 & \dots & (S_{N-1} I_{N-1} + K_{t,N-1}) & -\left(\frac{1}{R_{\text{ve},N}} + K_{t,N-1} + S_N I_N + K_{t,N} \right) \end{bmatrix}_{N \times N} $$
-    \caption{Active Pumping Matrix $\mathbf{A_{TEC}}$}
-    \label{fig:A_TEC}
-\end{figure*}
-
-
-
 \subsubsection{Vector $\mathbf{B}$ - Source Vector}
-The vector $\mathbf{B}$ is shown in \cref{fig:Vector_B}.
+
 \textbf{Description:}
 \begin{itemize}
     \item $\mathbf{B_{0}}$: Heat generation at the center.
@@ -1336,15 +1323,49 @@ The vector $\mathbf{B}$ is shown in \cref{fig:Vector_B}.
     \item \textbf{Last Row:} Includes the boundary condition term $-K_{t,N} T_{\text{w}}$.
 \end{itemize}
 
-\begin{figure*}
-    \centering
-    $$ \mathbf{B} = \begin{bmatrix} -Q_{\text{gen},0} \\ \hline -Q_{\text{gen},1} \\ \vdots \\ -Q_{\text{gen},N} \\ \hline -I_{1}^2 \left( \frac{R_{\text{TE-p},1}+R_{\text{TE-n},1}}{2} + R_{\text{ic},1} \right) \\ \vdots \\ -K_{t,N} T_{\text{w}} - I_{N-1}^2 \left( \frac{R_{\text{TE-p},N-1}+R_{\text{TE-n},N-1}}{2} + R_{\text{oc},N-1} \right) - I_{N}^2 \left( \frac{R_{\text{TE-p},N}+R_{\text{TE-n},N}}{2} + R_{\text{ic},N} \right) \end{bmatrix}_{(2N+1) \times 1} $$
-    \caption{Source Vector $\mathbf{B}$}
-    \label{fig:Vector_B}
-\end{figure*}
+
+\section{Validation}
+
+The developed Compact Thermal Model (CTM) has been validated against a high-fidelity COMSOL Multiphysics simulation. The comparison focuses on the maximum temperature achieved within the radial TEC structure under identical operating conditions.
+
+For all the test cases, a 3 stage radial TEC model was used. The CAD geometry was created in SolidWorks using a parametric model, allowing for easy adjustments of design parameters such as wedge angle, TEC thickness, and leg length. The CAD model was then live linked with COMSOL, and the MATLAB API for COMSOL was used to automate the simulation process and extract results. This workflow is illustrated below:
+
+$$\begin{matrix}\mathrm{Parametric}&& && \mathrm{COMSOL}\\\mathrm{SolidWorks}&&\longleftrightarrow&&\updownarrow\\\mathrm{model}&&&&\mathrm{MATLAB}\end{matrix}$$
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Validation Cases: CTM vs COMSOL Comparison}
+  \label{tab:validation_cases}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
+    \hline
+    \textbf{Case} & \textbf{Name} & \textbf{$\theta$} & \textbf{$t_{\text{TEC}}$} & \textbf{$f_L$} & \textbf{$L_1$} & \textbf{$I$} & \textbf{$q$} & \textbf{MATLAB} & \textbf{COMSOL} & \textbf{Error} & \textbf{Error} \\
+    \textbf{ID} & & \textbf{(°)} & \textbf{($\mu m$)} & & \textbf{($\mu m$)} & \textbf{(mA)} & \textbf{(W/m²)} & \textbf{$T_{\max}$ (°C)} & \textbf{$T_{\max}$ (°C)} & \textbf{(°C)} & \textbf{(\%)} \\
+    \hline
+    1 & Thin TEC Low Current & 30 & 100 & 1.00 & 1957.02 & 50 & 500 & 36.04 & 20.48 & -15.56 & -43.2 \\
+    \hline
+    2 & Moderate Current & 30 & 150 & 1.15 & 1690.73 & 100 & 500 & 31.81 & 20.25 & -11.56 & -36.4 \\
+    \hline
+    3 & Length Ratio Test & 30 & 150 & 1.20 & 1612.93 & 80 & 500 & 30.68 & 20.32 & -10.36 & -33.8 \\
+    \hline
+    4 & High Heat Flux & 30 & 200 & 1.15 & 1690.73 & 120 & 2000 & 58.23 & 22.42 & -35.81 & -61.5 \\
+    \hline
+    5 & Wide Wedge Angle & 45 & 150 & 1.15 & 1690.73 & 80 & 1000 & 44.85 & 21.33 & -23.52 & -52.4 \\
+    \hline
+  \end{tabular}
+\end{table}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{images/verification_comparison.png}
+  \caption{Maximum Temperature between CTM and COMSOL (left) and Prediction Error (right)}
+  \label{fig:comparsion_with_comsol}
+\end{figure}
+
+\begin{customnote}
+  The validation results show systematic overprediction of maximum temperature in the CTM compared to COMSOL. This discrepancy may stem from simplified assumptions in the compact model, particularly regarding heat spreading efficiency and the dimensional reduction approach. Nevertheless, the CTM provides a computationally efficient tool for rapid design iteration and optimization, with simulation times significantly faster than COMSOL.
+\end{customnote}
 
 \section{Summary}
 
-The complete thermal behavior of the radial TEC array is now encapsulated in the linear system $\mathbf{A} \cdot \mathbf{T} = \mathbf{B}$. Solving this system yields the temperature distribution vector $\mathbf{T}$, providing a computationally efficient metric for evaluating and optimizing the cooling performance of the radial TEC design.
-
+The complete thermal behavior of the radial TEC array is encapsulated in the linear system $\mathbf{A} \cdot \mathbf{T} = \mathbf{B}$. Solving this system yields the temperature distribution vector $\mathbf{T}$, providing a computationally efficient metric for evaluating and optimizing the cooling performance of the radial TEC design. While validation against high-fidelity COMSOL simulations reveals systematic overprediction of maximum temperatures, the Compact Thermal Model (CTM) remains a valuable tool for preliminary optimization due to its significantly reduced computational cost.
 \end{document}
