@@ -1,0 +1,29 @@
+INFO:  latexindent version 3.24.7, 2025-08-15, a script to indent .tex files
+       latexindent lives here: /usr/share/texmf-dist/scripts/latexindent/
+       Wed Apr  1 00:09:55 2026
+       Filename: /run/media/nuwa/Work/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/mercon_paper/draft.tex
+INFO:  Processing switches:
+       -s|--silent: Silent mode active (you have used either -s or --silent)
+       -w|--overwrite: Overwrite mode active, will make a back up before overwriting
+INFO:  Directory for backup files and log file indent.log:
+       /run/media/nuwa/Work/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/mercon_paper
+INFO:  YAML settings read: defaultSettings.yaml
+       Reading defaultSettings.yaml from /usr/share/texmf-dist/scripts/latexindent/defaultSettings.yaml
+INFO:  YAML reading settings
+       Home directory is /home/nuwa
+       latexindent.pl didn't find indentconfig.yaml or .indentconfig.yaml
+       see all possible locations: https://latexindentpl.readthedocs.io/en/latest/sec-appendices.html#indentconfig-options)
+INFO:  Backup procedure (-w flag active):
+       /run/media/nuwa/Work/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/mercon_paper/draft.bak0 already exists, incrementing by 1 (see maxNumberOfBackUps)
+       /run/media/nuwa/Work/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/mercon_paper/draft.bak1 already exists, incrementing by 1 (see maxNumberOfBackUps)
+       Backing up /run/media/nuwa/Work/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/mercon_paper/draft.tex to /run/media/nuwa/Work/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/mercon_paper/draft.bak2...
+       /run/media/nuwa/Work/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/mercon_paper/draft.tex will be overwritten after indentation
+INFO:  Phase 1: searching for objects
+INFO:  Phase 2: finding surrounding indentation
+INFO:  Phase 3: indenting objects
+INFO:  Phase 4: final indentation check
+INFO:  Output routine:
+       Overwriting file /run/media/nuwa/Work/Semester 7/ME4311 - MicroNano Electro Mechanical Systems and Nanotechnology/Project/Preliminary Optimization/Algorithm/notes/mercon_paper/draft.tex
+       --------------
+INFO:  Please direct all communication/issues to:
+        https://github.com/cmhughes/latexindent.pl

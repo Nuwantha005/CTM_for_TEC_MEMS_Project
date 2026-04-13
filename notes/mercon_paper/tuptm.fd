@@ -1,0 +1,9 @@
+\ProvidesFile{tuptm.fd}[2026/04/01 Fake Times font definition for TU]
+\DeclareFontFamily{TU}{ptm}{}
+\DeclareFontShape{TU}{ptm}{m}{n}{<-> ssub * lmr/m/n}{}
+\DeclareFontShape{TU}{ptm}{m}{it}{<-> ssub * lmr/m/it}{}
+\DeclareFontShape{TU}{ptm}{b}{n}{<-> ssub * lmbx/m/n}{}
+\DeclareFontShape{TU}{ptm}{b}{it}{<-> ssub * lmbx/m/it}{}
+\DeclareFontShape{TU}{ptm}{bx}{n}{<-> ssub * lmbx/m/n}{}
+\DeclareFontShape{TU}{ptm}{bx}{it}{<-> ssub * lmbx/m/it}{}
+\endinput

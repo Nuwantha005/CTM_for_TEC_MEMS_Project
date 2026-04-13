@@ -1,0 +1,207 @@
+function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_name, values, base_cases, output_dir, run_idx_offset, comsol_model_path)
+% run_single_validity_sweep Executes a 1D vs 3D sweep for a single variable
+%   sweep_name - String label for the sweep (e.g. 'HeatFlux')
+%   var_name - Property to vary ('q_Wm2', 'M', or 't_TEC_um')
+%   values - Array of values to sweep over
+%   base_cases - Base configuration structure
+%   output_dir - Directory to save CSV incrementally
+%   run_idx_offset - Integer for global run numbering
+%   comsol_model_path - Path to the mph file
+
+    results = table();
+    run_idx = run_idx_offset;
+    total_runs = length(values);
+    
+    %% Helper to calculate L_1
+    calc_L1 = @(R_cyl, w_is, f_L) ((10000e-6 / sqrt(2)) - (R_cyl*1e-6) - (3+1)*(w_is*1e-6)) * (1-f_L)/(1-f_L^3) * 1e6;
+
+    for vi = 1:length(values)
+        val = values(vi);
+        fprintf('\n[%d/%d] %s Sweep: %s = %.2f\n', vi, total_runs, sweep_name, var_name, val);
+
+        % Start with baseline, override current sweep variable
+        q_now = base_cases.base_q;
+        M_now = base_cases.base_M;
+        t_now = base_cases.base_t_TEC;
+        f_now = base_cases.f_L;
+
+        if strcmp(var_name, 'q_Wm2'), q_now = val; end
+        if strcmp(var_name, 'M'), M_now = val; end
+        if strcmp(var_name, 't_TEC_um'), t_now = val; end
+        if strcmp(var_name, 'f_L'), f_now = val; end
+
+        theta_deg = 360 / M_now;
+        L1_now = calc_L1(base_cases.R_cyl_um, base_cases.w_is_um, f_now);
+
+        %% Run MATLAB CTM
+        try
+            config = struct();
+            config.geometry.N_stages = 3;
+            config.geometry.wedge_angle_deg = theta_deg;
+            config.geometry.thickness_um = t_now;
+            config.geometry.radial_expansion_factor = f_now;
+            config.geometry.w_chip_um = 10000;
+            config.geometry.R_cyl_um = base_cases.R_cyl_um;
+            config.geometry.t_chip_um = base_cases.t_chip_um;
+            config.geometry.t_ins_um = base_cases.t_SOI_um;
+            config.geometry.interconnect_ratio = base_cases.ic_w_r;
+            config.geometry.outerconnect_ratio = base_cases.oc_w_r;
+            config.geometry.insulation_width_um = base_cases.w_is_um;
+            config.geometry.interconnect_angle_ratio = base_cases.ic_angle_r;
+            config.geometry.outerconnect_angle_ratio = base_cases.oc_angle_r;
+            config.geometry.interconnect_thickness_ratio = base_cases.ic_t_r;
+            config.geometry.outerconnect_thickness_ratio = base_cases.oc_t_r;
+            config.geometry.fill_factor = base_cases.fill_factor;
+
+            config.operating_conditions.I_current_A = base_cases.I_A;
+            config.boundary_conditions.q_flux_W_m2 = q_now;
+            config.boundary_conditions.T_water_K = base_cases.T_water;
+            config.boundary_conditions.h_conv_W_m2K = 1e6;
+
+            config.materials.Bi2Te3 = struct('k', 1.6, 'rho', 1.15e-5, 'S', 210e-6);
+            config.materials.Cu    = struct('k', 400, 'rho', 1.667e-8);
+            config.materials.Si    = struct('k', 130, 'rho', 0.01);
+            config.materials.AlN   = struct('k', 170, 'rho', 1e10);
+            config.materials.SiO2  = struct('k', 1.4, 'rho', 1e14);
+            config.materials.Al2O3 = struct('k', 35, 'rho', 1e12);
+
+            materials = MaterialProperties(config);
+            geometry = TECGeometry(config);
+            network = ThermalNetwork(geometry, materials, config);
+
+            T = ones(8, 1) * 300;
+            for iter = 1:100
+                T_old = T;
+                [T, Q_out, Q_in] = network.solve(T);
+                if max(abs(T - T_old)) < 1e-6
+                    break;
+                end
+            end
+            matlab_T = max(T) - 273.15;
+            fprintf('  MATLAB T_max = %.2f C\n', matlab_T);
+        catch ME
+            fprintf('  MATLAB Error: %s\n', ME.message);
+            matlab_T = NaN;
+        end
+
+        %% Run COMSOL
+        try
+            import com.comsol.model.*
+            import com.comsol.model.util.*
+            try
+                model = mphload(comsol_model_path);
+            catch
+                fprintf('  Error loading model. Ensuring mphserver is ready...\n');
+                % Give the server a moment if it just restarted
+                pause(5);
+                model = mphload(comsol_model_path);
+            end
+
+            model.param.set('LL_k_r', sprintf('%g', f_now));
+            model.param.set('LL_L_1', sprintf('%g', L1_now));
+            model.param.set('LL_R_cyl', sprintf('%g', base_cases.R_cyl_um));
+            model.param.set('LL_t_chip', sprintf('%g', base_cases.t_chip_um));
+            model.param.set('LL_t_SOI', sprintf('%g', base_cases.t_SOI_um));
+            model.param.set('LL_t_TEC', sprintf('%g', t_now));
+            model.param.set('LL_theta', sprintf('%g', theta_deg));
+            model.param.set('LL_w_is', sprintf('%g', base_cases.w_is_um));
+            model.param.set('q_i', sprintf('%g[W/m^2]', q_now));
+            model.param.set('I_0', sprintf('%g[A]', base_cases.I_A));
+            model.param.set('LL_fill_factor', sprintf('%g', base_cases.fill_factor));
+            model.param.set('LL_ic_angle_r', sprintf('%g', base_cases.ic_angle_r));
+            model.param.set('LL_ic_t_r', sprintf('%g', base_cases.ic_t_r));
+            model.param.set('LL_ic_w_r', sprintf('%g', base_cases.ic_w_r));
+            model.param.set('LL_oc_angle_r', sprintf('%g', base_cases.oc_angle_r));
+            model.param.set('LL_oc_t_r', sprintf('%g', base_cases.oc_t_r));
+            model.param.set('LL_oc_w_r', sprintf('%g', base_cases.oc_w_r));
+
+            model.study('std1').run();
+            try
+                T_all = mpheval(model, 'T', 'dataset', 'dset1');
+                comsol_T = max(T_all.d1) - 273.15;
+            catch
+                comsol_T = NaN;
+            end
+            fprintf('  COMSOL T_max = %.2f C\n', comsol_T);
+
+            ModelUtil.remove('Model'); % Clean up RAM
+
+        catch ME
+            fprintf('  COMSOL Error: %s\n', ME.message);
+            comsol_T = NaN;
+            
+            % Attempt to recover Model if loaded but failed
+            try, ModelUtil.remove('Model'); catch, end 
+            
+            fprintf('  Restarting COMSOL connection due to error...\n');
+            system('taskkill /F /IM comsolmphserver.exe 2>nul', '-echo');
+            pause(2);
+            system(sprintf('start "" "%s" -port %d', 'F:\EngineeringSoftware\COMSOL\COMSOL63\Multiphysics\bin\win64\comsolmphserver.exe', 2036));
+            pause(15);
+            try
+                mphstart(2036);
+            catch
+            end
+        end
+
+        %% Save to results
+        err_abs = comsol_T - matlab_T;
+        err_pct = 100 * abs(err_abs) / abs(comsol_T);
+
+        new_row = table(run_idx, categorical({sweep_name}), categorical({var_name}), val, ...
+            q_now, M_now, theta_deg, t_now, ...
+            matlab_T, comsol_T, err_abs, err_pct, ...
+            'VariableNames', {'RunID', 'SweepType', 'Variable', 'Value', ...
+            'q_Wm2', 'M', 'theta_deg', 't_TEC_um', ...
+            'MATLAB_Tmax', 'COMSOL_Tmax', 'Error_Abs', 'Error_Pct'});
+
+        results = [results; new_row];
+        
+        file_path = fullfile(output_dir, sprintf('%s_sweep_results.csv', sweep_name));
+        writetable(results, file_path);
+        
+        run_idx = run_idx + 1;
+    end
+    
+    %% Generate and Save Plot for the Sweep
+    try
+        fig = figure('Name', sprintf('%s Sweep Error', sweep_name), 'Visible', 'off');
+        
+        % Plot Error on left axis
+        yyaxis left
+        plot(results.Value, results.Error_Pct, '-o', 'LineWidth', 2, 'MarkerSize', 6);
+        ylabel('Relative Error (%)');
+        
+        % Plot Temperatures on right axis
+        yyaxis right
+        plot(results.Value, results.MATLAB_Tmax, '-s', 'LineWidth', 1.5, 'MarkerSize', 6);
+        hold on;
+        plot(results.Value, results.COMSOL_Tmax, '-d', 'LineWidth', 1.5, 'MarkerSize', 6);
+        ylabel('Max Temperature (^\circC)');
+        
+        legend('Error (%)', 'MATLAB T_{max}', 'COMSOL T_{max}', 'Location', 'best');
+        title(sprintf('1D vs 3D Validation: %s', strrep(sweep_name, '_', ' ')));
+        
+        % Clean up the x-axis label for display
+        clean_var_name = strrep(var_name, '_', ' ');
+        if strcmp(var_name, 'q_Wm2'), clean_var_name = 'Heat Flux (W/m^2)'; end
+        if strcmp(var_name, 't_TEC_um'), clean_var_name = 'TEC Thickness (\mum)'; end
+        if strcmp(var_name, 'M'), clean_var_name = 'M (Number of Wedges)'; end
+        xlabel(clean_var_name);
+        
+        grid on;
+        
+        % Save formats
+        plot_path_png = fullfile(output_dir, sprintf('%s_sweep_plot.png', sweep_name));
+        plot_path_fig = fullfile(output_dir, sprintf('%s_sweep_plot.fig', sweep_name));
+        saveas(fig, plot_path_png);
+        savefig(fig, plot_path_fig);
+        close(fig);
+        
+        fprintf('  Saved sweep plot to %s\n', plot_path_png);
+    catch ME
+        fprintf('  Warning: Could not save plot: %s\n', ME.message);
+    end
+    
+    next_run_idx = run_idx;
+end

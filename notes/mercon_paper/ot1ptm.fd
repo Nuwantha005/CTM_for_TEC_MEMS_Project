@@ -1,0 +1,11 @@
+\ProvidesFile{ot1ptm.fd}
+\DeclareFontFamily{OT1}{ptm}{}
+\DeclareFontShape{OT1}{ptm}{m}{n}{<-> ssub * cmr/m/n}{}
+\DeclareFontShape{OT1}{ptm}{m}{it}{<-> ssub * cmr/m/it}{}
+\DeclareFontShape{OT1}{ptm}{m}{sl}{<-> ssub * cmr/m/sl}{}
+\DeclareFontShape{OT1}{ptm}{m}{sc}{<-> ssub * cmr/m/sc}{}
+\DeclareFontShape{OT1}{ptm}{b}{n}{<-> ssub * cmr/bx/n}{}
+\DeclareFontShape{OT1}{ptm}{bx}{n}{<-> ssub * cmr/bx/n}{}
+\DeclareFontShape{OT1}{ptm}{b}{it}{<-> ssub * cmr/bx/it}{}
+\DeclareFontShape{OT1}{ptm}{bx}{it}{<-> ssub * cmr/bx/it}{}
+\endinput

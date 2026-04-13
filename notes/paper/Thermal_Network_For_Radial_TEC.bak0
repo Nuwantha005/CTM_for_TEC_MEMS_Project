@@ -1,0 +1,1371 @@
+\documentclass[10pt,a4paper,twocolumn]{article}
+
+% --- Packages ---
+\usepackage{times}
+\usepackage{setspace}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{mathtools}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{angles, quotes, calc, arrows.meta, decorations.pathreplacing}
+\usepackage[americanresistors]{circuitikz}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=red,urlcolor=magenta]{hyperref}
+\usepackage{cleveref}
+\usepackage{siunitx}
+\usepackage[font=small, labelfont=bf]{caption}
+% Center captions across columns
+\captionsetup{justification=centering,singlelinecheck=false}
+\captionsetup[figure]{justification=centering,singlelinecheck=false}
+\captionsetup[table]{justification=centering,singlelinecheck=false}
+
+\pagenumbering{Roman} % For uppercase Roman numerals (I, II, III)
+
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+% Define a custom tcolorbox style for a 'Note'
+\tcbset{
+    NoteBox/.style={
+        colback=yellow!10, % Background color (light yellow)
+        colframe=orange,   % Frame color (orange)
+        boxrule=1pt,       % Border thickness
+        arc=4pt,           % Rounded corners
+        left=10pt,         % Left padding
+        right=10pt,        % Right padding
+        top=6pt,           % Top padding
+        bottom=6pt,        % Bottom padding
+        % Indentation: set parindent inside the box
+        before upper={\parindent 15pt},
+    }
+}
+% Define a new environment using the custom style
+\newenvironment{customnote}[1][]{
+    \begin{tcolorbox}[NoteBox, #1]
+}{
+    \end{tcolorbox}
+}
+
+
+% --- Settings ---
+\singlespacing
+\pagestyle{plain}
+\setlength{\parindent}{0pt}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\setlength{\columnsep}{20pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+
+\begin{document}
+
+\twocolumn[
+  \noindent\LARGE\textbf{Appendix A}
+  \vspace{1em}
+]
+
+\section{Introduction}
+
+The radial TEC cooler can be modeled using a thermal network, reducing the system to whats known as a \textbf{Compact Thermal Model (CTM)}. This reduces the problem to a linear system and it can be used for preliminary design decisions and optimization. The thermal network is configured as a single stage occupies a cocentric ring around the chip, with multiple stages stacked radially outward for increased performance. This asymmetric feature can be exploited to model only a single as a one dimensional radial network. However, the presence of the chip layer, which emulates the heat flux from the chip, converts the system into a two dimensional network.
+
+\begin{figure}[H]
+  \centering
+  \fbox{%%
+    \parbox{0.90\columnwidth}{%
+      \footnotesize
+      \textbf{Nomenclature}\\[2pt]
+      \textbf{Symbols}\\[2pt]
+      \begin{tabular}{@{}p{0.12\columnwidth}p{0.78\columnwidth}@{}}
+        $\theta$ & Wedge Angle [\si{rad}]                           \\
+        $r$      & radius [\si{m}]                                  \\
+        $L$      & Length [\si{m}]                                  \\
+        $W$      & width [\si{m}]                                   \\
+        $N$      & No. of Stages [\si{\mathbb{Z^+}}]                \\
+        $t$      & thickness [\si{m}]                               \\
+        $f$      & Fractions use for dimensional reduction [\si{-}] \\
+        $Q$      & Heat Load [\si{W}]                               \\
+        $\kappa$ & Thermal Conductivity [\si{W/(m.K)}]              \\
+        $\rho$   & Electrical Resistivity [\si{\Omega m}]           \\
+        $T$      & Temperature [\si{K}]                             \\
+        $A$      & Cross Sectional Area [\si{m^2}]                  \\
+        $\kappa$ & Thermal Conductivity [\si{W/(m.K)}]              \\
+        $\rho$   & Electrical Resistivity [\si{\Omega m}]           \\
+        $S$      & Seebeck Coefficient [\si{V/K}]                   \\
+      \end{tabular}
+
+      \vspace{4pt}
+      \textbf{Subscripts and Superscripts}\\[2pt]
+      \begin{tabular}{@{}p{0.12\columnwidth}p{0.78\columnwidth}@{}}
+        $\text{chip}$ & Chip Layer                  \\
+        $\text{base}$ & Base of radial TEC array    \\
+        $\text{ins}$  & Insulator Layer             \\
+        $\text{TEC}$  & TEC Layer                   \\
+        $\text{cyl}$  & Cylinder                    \\
+        $i$           & i\textsuperscript{th} stage \\
+        $\text{in}$   & Inner                       \\
+        $\text{out}$  & Outer                       \\
+        $\text{is}$   & Radial Insulator            \\
+        $\text{az}$   & Azimuthal Insulator         \\
+        $\text{p}$    & p type leg                  \\
+        $\text{n}$    & n type leg                  \\
+        $\text{ic}$   & Interconnection             \\
+        $\text{oc}$   & Outerconnection             \\
+        $\text{e}$    & Electrical                  \\
+        $\text{t}$    & Thermal                     \\
+        $\text{ins}$  & Insulator Layer             \\
+        ve            & Vertical                    \\
+      \end{tabular}
+    }}
+\end{figure}
+
+\section{Geometry Parametrization}
+
+To allow a robust optimization framework, each and all the geometric elements of the radial TEC array must be parametrized. The radius of the TEC array is defined by $r_{\text{base}}$ such that it covers the entire rectangular chip area. The chip is assumed to be square with side length $L_{\text{chip}}$, and width $W_{\text{chip}}$. Therefore, the base radius is defined as:
+\begin{equation}
+  r_{\text{base}} = \frac{1}{2}\sqrt{L_{\text{chip}}^2+W_{\text{chip}}^2}
+\end{equation}
+
+\subsection{Wedge}
+
+Wedges are the fundamental repeating unit of the radial TEC structure. Each wedge contains a single element for each stage arranged radially. The innermost TEC element is belongs the to first stage and the outermost element belongs to the last stage. The wedge is mainly parametrized by the wedge angle $\theta$ and the base radius $r_{\text{base}}$, as shown in \cref{fig:wedge_top_view}. The wedge angle is determined by the number of wedges $N$ in the full 360 degree array, such that $\theta = 2 \pi / N$. The base radius is defined as the radial distance from the center of the chip to the inner edge of the first stage TEC element.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \node[anchor=south west, inner sep=0pt] (img) at (0,0) {
+      \includegraphics[width=0.95\columnwidth]{images/wedge_top_view.png}
+    };
+    \coordinate (Centre) at (0.1, 0.3);
+    \coordinate (ArcStart) at (5.6, 3.5);
+    \coordinate (ArcEnd) at (6.3, 0.1);
+    \draw[{Stealth}-{Stealth}, black, thin] (Centre) -- (ArcStart) node[midway, above, sloped] {$r_{\text{base}}$};
+    \pic [draw, black, thin, "$\theta$", angle eccentricity=1.09, angle radius=6.65cm,
+    pic actions/.append style={{Stealth}-{Stealth}}] {angle = ArcEnd--Centre--ArcStart};
+  \end{tikzpicture}
+  \caption{Top view of a single wedge showing the base radius $r_{\text{base}}$ and wedge angle $\theta$.}
+  \label{fig:wedge_top_view}
+\end{figure}
+
+\subsection{Layer System}
+
+Radial TEC array consists of 3 main layers stacked vertically, namely the chip layer, insulator layer, and the radial TEC array layer. The chip layer is modeled as a heat source with a constant heat flux boundary condition. The insulator layer provides electrical isolation between the chip and the TEC array. The radial TEC array layer contains the TEC elements and radial insulators arranged in a wedge pattern. Each layer is defined mainly by its thickness, denoted as $t_{\text{chip}}$, $t_{\text{ins}}$, and $t_{\text{TEC}}$ respectively.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \node[anchor=south west, inner sep=0pt] (img) at (0,0) {
+      \includegraphics[width=0.95\columnwidth]{images/layers_side_view.png}
+    };
+    \coordinate (A) at (4.1, 4.3);
+    \coordinate (B) at (4.1, 1.8);
+    \coordinate (C) at (4.1, 1.3);
+    \coordinate (D) at (4.1, 0.1);
+    \draw[{Stealth}-{Stealth}, black, thin] (A) -- (B) node[midway, right] {$t_{\text{TEC}}$};
+    \draw[{Stealth}-{Stealth}, black, thin] (B) -- (C) node[midway, right] {$t_{\text{ins}}$};
+    \draw[{Stealth}-{Stealth}, black, thin] (C) -- (D) node[midway, right] {$t_{\text{chip}}$};
+  \end{tikzpicture}
+  \caption{Side view of the layer system.}
+  \label{fig:layers_side_view}
+\end{figure}
+
+\subsection{Central Cylinder}
+
+In the center of the radial TEC array lies a cylindrical region that represents the area not covered by the TEC elements. This central cylinder is defined by its radius $r_{\text{cyl}}$. This cylinder spans all 3 layers of the system, from the chip layer to the radial TEC array layer.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \node[anchor=south west, inner sep=0pt] (img) at (0,0) {
+      \includegraphics[width=0.95\columnwidth]{images/cylinder_iso.png}
+    };
+    \coordinate (ArcEnd) at (5.5, 2.7);
+    \coordinate (Centre) at (1.5, 4.5);
+    \coordinate (ArcStart) at (4.3, 1.2);
+    \coordinate (A) at (0.5, 3.6);
+    \coordinate (B) at (5.5, 2.8);
+    \draw[{Stealth}-{Stealth}, black, thin] (A) -- (B) node[midway, above, sloped] {$r_{\text{cyl}}$};
+    \pic [draw, black, thin, "$\theta$", angle eccentricity=1.09, angle radius=4.65cm,
+    pic actions/.append style={{Stealth}-{Stealth}}] {angle = ArcStart--Centre--ArcEnd};
+  \end{tikzpicture}
+  \caption{Isometric view of the central cylinder}
+  \label{fig:cylinder_iso}
+\end{figure}
+
+\subsection{TEC Element}
+
+TEC elements are sandwiched between radial insulators from both radial direction and azimuthal direction. Each TEC element is defined by its inner and outer radius, $r_{\text{in}}$ and $r_{\text{out}}$ respectively, as well as its thickness $t_{\text{TEC}}$.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \node[anchor=south west, inner sep=0pt] (img) at (0,0) {
+      \includegraphics[width=0.95\columnwidth]{images/TEC_element_iso.png}
+    };
+    \coordinate (centre1) at (0.0, 4.4);
+    \coordinate (centre2) at (0.0, 4.6);
+    \coordinate (r1) at (4.0, 2.75);
+    \coordinate (r2) at (7.0, 2.25);
+    \coordinate (A) at (2.8, 1.8);
+    \coordinate (B) at (4.6, 0.1);
+    \draw[{Stealth}-{Stealth}, black, thin] (centre1) -- (r1) node[midway, below, sloped] {$r_{\text{in}}$};
+    \draw[{Stealth}-{Stealth}, black, thin] (centre2) -- (r2) node[midway, above, sloped] {$r_{\text{out}}$};
+    \draw[{Stealth}-{Stealth}, black, thin] (A) -- (B) node[midway, below, sloped] {$L$};
+  \end{tikzpicture}
+  \caption{A Single TEC element}
+  \label{fig:TEC_elememt_iso}
+\end{figure}
+
+\subsection{Thermoelectric Legs}
+
+The wedge is divided into two separate regions in the azimuthal direction, one consisting of p type semiconductor material and other consisting of n type semiconductor material. They are shown in \cref{fig:TEC_elememt_iso} in light violet and light red colours respectively. Each leg in the stage can have arbitary lengths as long as they all add up to the final length. However, this increases the number of independant variables in the optimization problem. Therefore, we can perform a dimensional reduction by assuming that lengths of stages vary by some ratio. So let's define leng length ratio $f_L$ as,
+
+\begin{equation}
+  f_L = \frac{L_{i+1}}{L_i}
+\end{equation}
+
+where $L_i$ is the length of the TEC legs in stage $i$. Therefore, the length of each stage can be defined as:
+
+\begin{equation}
+  L_i = L_1 \cdot f_L^{(i-1)}
+\end{equation}
+
+where $L_1$ is the length of the TEC legs in the first stage. Since the radial insulator isn't included in the length, we can get a relationship between stage lengths and radius of the TEC array as:
+
+\begin{equation*}
+  \begin{aligned}
+    r_{\text{base}} & = r_{\text{cyl}} + \sum_{i=1}^{N} L_i + (N+1) \cdot W_{\text{is}}                    \\
+                    & =  r_{\text{cyl}} + \sum_{i=1}^{N} L_1 \cdot f_L^{(i-1)} + (N+1) \cdot W_{\text{is}} \\
+                    & =  r_{\text{cyl}} + L_1 \cdot \frac{1-f_L^{N}}{1-f_L} + (N+1) \cdot W_{\text{is}}
+  \end{aligned}
+\end{equation*}
+
+Solving for $L_1$ gives:
+\begin{equation}
+  L_1 = \frac{(r_{\text{base}} - r_{\text{cyl}} - (N+1) \cdot W_{\text{is}}) \cdot (1-f_L)}{1-f_L^{N}}
+\end{equation}
+
+This means that the lengths of all stages can be defined using only two independant variables, $f_L$ and $r_{\text{cyl}}$.
+
+\subsection{Radial Insulator}
+
+Radial insulators separate each TEC element in the radial direction. Each radial insulator is defined by its width $W_{\text{is}}$ which is constant throughout the entire radial TEC array. It has the same thickness as the TEC elements, $t_{\text{TEC}}$. Its indicated in dark green colour in \cref{fig:TEC_elememt_iso,fig:az_and_is_top}
+
+\subsection{Azimuthal Insulator}
+
+Azimuthal insulators separate the p-type and n-type legs in each TEC element, as well as between adjacent wedges. Each azimuthal insulator is defined by its with along the arc in the azimuthal direction, denoted as $W_{\text{az}}$. It also has the same thickness as the TEC elements, $t_{\text{TEC}}$. It is indicated in dark gray colour in \cref{fig:TEC_elememt_iso,fig:az_and_is_top}.
+
+%For the optimization purposes, and as a standard practice in TEC design, a fill factor can be defined using the azimuthal insulator width. The fill factor $f$ is defined as:
+
+%\begin{equation}
+% f = \frac{\text{Area Occupied by Thermoelectric Material}}{\text{Total Area of TEC Element}}
+%\end{equation}
+
+%Considering the radial direction, we can arrive at following expression by considering the arc length occupied by the azimuthal insulator: 
+
+%\begin{equation}
+%   f = \frac{1-2W_{\text{az}}}{r\theta }
+%\end{equation}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \node[anchor=south west, inner sep=0pt] (img) at (0,0) {
+      \includegraphics[width=0.95\columnwidth]{images/az_and_is_top.png}
+    };
+
+    % help lines
+    %draw[help lines, step=0.5cm] (0,0) grid (\columnwidth,7);
+
+
+    % Three W_is dimensions with engineering dimension style
+    \coordinate (W1left) at (1.0, 0.5);
+    \coordinate (W1gapL) at (1.7, 0.7);
+    \coordinate (W1gapR) at (1.8, 0.7);
+    \coordinate (W1right) at (2.6, 1.0);
+
+    \coordinate (W2left) at (3.25, 3.5);
+    \coordinate (W2gapL) at (3.65, 2.6);
+    \coordinate (W2gapR) at (3.7, 2.4);
+    \coordinate (W2right) at (4.0, 1.5);
+
+    \coordinate (W3left) at (2.0, 5.5);
+    \coordinate (W3gapL) at (2.5, 4.6);
+    \coordinate (W3gapR) at (2.55, 4.5);
+    \coordinate (W3right) at (3.05, 3.5);
+
+    % First W_is dimension
+    \draw[-{Stealth}, black, thin] (W1left) -- (W1gapL);
+    \draw[{Stealth}-, black, thin] (W1gapR) -- (W1right);
+    \node[above] at (0.8, 0.5) {$W_{\text{is}}$};
+
+    % Second W_is dimension
+    \draw[-{Stealth}, black, thin] (W2left) -- (W2gapL);
+    \draw[{Stealth}-, black, thin] (W2gapR) -- (W2right);
+    \node[above] at (4, 3) {$W_{\text{az}}$};
+
+    % Third W_is dimension
+    \draw[-{Stealth}, black, thin] (W3left) -- (W3gapL);
+    \draw[{Stealth}-, black, thin] (W3gapR) -- (W3right);
+    \node[above] at (2.4, 5.5) {$W_{\text{az}}/2$};
+  \end{tikzpicture}
+  \caption{Radial and Azimuthal Insulators Top View}
+  \label{fig:az_and_is_top}
+\end{figure}
+
+
+\subsection{Interconnector}
+
+Interconnector provides electrical contact between TEC elements within each stage. Its located near the cold side of the TE unit and connects the n-type leg of a wedge to the p-type leg of the same wedge.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \node[anchor=south west, inner sep=0pt] (img) at (0,0) {
+      \includegraphics[width=0.95\columnwidth]{images/ic_iso.png}
+    };
+
+    %\draw[help lines, step=0.5cm] (0,0) grid (\columnwidth,7);
+
+    \coordinate (ArcEnd) at (2.0, 3.0);
+    \coordinate (Centre) at (2.5, 0);
+    \coordinate (ArcStart) at (4.5, 2);
+    \coordinate (A) at (2, 3.5);
+    \coordinate (B) at (2.8, 5.2);
+    \coordinate (C) at (5.0, 2.25);
+    \coordinate (D) at (5.0, 2.8);
+
+    \draw[{Stealth}-{Stealth}, black, thin] (A) -- (B) node[midway, left, rotate=0] {$W_{\text{ic}}$};
+
+    \draw[{Stealth}-{Stealth}, black, thin] (C) -- (D) node[midway, right, rotate=0] {$t_{\text{ic}}$};
+
+    \pic [draw, black, thin, "$\beta_{\text{ic}}$", angle eccentricity=0.9, angle radius=2.65cm,
+    pic actions/.append style={{Stealth}-{Stealth}}] {angle = ArcStart--Centre--ArcEnd};
+  \end{tikzpicture}
+  \caption{Isometric view of Interconnector}
+  \label{fig:ic_iso}
+\end{figure}
+
+Interconnector is parametrized by its width $W_{\text{ic}}$, thickness $t_{\text{ic}}$, and angle $\beta_{\text{ic}}$ it subtends at the center of the wedge, as shown in \cref{fig:ic_iso}. For the optmization purposes, all the interconnector dimensions are defined as fractions of the TEC element dimensions. Therefore, we can define:
+\begin{equation}
+  W_{\text{ic}} = f_{\text{ic,W}} \cdot L_{\text{TEC}} \quad ; \quad f_{\text{ic,W}} \in (0,1)
+\end{equation}
+\begin{equation}
+  t_{\text{ic}} = f_{\text{ic,t}} \cdot t_{\text{TEC}} \quad ; \quad f_{\text{ic,t}} \in (0,1)
+\end{equation}
+\begin{equation}
+  \beta_{\text{ic}} = f_{\text{ic,}\beta} \cdot \theta \quad ; \quad f_{\text{ic,}\beta} \in (0,1)
+\end{equation}
+
+The thickness is measured from the bottom of the TEC element to the top of the TEC array surface. Therefore it's not visible from the top view when $t_{\text{ic}} < t_{\text{TEC}}$.
+
+\subsection{Outerconnector}
+
+Outerconnector refeers to the electrical contact between TEC elements of adjacent wedges. Its located near the hot side of the TEC unit and connects the p-type leg of a wedge to the n-type leg of the adjacent wedge.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \node[anchor=south west, inner sep=0pt] (img) at (0,0) {
+      \includegraphics[width=0.95\columnwidth]{images/oc_iso.png}
+    };
+
+    %\draw[help lines, step=0.5cm] (0,0) grid (\columnwidth,5);
+
+    \coordinate (ArcStart) at (4.25, 2.5);
+    \coordinate (Centre) at (4.5, 4.5);
+    \coordinate (ArcEnd) at (6.5, 3.1);
+    \coordinate (A) at (5.75, 4.1);
+    \coordinate (B) at (6.25, 3.9);
+    \coordinate (C) at (6.5, 3.3);
+    \coordinate (D) at (6.5, 3.8);
+
+    \draw[{Stealth}-{Stealth}, black, thin] (A) -- (B) node[midway, above, rotate=0] {$W_{\text{oc}}$};
+
+    \draw[{Stealth}-{Stealth}, black, thin] (C) -- (D) node[midway, right, rotate=0] {$t_{\text{oc}}$};
+    \pic [draw, black, thin, "$\beta_{\text{oc}}/2$", angle eccentricity=1.15, angle radius=2.35cm,
+    pic actions/.append style={{Stealth}-{Stealth}}] {angle = ArcStart--Centre--ArcEnd};
+  \end{tikzpicture}
+  \caption{Isometric view of Outerconnector}
+  \label{fig:oc_iso}
+\end{figure}
+
+Outerconnector is parametrized similarly to the interconnector, with width $W_{\text{oc}}$, thickness $t_{\text{oc}}$, and angle $\beta_{\text{oc}}$ it subtends at the center of the wedge, as shown in \cref{fig:oc_iso}. For the optmization purposes, all the outerconnector dimensions are defined as fractions of the TEC element dimensions. Therefore, we can define:
+
+\begin{equation}
+  W_{\text{oc}} = f_{\text{oc,W}} \cdot L_{\text{TEC}} \quad ; \quad f_{\text{oc,W}} \in (0,1)
+\end{equation}
+\begin{equation}
+  t_{\text{oc}} = f_{\text{oc,t}} \cdot t_{\text{TEC}} \quad ; \quad f_{\text{oc,t}} \in (0,1)
+\end{equation}
+\begin{equation}
+  \beta_{\text{oc}} = f_{\text{oc,}\beta} \cdot \theta \quad ; \quad f_{\text{oc,}\beta} \in (0,1)
+\end{equation}
+
+The thickness is measured from the top of the TEC element to the bottom of the TEC array surface, in contrast to the interconnector.
+
+\section{Resistance Calculation}
+
+To build the thermal network, the thermal resistances of each component must be calculated. Apart from that, the electrical resistances of the TEC elements must also be calculated to account for Joule heating effects.
+
+\subsection{Resistor Arrangement}
+
+\subsubsection{TEC Layer}
+
+The calculation of thermal resistances depends on the direction of heat flow and the arrangement of components in that direction. In the radial TEC array, heat flows radially outward from the center of the chip to the outer edge of the TEC array.
+
+Since there are many components, we need to pick a point to be used as a node in each TEC element. For convenience, we pick the junction between radial insulator, and central azimuthal insulator as the node point. This means that all components between two such points will be absorbed into a single thermal resistance. This resistance is used mainly to calculate the back conduction. The arrangement of resistors between two such nodes is shown in \cref{fig:TEC_resistor_diagram_iso}.
+
+
+\begin{figure*}
+  \centering
+  \begin{circuitikz}[scale=1.0, transform shape]
+    \ctikzset{resistors/scale=0.5}
+
+    % Background Image
+    \node[anchor=south west, inner sep=0pt] (image) at (0,0) {
+      \includegraphics[width=\textwidth]{images/resistor_system_iso_cropped.png}
+    };
+
+    % help lines
+    % \draw[help lines, step=0.5cm, opacity=0.95] (0,0) grid (\textwidth,10);
+
+    \node[circ, label={left:$T_{\text{TEC},i}$}](ic_1) at (2.75,7.25){};
+    \node[circ, label=right:$T_{\text{TEC},i+1}$](ic_2) at (13.75,3.5){};
+
+    \node[circ] (ic_t_s) at (3.25,7.75){};
+    \node[circ] (ic_b_s) at (2.0,6.5){};
+
+    \node[circ] (ic_t_e) at (5.25,7.0){};
+    \node[circ] (ic_b_e) at (4.0,5.5){};
+
+    \node[circ] (TE_t_1_s) at (3.75,9.0){};
+    \node[circ] (TE_b_1_s) at (1.0, 5.5){};
+
+    \node[circ] (TE_t_1_e) at (6.25,8.5){};
+    \node[circ] (TE_b_1_e) at (3.0, 4.5){};
+
+    \draw (ic_t_s) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] (ic_t_e);
+    \draw (ic_b_s) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] (ic_b_e);
+
+    \draw (TE_t_1_s) to[R, l={ $R_{\text{t,TE-p,I}}$},*-*] (TE_t_1_e);
+    \draw (TE_b_1_s) to[R, l={ $R_{\text{t,TE-n,I}}$}, *-*] (TE_b_1_e);
+
+    \draw (ic_t_e) to (TE_t_1_e);
+    \draw (ic_b_e) to (TE_b_1_e);
+
+    \node[circ] (TE_t_2_s) at (5.7,7.75){};
+    \node[circ] (TE_b_2_s) at (3.5,5.0){};
+
+    \node[circ] (TE_t_2_e) at (12.0,6.0){};
+    \node[circ] (TE_b_2_e) at (9.0,2.5){};
+
+    \draw (TE_t_2_s) to[R, l={ $R_{\text{t,TE-p,II}}$},*-*] (TE_t_2_e);
+    \draw (TE_b_2_s) to[R, l={ $R_{\text{t,TE-n,II}}$}, *-*] (TE_b_2_e);
+
+    \node[circ] (oc_t_s) at (13.0,7.5){};
+    \node[circ] (oc_b_s) at (8.0,1.5){};
+
+    \node[circ] (oc_t_e) at (14.0,7.25){};
+    \node[circ] (oc_b_e) at (8.5,1.0){};
+
+    \node[circ] (TE_t_3_s) at (11.25,4.75){};
+    \node[circ] (TE_b_3_s) at (10.8,4.25){};
+
+    \node[circ] (TE_t_3_e) at (12.5,4.5){};
+    \node[circ] (TE_b_3_e) at (11.7,3.8){};
+
+    \draw (oc_t_s) to[R, l={\footnotesize $R_{\text{t,oc}}/2$}, *-*] (oc_t_e);
+    \draw (oc_b_s) to[R, l={\footnotesize $R_{\text{t,oc}}/2$}, *-*] (oc_b_e);
+
+    \draw (TE_t_3_s) to[R, l={ $R_{\text{t,TE-p,III}}$},*-*] (TE_t_3_e);
+    \draw (TE_b_3_s) to[R, l={ $R_{\text{t,TE-n,III}}$}, *-*] (TE_b_3_e);
+
+    \draw (oc_t_s) to (TE_t_2_e) to (TE_t_3_s);
+    \draw (oc_b_s) to (TE_b_2_e) to (TE_b_3_s);
+
+    \node[circ] (before_ic_2) at (12.0,4.25){};
+
+    % Middle branch - Azimuthal insulator
+    \draw (ic_1) to[R, l=$R_{\text{az}}$] (before_ic_2);
+
+    \node[circ](t_az_start) at (4,9.5){};
+    \node[circ](t_az_end) at (14.5,8.25){};
+
+    % top azimuthal insulator
+    \draw (ic_1) to (ic_t_s) to (TE_t_1_s) to (t_az_start);
+    \draw (t_az_start) to [R, l=$R_{\text{az}}/2$] (t_az_end);
+    \draw (t_az_end) to (oc_t_e) to (TE_t_3_e) to (before_ic_2);
+
+    \node[circ](b_az_start) at (0.5,5){};
+    \node[circ](b_az_end) at (8.5,0.5){};
+
+    % bottom azimuthal insulator
+    \draw (ic_1) to (ic_b_s) to (TE_b_1_s) to (b_az_start);
+    \draw (b_az_start) to [R, l=$R_{\text{az}}/2$] (b_az_end);
+    \draw (b_az_end) to (oc_b_e) to (TE_b_3_e) to (before_ic_2);
+
+    \draw (before_ic_2) to[R, l=\footnotesize $R_{\text{is}}$] (ic_2);
+
+  \end{circuitikz}
+  \caption{Thermal resistance network between two adjacent interconnector nodes showing parallel paths through p-type leg, n-type leg, and radial insulator.}
+  \label{fig:TEC_resistor_diagram_iso}
+\end{figure*}
+
+\subsubsection{Chip Layer}
+
+Nodes in the chip layer are designated to be directly below the nodes in the TEC layer in order to ease the vertical resistance calculation. The arrangement of resistors between two such nodes in the chip layer is shown in \cref{fig:Chip_resistor_diagram_side}. Two main resistors are shown here: vertical resistance $(R_{\text{ve}})$ which represents the heat transfer between chip layer and TEC layer, and the horizontal resistance $(R_{\text{chip}})$ which represents the heat transfer in between the chip nodes.
+
+\begin{figure*}
+  \centering
+  \begin{circuitikz}[scale=1.0, transform shape]
+    \ctikzset{resistors/scale=0.5}
+
+    % Background Image
+    \node[anchor=south west, inner sep=0pt] (image) at (0,+3) {
+      \includegraphics[width=\textwidth]{images/vertical_res_network_side_view.png}
+    };
+
+    % Cut Plane Image with frame
+    \node[anchor=south west, inner sep=4pt, draw=black, thick, rectangle] (image) at (8.75,5.5) {%
+      \includegraphics[width=0.4\textwidth]{images/cut_section for vertical_resistance.png}%
+    };
+
+    % help lines
+    % \draw[help lines, step=0.5cm, opacity=0.95] (0,0) grid (\textwidth,10);
+
+    \node[circ, label={below:$T_{\text{chip},i}$}](chip_1) at (0.3,3.4){};
+    \node[circ, label={below:$T_{\text{chip},i+1}$}](chip_2) at (15.35,3.4){};
+
+    \node[circ, label={above:$T_{\text{TEC},i}$}](TEC_1) at (0.3,4.4){};
+    \node[circ, label={above:$T_{\text{TEC},i+1}$}](TEC_2) at (15.35,4.4){};
+
+    % Chip layer horizontal resistor
+    \draw (chip_1) to [R, l_=$R_{\text{chip},i}$] (chip_2);
+
+    % vertical resistors
+    \draw (chip_1) to [R, l_=\colorbox{white}{$R_{\text{ve},i}$}, resistors/scale=0.25] (TEC_1);
+    \draw (chip_2) to [R, l=\colorbox{white}{$R_{\text{ve},i+1}$}, resistors/scale=0.25] (TEC_2);
+
+    % underbrace from chip_1 to chip_2
+    \draw[decorate, decoration={brace, amplitude=15pt, mirror}]
+    (0.3,2.4) -- (15.35,2.4) node[midway, below=12pt] {Area used for heat generation of node $i$};
+
+  \end{circuitikz}
+  \caption{Resistor diagram in the chip layer between 2 nodes.}
+  \label{fig:Chip_resistor_diagram_side}
+\end{figure*}
+
+Since there is a heat generation term for the chip layer nodes, and this heat generation is characterized by a heat flux value, an area is require to calculate the generated heat per node. Apart from that, an area is also required to calculate the vertical resistance values. For both of these area values, it was decided to use the complete area of the corresponding TEC element. This decision was based on the boundaries.
+
+
+Realistically, the annular segment surrounding the chip node should be used to calculate the area, so that each chip node gets half of the area from connecting TEC elements. However, this will result in the edge node not accounting for outermost area fraction. Apart from that, since the central node is modeled as a cylinder, its convenient to use the area of the corresponding circle to calculate the heat generation for the node 0. Similar issues exists when calculating the vertical resistance as well. Therefore, in the chosen method, resistance values and heat generation and resistance values corresponding to $i$\textsuperscript{th} node and resistors will be calculated using the area covered by the $i$\textsuperscript{th} TEC element.
+
+This wrong area calculation will likely result in sightly off Temperature values for TEC and chip nodes, but the overall result of central Temperature and other metrics such as COP would not be affected as much. Therefore this compromise is tolerable because the main use of the model is to be used in the optimization process.
+
+\subsection{Thermal Resistances}
+
+The thermal resistance of each component will be calculated based on geometry and material properties. The general formula for thermal resistance is given by:
+\begin{equation}
+  R_{\text{t}} = \frac{L}{\kappa \cdot A}
+  \label{eq:thermal_resistance_r}
+\end{equation}
+
+For a variables cross sectional area, the thermal resistance can be calculated using:
+
+\begin{equation}
+  R_{\text{t}} = \int_{x=0}^{L} \frac{dx}{\kappa \cdot A(x)}
+  \label{eq:resistance_r_int}
+\end{equation}
+
+\subsubsection{Thermoelectric Legs}
+
+Due to the presence of multiple components within the area of a Thermoelectric leg, the Calculation must be carried out accounting for the area reduction caused by those components. They include, the azimuthal insulators, interconnector, and outerconnector. Since the heat is carried in the radial direction, the cross sectional area is given by:
+
+\begin{equation}
+  A(r) = S(r) \cdot t_{\text{TEC}}
+  \label{eq:annular_segment_radial_area}
+\end{equation}
+
+Since we consider only one thermoelectric leg, the associated azimuthal angle is $\theta/2$ and since $S(r) = r \cdot \frac{\theta}{2}$,
+
+\begin{equation}
+  A(r) = r \cdot \frac{\theta}{2} \cdot t_{\text{TEC}}
+  \label{eq:cross_section_area_radial_dir}
+\end{equation}
+
+When going radially outward starting from $r_{\text{in}}$ to $r_{\text{out}}$ based on the fraction of area belongs to the TE material, we can divide TE leg into 3 regions.
+
+\textbf{Region with interconnect occupying a fraction of cross section area}
+
+This region spans from $r=r_{\text{in}}$ to $r=(r_{\text{in}}+W_{\text{ic}})$ In this region, the cross section area becomes,
+
+\begin{equation}
+  \begin{aligned}
+    A(r) & = r\cdot \frac{\theta}{2} \cdot t_{\text{TEC}} - r \cdot \frac{\beta_{\text{ic}}}{2} \cdot t_{\text{ic}} \\
+         & = \frac{r}{2} (\theta \cdot t_{\text{TEC}} - \beta_{\text{ic}} \cdot t_{\text{ic}} )
+  \end{aligned}
+\end{equation}
+
+From this, we need to subtract the cross sectional area occupied by the azimuthal insulator. This area is equal to the arc length of the azimuthal insulator at radius $r$ multiplied by the thickness of the TEC layer. Since the azimuthal insulator width is $W_{\text{az}}$ is constant for all $r$ values, the area occupied by the azimuthal insulator is given by:
+
+\begin{equation}
+  A_{\text{az}} = W_{\text{az}} \cdot t_{\text{TEC}}
+\end{equation}
+
+Here we consider single TEC leg, so the azimuthal insulator occupies half the width, two times and it adds upto $W_{\text{az}}$. Therefore, the effective cross sectional area in this region becomes:
+
+\begin{equation*}
+  \begin{aligned}
+    A(r) & = \frac{r}{2} (\theta \cdot t_{\text{TEC}} - \beta_{\text{ic}} \cdot t_{\text{ic}} ) - W_{\text{az}} \cdot t_{\text{TEC}}                    \\
+         & = \frac{1}{2} \left[ r (\theta \cdot t_{\text{TEC}} - \beta_{\text{ic}} \cdot t_{\text{ic}} ) - 2 W_{\text{az}} \cdot t_{\text{TEC}} \right]
+  \end{aligned}
+\end{equation*}
+
+Since $r$ is the variable of integration, let's write in $ax+b$ form.
+\begin{equation}
+  A(r) = \frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}}}{2} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}}
+  \label{eq:area_TE_ic}
+\end{equation}
+
+Then the integration in the \cref{eq:resistance_r_int} becomes,
+
+\begin{equation*}
+  R_{\text{t,TE,I}} = \int_{r_{\text{in}}}^{r_{\text{in}}+W_{\text{ic}}} \frac{dr}{\kappa_{\text{TE}} \left( \frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}}}{2} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}} \right)}
+\end{equation*}
+
+Since a solution to a integral in the form of $\int_{x_1}^{x_2} \frac{dx}{ax+b}$ is given by,
+
+\begin{equation}
+  \begin{aligned}
+    \int_{x_1}^{x_2} \frac{dx}{ax+b} & = \frac{1}{a} \int_{x_1}^{x_2} \frac{d(ax+b)}{ax+b}                  \\
+                                     & = \frac{1}{a} \left[ \ln|ax+b| \right]_{x_1}^{x_2}                   \\
+                                     & = \frac{1}{a} \left[ \ln\left| \frac{ax_2+b}{ax_1+b} \right| \right]
+  \end{aligned}
+  \label{eq:ax_b_integral_result}
+\end{equation}
+
+Applying the definite integral limits gives:
+
+\begin{equation}
+  \begin{aligned}
+  &R_{\text{t,TE,I}} = \frac{2}{\kappa_{\text{TE}} (\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}})} \cdot \\ & \ln \left| \frac{(\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}})(r_{\text{in}}+W_{\text{ic}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}}{(\theta \cdot t_{\text{TEC}}- \beta_{\text{ic}} \cdot t_{\text{ic}})r_{\text{in}} - 2 W_{\text{az}} \cdot t_{\text{TEC}}} \right|
+  \end{aligned}
+  \label{eq:R_TE_I}
+\end{equation}
+
+\textbf{Region without any other geometry sharing  a fraction of cross section area}
+
+This region spans from $r=(r_{\text{in}}+W_{\text{ic}})$ to $r=(r_{\text{out}}-W_{\text{oc}})$. In this region, the cross section area remains the same as \cref{eq:cross_section_area_radial_dir}.
+
+\begin{equation*}
+  A(r) = r \cdot \frac{\theta}{2} \cdot t_{\text{TEC}}
+\end{equation*}
+
+When the correction for azimuthal insulator area is applied, the effective cross sectional area becomes:
+
+\begin{equation*}
+  A(r) = r \cdot \frac{\theta}{2}  \cdot t_{\text{TEC}} - W_{\text{az}} \cdot t_{\text{TEC}}
+\end{equation*}
+
+Rearranging into $ax+b$ form gives:
+\begin{equation}
+  A(r) = \frac{1}{2}\theta \cdot t_{\text{TEC}} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}}
+  \label{eq:area_TE_full}
+\end{equation}
+
+Then the integration in the \cref{eq:resistance_r_int} becomes,
+
+\begin{equation*}
+  R_{\text{t,TE,II}} = \int_{r_{\text{in}}+W_{\text{ic}}}^{r_{\text{out}}-W_{\text{oc}}} \frac{dr}{\kappa_{\text{TE}} \left( \frac{1}{2}\theta \cdot t_{\text{TEC}} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}} \right)}
+\end{equation*}
+
+According to \cref{eq:ax_b_integral_result}, applying the definite integral limits gives:
+
+\begin{equation}
+  \begin{aligned}
+    R_{\text{t,TE,II}} = & \frac{2}{\kappa_{\text{TE}} \theta \cdot t_{\text{TEC}}} \cdot \\ & \ln \left| \frac{\theta \cdot t_{\text{TEC}} (r_{\text{out}}-W_{\text{oc}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}}{\theta \cdot t_{\text{TEC}} (r_{\text{in}}+W_{\text{ic}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}} \right|
+    \label{eq:TE_II_t_res}
+  \end{aligned}
+\end{equation}
+
+\textbf{Region with outerconnect sharing  a fraction of cross section area}
+
+This region spans from $r=(r_{\text{out}}-W_{\text{oc}})$ to $r=r_{\text{out}}$. In this region, the cross section area becomes,
+
+\begin{equation*}
+  \begin{aligned}
+    A(r) & = r\cdot \frac{\theta}{2} \cdot t_{\text{TEC}} - r \cdot \frac{\beta_{\text{oc}}}{2} \cdot t_{\text{oc}} \\
+         & = \frac{r}{2} (\theta \cdot t_{\text{TEC}} - \beta_{\text{oc}} \cdot t_{\text{oc}} )
+  \end{aligned}
+\end{equation*}
+
+After subtracting the azimuthal insulator area, the effective cross sectional area in this region becomes:
+
+\begin{equation*}
+  \begin{aligned}
+    A(r) & = \frac{r}{2} (\theta \cdot t_{\text{TEC}} - \beta_{\text{oc}} \cdot t_{\text{oc}} ) - W_{\text{az}} \cdot t_{\text{TEC}}                    \\
+         & = \frac{1}{2} \left[ r (\theta \cdot t_{\text{TEC}} - \beta_{\text{oc}} \cdot t_{\text{oc}} ) - 2 W_{\text{az}} \cdot t_{\text{TEC}} \right]
+  \end{aligned}
+\end{equation*}
+
+Rearranging into $ax+b$ form gives:
+\begin{equation}
+  A(r) = \frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}}}{2} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}}
+  \label{eq:area_TE_oc}
+\end{equation}
+
+Then the integration in the \cref{eq:resistance_r_int} becomes,
+
+\begin{equation*}
+  R_{\text{t,TE,III}} = \int_{r_{\text{out}}-W_{\text{oc}}}^{r_{\text{out}}} \frac{dr}{\kappa_{\text{TE}} \left( \frac{\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}}}{2} \cdot r - W_{\text{az}} \cdot t_{\text{TEC}} \right)}
+\end{equation*}
+
+According to \cref{eq:ax_b_integral_result}, applying the definite integral limits gives:
+
+\begin{equation}
+  \begin{aligned}
+  &R_{\text{t,TE,III}} = \frac{2}{\kappa_{\text{TE}} (\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}})} \cdot \\ & \ln \left| \frac{(\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}})r_{\text{out}} - 2 W_{\text{az}} \cdot t_{\text{TEC}}}{(\theta \cdot t_{\text{TEC}}- \beta_{\text{oc}} \cdot t_{\text{oc}})(r_{\text{out}}-W_{\text{oc}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}} \right|
+  \end{aligned}
+  \label{eq:R_TE_III}
+\end{equation}
+
+\begin{customnote}
+  The same way we divided the TEC element into 3 regions in the radial direction, we can perform division based integrals for azimuthal and vertical directions as well.\\
+
+  However, this would create total of 27 regions for each TEC element, making the calculations cumbersome.\\
+
+  Therefore, we make the assumption that the heat flow is uniform across the entire cross sectional area of the TEC leg, and we apply area correction only in the radial direction. This simplification is valid as long as the azimuthal and vertical dimensions of the TEC leg are small compared to the radial dimension, Which is the case in our design.\\
+\end{customnote}
+
+\subsubsection{Interconnect}
+
+The interconnect transfers heat in radial direction. Therefore, the thermal resistance of the interconnect can be calculated similarly to the thermoelectric leg, using the same cross sectional area calculations. The cross sectional area of the interconnect is given by:
+
+\begin{equation*}
+  \begin{aligned}
+    A_{\text{ic}}(r) & = S(r)\cdot t_{\text{ic}}                       \\
+                     & = r \cdot \beta_{\text{ic}} \cdot t_{\text{ic}}
+  \end{aligned}
+\end{equation*}
+
+The \cref{eq:resistance_r_int} becomes:
+
+\begin{equation*}
+  R_{\text{t,ic}} = \int_{r_{\text{in}}}^{r_{\text{in}}+W_{\text{ic}}} \frac{dr}{\kappa_{\text{TE}} \cdot r \cdot \beta_{\text{ic}} \cdot t_{\text{ic}}}
+\end{equation*}
+
+Evaluating the integral assuming constant thermal conductivity $\kappa_{\text{TE}}$ gives:
+
+\begin{equation}
+  R_{\text{t,ic}} = \frac{1}{\kappa_{\text{TE}} \cdot \beta_{\text{ic}} \cdot t_{\text{ic}}} ln\left( \frac{r_{\text{in}} + W_{\text{ic}}}{r_{\text{in}}} \right)
+\end{equation}
+
+\subsubsection{Outerconnect}
+
+The outerconnect transfers heat in radial direction. Therefore, the thermal resistance of the outerconnect can be calculated similarly to the interconnect. The only difference is that there are two outerconnects per TEC element, one on each side. However, since they are subtending only half the angle of the interconnect, their combined resistance is equal to that of a single interconnect. Therefore, the thermal resistance of the outerconnect for a single TEC element is given by:
+
+
+\begin{equation}
+  R_{\text{t,oc}} = \frac{1}{\kappa_{\text{TE}} \cdot \beta_{\text{oc}} \cdot t_{\text{oc}}} \\ln\left( \frac{r_{\text{out}}}{r_{\text{out}} - W_{\text{oc}}} \right)
+\end{equation}
+
+\subsubsection{Radial Insulators}
+
+As per the resistor arrangement shown in \cref{fig:TEC_resistor_diagram_iso}, the radial insulator after the current stage is the one that gets added currnt lumped resistor. Therefore, the integral limits are from $r=(r_{\text{out}})$ to $r=(r_{\text{out}}+W_{\text{is}}$. The cross sectional area of the radial insulator is given by:
+
+\begin{equation*}
+  \begin{aligned}
+    A_{\text{is}}(r) & = S(r)\cdot t_{\text{TEC}}            \\
+                     & = r \cdot \theta \cdot t_{\text{TEC}}
+  \end{aligned}
+\end{equation*}
+
+Then the \cref{eq:resistance_r_int} becomes:
+
+\begin{equation*}
+  R_{\text{is}} = \int_{r_{\text{out}}}^{r_{\text{out}}+W_{\text{is}}} \frac{dr}{\kappa_{\text{is}} \cdot r \cdot \theta \cdot t_{\text{TEC}}}
+\end{equation*}
+
+Evaluating the integral assuming constant thermal conductivity $\kappa_{\text{is}}$ gives:
+
+\begin{equation}
+  R_{\text{is}} = \frac{1}{\kappa_{\text{is}} \cdot \theta \cdot t_{\text{TEC}}} \\ln\left( \frac{r_{\text{out}} + W_{\text{is}}}{r_{\text{out}}} \right)
+  \label{eq:radial_ins_resistance}
+\end{equation}
+
+\subsubsection{Azimuthal Insulator}
+
+Since the azimuthal insulator is characterized by the constant by the constant arc length $W_{\text{az}}$, the thermal resistance can be calculated directly without integration. The cross sectional area of the azimuthal insulator is given by:
+
+\begin{equation*}
+  A_{\text{az}} = W_{\text{az}} \cdot t_{\text{TEC}}
+\end{equation*}
+
+Therefore, \cref{eq:thermal_resistance_r} becomes:
+
+\begin{equation}
+  R_{\text{az}} = \frac{L}{\kappa_{\text{az}} \cdot W_{\text{az}} \cdot t_{\textsl{TEC}}}
+\end{equation}
+
+\subsubsection{Vertical Resistance}
+
+Heat generated through the chip layer will be transferred vertically upward to the TEC layer through the insulator layer. While this insulator layer can be something like SOI which is weakly thermally conductive, the conductivity cannot be ignored because the thin layer would decrease the thermal resistance significantly. The are area heat travels through can be calculated using the area of the corresponding TEC element. Therefore, the cross sectional area for vertical resistance is given by:
+
+\begin{equation}
+  A_{\text{TEC}} = \frac{\theta}{2} (r_{\text{out}}^2 - r_{\text{in}}^2)
+  \label{eq:TEC_element_area}
+\end{equation}
+
+Then \cref{eq:thermal_resistance_r} becomes,
+
+\begin{equation}
+  R_{\text{ve}} = \frac{2 t_{\text{ins}}}{\kappa_{\text{ins}}\theta  \left(r_{\text{out}}^2 - r_{\text{in}}^2\right)}
+\end{equation}
+
+\subsubsection{Chip Layer Resistance}
+
+Chip layer node to node thermal resistance can be calculated by performing the integration shown in \cref{eq:resistance_r_int}. Here the area is calculated for the whole span of the wedge, therefore $S(r) = r\cdot\theta$, and \cref{eq:cross_section_area_radial_dir} becomes,
+
+\begin{equation*}
+  A(r) =  r\cdot\theta\cdot t_{\text{chip}}
+\end{equation*}
+
+Then the integral in \cref{eq:resistance_r_int} becomes,
+
+\begin{equation*}
+  R_{\text{chip}} = \int_{r_{\text{in}}}^{r_{\text{out}}} \frac{dr}{\kappa_{\text{chip}} \cdot r\cdot\theta\cdot t_{\text{chip}}}
+\end{equation*}
+
+Evaluating the integral and applying the limits gives,
+
+\begin{equation}
+  R_{\text{chip}} = \frac{1}{\kappa_{\text{chip}} \cdot\theta\cdot t_{\text{chip}}}ln\left( \frac{r_{\text{out}}}{r_{\text{in}}}\right)
+\end{equation}
+
+\subsubsection{Central Cylinder Resistance}
+
+In the resistor network, the central cylinder acts as a common node for both layers, denoted by \textbf{Node 0}. This is because it's a single block spanning all 3 layers as shown in \cref{fig:cylinder_iso}. Therefore, it is required to calculated the resistance between node 0 and node 1 of both TEC layer and the chip layer.
+
+The standard solution for a cylinder with volumetric generation is $T_{\text{center}} - T_{\text{surf}} = \frac{Q}{4\pi k t}$. Adjusting for the wedge angle $\theta$ (where the full circle is $2\pi$), the factor becomes $2\theta$. From this, the thermal resistance between node 0 and node 1 in the TEC layer can be derived as:
+
+\begin{equation}
+  R_{\text{cyl}} = \frac{1}{2\theta \kappa t}
+  \label{eq:cyl_Resistance1}
+\end{equation}
+
+\textbf{For the Chip Layer}
+
+For the chip layer, this can be directly used as the resistance between node 0 and node 1. Therefore, the thermal resistance between node 0 and node 1 in the chip layer becomes:
+
+\begin{equation}
+  R_{\text{chip},0 \to 1} =  \frac{1}{2\theta \kappa_{\text{chip}} t_{\text{chip}}}
+  \label{eq:R_chip_0_to_1}
+\end{equation}
+
+\textbf{For the TEC Layer}
+
+For the TEC layer, $t\to t_{\text{TEC}}$ and $\kappa \to \kappa_{\text{TEC}}$. However, between the central cylinder and the first node on the TEC layer, there is a radial insulator layer which wasn't accounted for during the TEC layer resistance calculation because its position is before the first node. Therefore, the radial insulator resistance must be added to the above resistance, which is given by \cref{eq:radial_ins_resistance}. Since the resistors are in series, the thermal resistance between node 0 and node 1 in the TEC layer becomes:
+
+\begin{equation}
+  R_{\text{TEC},0 \to 1} = \frac{1}{2\theta \kappa_{\text{chip}} t_{\text{TEC}}} + R_{\text{is},0}
+  \label{eq:R_TEC_0_to_1}
+\end{equation}
+
+\subsection{Lumping Resistors Together}
+
+Now we need to lump all the resistors between two adjacent interconnect nodes together.The resistor arrangement is shown in \cref{fig:TEC_resistor_diagram_iso} is shown in a simplified manner in \cref{fig:lumped_resistor_network}.
+
+\begin{figure}[H]
+  \centering
+  \resizebox{\columnwidth}{!}{%
+    \begin{circuitikz}
+      \ctikzset{resistors/scale=0.5}
+
+      % Nodes
+      \node[circ, label={left:$T_{i,\text{ic}}$}](ic_1) at (0,0){};
+      \node[circ, label=right:$T_{i+1,\text{ic}}$](ic_2) at (7,0){};
+
+      \node[circ](oc) at (6,0){};
+
+      % Top Azimuthal Insulator Path
+      \draw(ic_1) to ++(0,3) to [R, l=$R_{\text{az}}/2$] ++(6,0) to (oc);
+
+      % Top branch - Thermoelectric leg (p-type)
+      \draw (0,1) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] ++(1.5,0) to ++(0,0.5) to[R, l={ $R_{\text{t,TE-p,II}}$},*-*] ++(3,0) to ++(0,-0.5)
+      to [R, l={\footnotesize $R_{\text{t,oc}}/2$},*-*] ++(1.5,0);
+
+      \draw (0,2) to[R, l={\footnotesize $R_{\text{t,TE-p,I}}$}, *-*] ++(1.5,0) to ++(0,-0.5);
+      \draw (4.5,1.5) to ++(0,+0.5) to[R, l={\footnotesize $R_{\text{t,TE-p,III}}$}, *-*] ++(+1.5,0) ;
+
+      % Middle branch - Azimuthal insulator
+      \draw (ic_1) to[R, l=$R_{\text{az}}$] (oc);
+
+      % Bottom branch - Thermoelectric leg (n-type)
+      \draw (0,-1) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] ++(1.5,0) to ++(0,-0.5) to[R, l={ $R_{\text{t,TE-n,II}}$},*-*] ++(3,0) to ++(0,+0.5)
+      to [R, l={\footnotesize $R_{\text{t,oc}}/2$},*-*] ++(1.5,0);
+
+      \draw (0,-2) to[R, l={\footnotesize $R_{\text{t,TE-n,I}}$}, *-*] ++(1.5,0) to ++(0,+0.5);
+      \draw (4.5,-1.5) to ++(0,-0.5) to[R, l={\footnotesize $R_{\text{t,TE-n,III}}$}, *-*] ++(+1.5,0) ;
+
+      % Bottom Azimuthal Insulator Path
+      \draw(ic_1) to ++(0,-3) to [R, l=$R_{\text{az}}/2$] ++(6,0) to (oc);
+
+      \draw (oc) to[R, l={\footnotesize $R_{\text{is}}$}] (ic_2);
+    \end{circuitikz}%
+  }
+  \caption{Resistor network between two adjacent interconnector nodes.}
+  \label{fig:lumped_resistor_network}
+\end{figure}
+
+Now all the resistors can be lumped together to a single resistor. First, let's lump together the parallel resistors in the regions I and III together.
+
+\begin{equation}
+  \frac{1}{R_{\text{t,TE-p,I,combined}}} = \frac{1}{R_{\text{t,TE-p,I}}} + \frac{1}{R_{\text{t,ic}}/2}
+\end{equation}
+
+\begin{equation}
+  \frac{1}{R_{\text{t,TE-p,III,combined}}} = \frac{1}{R_{\text{t,TE-p,III}}} + \frac{1}{R_{\text{t,oc}}/2}
+\end{equation}
+
+Similarly for n-TE side,
+
+\begin{equation}
+  \frac{1}{R_{\text{t,TE-n,I,combined}}} = \frac{1}{R_{\text{t,TE-n,I}}} + \frac{1}{R_{\text{t,ic}}/2}
+\end{equation}
+
+\begin{equation}
+  \frac{1}{R_{\text{t,TE-n,III,combined}}} = \frac{1}{R_{\text{t,TE-n,III}}} + \frac{1}{R_{\text{t,oc}}/2}
+\end{equation}
+
+These combined resistors are in series with the region II resistors. Therefore, the total thermoelectric leg resistors for both p-type and n-type legs become:
+
+\begin{equation}
+  \begin{aligned}
+    R_{\text{t,TE-p,combined}} &= R_{\text{t,TE-p,I,combined}} + R_{\text{t,TE-p,II}}\\ &+ R_{\text{t,TE-p,III,combined}}
+  \end{aligned}
+\end{equation}
+
+\begin{equation}
+  \begin{aligned}
+    R_{\text{t,TE-n,combined}} &= R_{\text{t,TE-n,I,combined}} + R_{\text{t,TE-n,II}}\\ & + R_{\text{t,TE-n,III,combined}}
+  \end{aligned}
+\end{equation}
+
+These combined resistances are in parallel with the azimuthal resistances. Therefore,
+
+\begin{equation}
+  \begin{aligned}
+    \frac{1}{R_{\text{TE,combined}}}  &= \frac{1}{R_{\text{az}}/2} + \frac{1}{R_{\text{t,TE-p,combined}}} \\ &+ \frac{1}{R_{\text{az}}} + \frac{1}{R_{\text{t,TE-n,combined}}} +  \frac{1}{R_{\text{az}}/2}
+  \end{aligned}
+\end{equation}
+
+Finally, the above resistor is in series with the radial insulator resistor, and the total lumped resistance between two adjacent interconnect nodes becomes,
+
+\begin{equation}
+  R_{\text{TEC}} = R_{\text{TE,combined}} + R_{\text{is}}
+  \label{eq:TEC_element_Resistance}
+\end{equation}
+
+\subsection{Electrical Resistances}
+
+The electrical resistance of each component will be calculated based on geometry and material properties. The general formula for electrical resistance is given by:
+
+\begin{equation}
+  R_{\text{e}} = \frac{\rho_{\text{TE}} \cdot L}{A}
+\end{equation}
+
+For a variables cross sectional area, the electrical resistance can be calculated using:
+\begin{equation}
+  R_{\text{e}} = \int_{x=0}^{L} \frac{\rho_{\text{TE}} \cdot dx}{A(x)}
+  \label{eq:e_resistance_int}
+\end{equation}
+
+\subsubsection{Thermoelectric Legs}
+
+The electrical resistance of the thermoelectric leg can be calculated similarly to the thermal resistance, using the same cross sectional area calculations. However, the effect of considering areas such as I and III similar to thermal resistance is negligable because electricity flows from interconnect to the outerconnect directly through the region II only. There is no lateral / azimuthal charge transfer. Therefore, the electrical resistance of the thermoelectric leg for a single TEC element is given by the same expression from \cref{eq:TE_II_t_res}, wtih $\kappa_{\text{TE}}$ replaced by $\frac{1}{\rho_{\text{TE}}}$. Therefore, the electrical resistance of a single thermoelectric leg becomes:
+
+\begin{equation}
+  \begin{aligned}
+    R_{\text{e,TE,II}} = & \frac{2\rho_{\text{TE}}}{ \theta \cdot t_{\text{TEC}}} \cdot \\ & \ln \left| \frac{\theta \cdot t_{\text{TEC}} (r_{\text{out}}-W_{\text{oc}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}}{\theta \cdot t_{\text{TEC}} (r_{\text{in}}+W_{\text{ic}}) - 2 W_{\text{az}} \cdot t_{\text{TEC}}} \right|
+    \label{eq:TE_e_res}
+  \end{aligned}
+\end{equation}
+
+\subsubsection{Interconnects}
+
+The interconnects transfer electricity mainly in azimuthal direction. Because of this, the variable of integration is the angle. Therefore, we can substitute $dx=rd\phi$ to \cref{eq:e_resistance_int} and it becomes:
+
+\begin{equation}
+  R_{\text{e,ic}} = \int_{\phi_1}^{\phi_2} \frac{\rho_{\text{ic}}\cdot r}{A(\phi)}\cdot d\phi
+\end{equation}
+
+
+These interconnects have a rectangular cross section area, with width $W_{\text{ic}}$ and thickness $t_{\text{ic}}$. Since both dimensional are independant of the angle $\phi$, the cross sectional integration becomes:
+
+\begin{equation*}
+  R_{\text{e,ic}} = \int_{\phi_1}^{\phi_2} \frac{\rho_{\text{ic}}\cdot r}{W_{\text{ic}} \cdot t_{\text{ic}}} \cdot d\phi
+\end{equation*}
+
+Assuming constant resistivity $\rho_{\text{ic}}$, and using the average radius value for $r$ as $r_{\text{avg}}=r_{\text{in}}+\frac{1}{2}W_{\text{ic}}$ they can be taken outside the integral:
+
+\begin{equation*}
+  R_{\text{e,ic}} = \frac{\rho_{\text{ic}}\cdot r_{\text{avg}}}{W_{\text{ic}} \cdot t_{\text{ic}}} \int_{\phi_1}^{\phi_2} d\phi
+\end{equation*}
+
+Assuming that interconnect start at some arbitrary angle $\phi_1$ and ends at $\phi_2 = \phi_1 + \beta_{\text{ic}}$, the integral evaluates to:
+
+\begin{equation*}
+  \begin{aligned}
+    R_{\text{e,ic}} & =  \frac{\rho_{\text{ic}}\cdot r_{\text{avg}}}{W_{\text{ic}} \cdot t_{\text{ic}}}  \int_{\phi_1}^{\phi_1 + \beta_{\text{ic}}}d\phi \\
+                    & = \frac{\rho_{\text{ic}} \cdot r_{\text{avg}} }{W_{\text{ic}} \cdot t_{\text{ic}}}(\phi_1 + \beta_{\text{ic}} - \phi_1)            \\
+                    & = \frac{\rho_{\text{ic}} \cdot r_{\text{avg}} \cdot \beta_{\text{ic}}}{W_{\text{ic}} \cdot t_{\text{ic}}}
+  \end{aligned}
+\end{equation*}
+
+Therefore, the electrical resistance of the interconnect for a single TEC element is given by:
+
+\begin{equation}
+  R_{\text{e,ic}} = \frac{\rho_{\text{ic}} \cdot r_{\text{avg}} \cdot \beta_{\text{ic}}}{W_{\text{ic}} \cdot t_{\text{ic}}}
+\end{equation}
+
+\subsubsection{outerconnect}
+
+Interconnect and outerconnect have similar geometry and current flow direction. Therefore, the electrical resistance of the outerconnect can be calculated similarly to the interconnect. The only difference is that there are two outerconnects per TEC element, one on each side. However, since they are subtending only half the angle of the interconnect, their combined resistance is equal to that of a single interconnect. Therefore, the electrical resistance of the outerconnect for a single TEC element is given by:
+
+\begin{equation}
+  R_{\text{e,oc}} = \frac{\rho_{\text{ic}} \cdot r_{\text{avg}} \cdot \beta_{\text{oc}}}{W_{\text{oc}} \cdot t_{\text{oc}}}
+\end{equation}
+
+Where $r_{\text{avg}} = r_{\text{out}} - \frac{1}{2}W_{\text{oc}}$.
+
+\section{Formation of the Linear System}
+
+To find the temperature values at each node in the thermal network, we can set up a system of linear equations based on the lumped resistances and heat sources. Each node will have an equation representing the balance of heat flow into and out of that node. Here we write the energy balance available 3 types of nodes: chip layer nodes, TEC layer nodes and central node.
+
+\subsection{Chip Layer}
+
+A general node in this layer has 4 terms: 2 lateral heat transfer, 1 vertical heat transfer to the TEC layer and the heat generation from the heat flux applied. Writing the energy balance equation,
+
+\begin{align*}
+  \underbrace{\frac{T_{\text{chip}, i-1} - T_{\text{chip}, i}}{R_{\text{chip}, i-1}}}_{\text{Lateral In}} & + \underbrace{\frac{T_{\text{chip}, i+1} - T_{\text{chip}, i}}{R_{\text{chip}, i}}}_{\text{Lateral Out}} \\ &- \underbrace{\frac{T_{\text{chip}, i} - T_{\text{TEC}, i}}{R_{\text{ve}, i}}}_{\text{Vertical Loss}} + Q_{\text{gen}, i} = 0
+\end{align*}
+
+Isolating the unknown temperature terms in the above equation gives,
+
+\begin{equation}
+  \small
+  \begin{aligned}
+     & \frac{1}{R_{\text{chip}, i-1}} T_{\text{chip}, i-1}-\left(
+    \frac{1}{R_{\text{chip}, i-1}} + \frac{1}{R_{\text{chip}, i}} + \frac{1}{R_{\text{ve}, i}}
+    \right) T_{\text{chip}, i}                                                                           \\
+     & + \frac{1}{R_{\text{chip}, i}} T_{\text{chip}, i+1}+ \frac{1}{R_{\text{ve}, i}} T_{\text{TEC}, i}
+    =- Q_{\text{gen}, i}.
+  \end{aligned}
+\end{equation}
+
+This layer doesn't have any boundary conditions due to its closed nature. However, it should be noted that when writing the equation for the 1\textsuperscript{st} node, the term $R_{\text{chip},i-1} = R_{\text{chip},0}$ is equal to $R_{\text{chip}, 0\to 1}$ which is given by \cref{eq:R_chip_0_to_1}.
+
+\subsection{TEC Layer}
+
+The nodes in the TEC layer are governed by thermoelectric effect. The standard equation for the TEC module is as follows.
+
+\begin{equation}
+  Q_{c}=S I T_{c}-\textstyle{\frac{1}{2}}I^{2}R-K_t\left(T_{h}-T_{c}\right),
+  \label{eq:TEC_standard}
+\end{equation}
+
+The terms represents heat pump through thermoelectric effects, joule heating due to electrical resistance, and back conduction respectively. Note that we have derived thermal resistance values instead of conductance values, so we need to use their reciprocals when substituting into the equation.
+
+
+\subsubsection{Resistance Heat generation Assignment}
+
+The 0.5 term in the joule heating term is to divide the heating from the TE legs to both cold side and hot side equally. However here we have interconnect and outerconnect that generates the heat. But their heat doesn't get added to both sides equally. So instead of a single lumped $R_{e,i}$, we have to  split the electrical resistance of Stage $i$ into three distinct physical components:
+
+\begin{itemize}
+  \item $R_{e,ic,i}$ (Inner/Cold Interconnect):The resistance of the copper trace at the cold junction (the node itself).
+  \item $R_{e,TE-p,i}$ and $R_{e,TE-n,i}$ (TE Legs): The resistance of the P and N semiconductor pillars.
+  \item $R_{e,oc,i}$ (Outer/Hot Interconnect): The resistance of the copper trace at the hot junction (the outer rim of this stage).
+\end{itemize}
+
+We assign Joule heating based on where the component is located relative to the node $T_{c,i}$.
+\begin{itemize}
+  \item At Node $T_{c,i}$: We have the Interconnect of Stage i.
+
+        Contribution: 100\% of $I_i^2 R_{e,ic,i}$ adds heat to this node.
+
+  \item  Between Node $T_{c,i}$ and Outer Boundary: We have the Legs of Stage i.
+
+        Contribution: 50\% of $I_i^2 R_{e,TE-p,i}$ + 50\% of $I_i^2 R_{e,TE-n,i}$ flows back to this node (the cold side).
+
+  \item  Coming from the Previous Stage $(i-1)$: The previous stage rejects heat into  current node. This rejected heat includes the generation from its own legs and its own outer interconnect.
+
+        Contribution: 100\% of $I_{i-1}^2 R_{e,oc,i-1}$ (Outerconnect of prev stage) + 50\% of $I_{i-1}^2 R_{e,TE-p,i-1}$ + 50\% of $I_{i-1}^2 R_{e,TE-n,i-1}$.
+\end{itemize}
+
+Note that at the edge boundary, the heat generated from the outerconnect, and the half of p and n TE leg heating of the last stage will not be added to any node, as it is assumed to be dissipated to the boundary condition.
+
+\subsubsection{Writing Energy Balance}
+
+Writing the energy balance equation for a general TEC layer node,
+
+\begin{align}
+  \underbrace{\frac{T_{\text{chip},i} - T_{c,i}}{R_{\text{ve},i}}}_{\text{From Chip}}+\underbrace{Q_{h, i-1}}_{\text{From Stage } i-1} - \underbrace{Q_{c, i}}_{\text{Into Stage } i} = 0
+  \label{eq:TEC_layer_energy_balance}
+\end{align}
+
+\paragraph{Heat Rejected from Stage $i-1$ - $Q_{h, i-1}$} This is the heat exiting the hot side of the inner ring. It includes the Peltier heat, the back conduction, and Specific Joule Terms:
+
+\begin{equation}
+  \small
+  \begin{aligned}
+    Q_{h,i-1} & = S_{i-1} I_{i-1} T_{\text{TEC},i-1} - K_{t,i-1}(T_{\text{TEC},i} - T_{\text{TEC},i-1}) \\ &+ \underbrace{\left[ \frac{1}{2}I_{i-1}^2 (R_{\text{TE-p},i-1}+R_{\text{TE-n},i-1})+  I_{i-1}^2 R_{e,\text{oc},i-1} \right]}_{\text{Joule Heat at Hot Side}}
+  \end{aligned}
+  \label{eq:Q_h_i-1}
+\end{equation}
+
+\paragraph{Heat Absorbed by stage $i$ - $Q_{c, i}$} This is the heat entering the cold side of the inner ring. It includes the Peltier heat, the back conduction, and Specific Joule Terms:
+
+\begin{equation}
+  \small
+  \begin{aligned}
+    Q_{c,i} & = S_{i} I_{i} T_{c,i} - K_{t,i}(T_{\text{TEC},i+1} - T_{\text{TEC},i}) \\ &- \underbrace{\left[ \frac{1}{2}I_{i}^2 (R_{\text{TE-p},i}+R_{\text{TE-n},i}) +  I_{i}^2 R_{e,\text{ic},i} \right]}_{\text{Joule Heat at Cold Side}}
+    \label{eq:Q_c_i}
+  \end{aligned}
+\end{equation}
+
+Note that we subtracted the Joule heating term because, in the context of the current node, the jouel heating term should be added to final equation. Since we are subtracting the $Q_c$ term, the sign of the jouel heating term must be negative to be added as a generation term in the final equation.
+Substituting \cref{eq:Q_h_i-1} and \cref{eq:Q_c_i} into \cref{eq:TEC_layer_energy_balance} and isolating the unknown temperature terms gives:
+
+\begin{equation}
+  \small
+  \begin{aligned}
+     & \left(S_{i-1}I_{i-1}+K_{t,i-1}\right)T_{\text{TEC},i-1}-\left(\frac{1}{R_{\text{ve},i}}+K_{t,i-1}+S_{i}I_{i}+K_{t,i} \right)T_{\text{TEC},i} \\ &+K_{t,i}T_{\text{TEC},i+1}
+    +\frac{1}{R_{\text{ve},i}}T_{\text{chip},i}                                                                                                     \\ &=-I_{i-1}^2 \left( \frac{(R_{\text{TE-p},i-1}+R_{\text{TE-n},i-1})}{2} + R_{\text{oc},i-1} \right) \\
+     & \quad - I_{i}^2 \left( \frac{(R_{\text{TE-p},i}+R_{\text{TE-n},i})}{2} + R_{\text{ic},i} \right)
+  \end{aligned}
+\end{equation}
+
+Similar to chip layer, when writing the equation for the 1\textsuperscript{st} node, the term $K_{t,i-1} = K_{t,0}$ is equal to $\frac{1}{R_{\text{TEC}, 0\to 1}}$ which is given by \cref{eq:R_TEC_0_to_1}. It should also be noted that the $K_{t}$ values are calculated using the lumped thermal resistance values derived in \cref{eq:TEC_element_Resistance}.
+
+\subsubsection{Boundary Condition}
+
+We assume a constant temperature boundary condition at the outer edge of the TEC layer to ease the modelling process. Since the micro channel characteristics aren't a part of the mathematical model, this boundary condition is justified. Therefore, for the last TEC layer node, the therm $T_{\text{TEC}ni+1}$ becomes a known value equal to the boundary temperature $T_{\text{w}}$. The energy balance equation for the last TEC layer node becomes:
+
+\begin{equation*}
+  \small
+  \begin{aligned}
+     & \left(S_{N-1}I_{N-1}+K_{t,N-1}\right)T_{\text{TEC},N-1}\\ &-\left(\frac{1}{R_{\text{ve},N}}+K_{t,N-1}+S_{N}I_{N}+K_{t,N} \right)T_{\text{TEC},N} +K_{t,N}T_{\text{w}}
+    +\frac{1}{R_{\text{ve},N}}T_{\text{chip},N}                                                                                                     \\ &=-I_{N-1}^2 \left( \frac{(R_{\text{TE-p},N-1}+R_{\text{TE-p},N-1})}{2} + R_{\text{oc},N-1} \right) \\
+     & \quad - I_{N}^2 \left( \frac{(R_{\text{TE-p},N}+R_{\text{TE-n},N})}{2} + R_{\text{ic},N} \right)
+  \end{aligned}
+\end{equation*}
+
+Where $N$ is the number of stages in the radial TEC. Since $T_{\text{w}}$ is known, it can be carried out to the right hand side of the equation. Then the above equation becomes,
+
+\begin{equation}
+  \small
+  \begin{aligned}
+     & \left(S_{N-1}I_{N-1}+K_{t,N-1}\right)T_{\text{TEC},N-1}\\ &-\left(\frac{1}{R_{\text{ve},N}}+K_{t,N-1}+S_{N}I_{N}+K_{t,N} \right)T_{\text{TEC},N} +\frac{1}{R_{\text{ve},N}}T_{\text{chip},N}                                                                                                     \\ &=-I_{N-1}^2 \left( \frac{(R_{\text{TE-p},N-1}+R_{\text{TE-p},N-1})}{2} + R_{\text{oc},N-1} \right) \\
+     & \quad - I_{N}^2 \left( \frac{(R_{\text{TE-p},N}+R_{\text{TE-n},N})}{2} + R_{\text{ic},N} \right) - K_{t,N} T_{\text{w}}
+  \end{aligned}
+\end{equation}
+
+\subsection{Central Node}
+
+At the exact center ($r=0$ to $r=r_{\text{cyl}}$), the "Chip Layer" and "TEC Layer" are mechanically and thermally merged by the heat spreader/via bundle. Therefore, they share the same temperature. Denoting this temperature as $T_{0}$, we can write the energy balance equation for this central node as:
+
+\begin{equation*}
+     \frac{T_{\text{chip},1} - T_{0}}{R_{\text{chip},0\to 1}} + \frac{T_{\text{TEC},1} - T_{0}}{R_{\text{TEC},0\to 1}} - Q_{\text{gen},0} = 0
+\end{equation*}
+
+Isolating the unknown temperature terms in the above equation gives,
+
+\begin{equation}
+  \begin{aligned}
+     & -\left( \frac{1}{R_{\text{chip},0\to 1}} + \frac{1}{R_{\text{TEC},0\to 1}} \right) T_{0} + \frac{1}{R_{\text{chip},0\to 1}} T_{\text{chip},1}\\ &+ \frac{1}{R_{\text{TEC},0\to 1}} T_{\text{TEC},1} = - Q_{\text{gen},0}
+  \end{aligned}
+\end{equation}
+
+The above equation will work as the first equation in the linear system.
+
+\section{Matrix Formulation}
+
+The system of linear equations derived from the energy balance equations can be represented in matrix form as:
+
+\begin{equation}
+  \mathbf{A} \cdot \mathbf{T} = \mathbf{B}
+\end{equation}
+
+Where $\mathbf{T}$ is the vector of unknown temperatures at each node, $\mathbf{A}$ is the coefficient matrix derived from the lumped resistances and thermoelectric parameters, and $\mathbf{B}$ is the vector representing the known terms including heat generation and boundary conditions.
+
+\subsection{Block Notation}
+
+\paragraph{The unknown vector} $\mathbf{T}$ can be organized in a block notation as follows:
+
+\begin{equation}
+  \small
+  \mathbf{T} = \begin{bmatrix}
+    T_{0}                   \\
+    \mathbf{T_{\text{chip}}}\\
+    \mathbf{T_{\text{TEC}}}
+  \end{bmatrix}
+\end{equation}
+
+with,
+
+\begin{equation}
+  \mathbf{T_{\text{chip}}}=
+  \begin{bmatrix}
+    T_{\text{chip},1} \\
+    T_{\text{chip},2} \\
+    \vdots \\
+    T_{\text{chip},N}
+  \end{bmatrix}
+  \quad \text{and} \quad
+  \mathbf{T_{\text{TEC}}}=
+  \begin{bmatrix}
+    T_{\text{TEC},1} \\
+    T_{\text{TEC},2} \\
+    \vdots \\
+    T_{\text{TEC},N}
+  \end{bmatrix}
+\end{equation}
+
+\paragraph{The coefficient matrix} $\mathbf{A}$ can be organized in a block notation as follows:
+
+\begin{equation}
+   \mathbf{A} = 
+   \begin{bmatrix} \mathbf{A_{00}} & \mathbf{Link_{0 \to Si}} & \mathbf{Link_{0 \to TEC}} \\ \mathbf{Link_{Si \to 0}} & \mathbf{A_{chip}} & \mathbf{A_{ve}} \\ \mathbf{Link_{TEC \to 0}} & \mathbf{A_{ve}} & \mathbf{A_{TEC}} 
+  \end{bmatrix}
+\end{equation}
+
+Where: 
+\begin{itemize}
+\item $\mathbf{A_{00}}$ (Scalar): The sum of conductances leaving Node 0.
+\item $\mathbf{Link_{0 \to Si}}$ : Coupling to the first chip ring.
+\item $\mathbf{Link_{0 \to TEC}}$ : Coupling to the first TEC ring.
+\item $\mathbf{A_{chip}}$ : a Tridiagonal matrix representing lateral conduction in the Chip. 
+\item $\mathbf{A_{TEC}}$ : a Tridiagonal matrix representing the active TEC network. 
+\item $\mathbf{A_{ve}}$ : a Diagonal matrix representing the vertical conduction between the Chip and TEC layers.
+\end{itemize}
+
+\paragraph{The known vector} $\mathbf{B}$ can be organized in a block notation as follows:
+
+\begin{equation}
+  \mathbf{B}= 
+  \begin{bmatrix} 
+    \mathbf{B_0} \\  \mathbf{B_{\text{chip}}} \\ \mathbf{B_{\text{TEC}}} 
+  \end{bmatrix}
+\end{equation}
+
+Where :
+
+\begin{itemize}
+\item $\mathbf{B_0}$ (Scalar): The heat generation at Node 0
+\item $\mathbf{B_{\text{chip}}}$ : A vector representing heat generation in the chip layer.
+\item $\mathbf{B_{\text{TEC}}}$ : A vector representing the Joule heating in the TEC layer.
+\end{itemize}
+
+\subsection{Expanded Notation}
+
+\subsubsection{$\mathbf{A_{00}}$ - Center Scalar}
+$$ \mathbf{A_{00}} = \left[ -\left(\frac{1}{R_{\text{chip}, 0\to 1}} + \frac{1}{R_{\text{TEC}, 0\to 1}}\right) \right] $$
+\textbf{Description:} This scalar represents the sum of all thermal conductances leaving the center node ($T_0$). It connects to the first Silicon ring and the first TEC node.
+
+\subsubsection{$\mathbf{Link_{0 \to Si}}$ - Center to Silicon}
+$$ \mathbf{Link_{0 \to Si}} = \begin{bmatrix} \frac{1}{R_{\text{chip}, 0\to 1}} & 0 & \dots & 0 \end{bmatrix}_{1 \times N} $$
+\textbf{Description:} A row vector of size $1 \times N$. Only the first element is non-zero, representing the connection to $T_{\text{chip},1}$.
+
+\subsubsection{$\mathbf{Link_{0 \to TEC}}$ - Center to TEC}
+$$ \mathbf{Link_{0 \to TEC}} = \begin{bmatrix} \frac{1}{R_{\text{TEC}, 0\to 1}} & 0 & \dots & 0 \end{bmatrix}_{1 \times N} $$
+\textbf{Description:} A row vector of size $1 \times N$. Only the first element is non-zero, representing the connection to $T_{\text{TEC},1}$.
+
+\subsubsection{$\mathbf{Link_{Si \to 0}}$ - Silicon to Center}
+$$ \mathbf{Link_{Si \to 0}} = \begin{bmatrix} \frac{1}{R_{\text{chip}, 0\to 1}} \\ 0 \\ \vdots \\ 0 \end{bmatrix}_{N \times 1} $$
+\textbf{Description:} A column vector of size $N \times 1$. This is the transpose of Region 2.
+
+\subsubsection{$\mathbf{A_{chip}}$ - Lateral Conduction Matrix}
+\textbf{Description:} A symmetric \textbf{Tridiagonal} matrix representing passive heat spreading.
+\begin{itemize}
+    \item \textbf{Diagonal $(i,i)$:} The negative sum of all conductances leaving the node.
+    \item \textit{Boundary:} Note that at $i=1$, the term connects to $T_0$. At $i=N$, the term assumes an adiabatic edge (no $R_{\text{chip},N}$).
+    \item \textbf{Off-Diagonals:} Represents the lateral resistance $R_{\text{chip}}$ between rings.
+\end{itemize}
+
+\subsubsection{$\mathbf{A_{ve}}$ - Vertical Coupling}
+$$ \mathbf{A_{ve}} = \begin{bmatrix} \frac{1}{R_{\text{ve},1}} & 0 & \dots & 0 \\ 0 & \frac{1}{R_{\text{ve},2}} & \dots & 0 \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \dots & \frac{1}{R_{\text{ve},N}} \end{bmatrix}_{N \times N} $$
+\textbf{Description:} A \textbf{Diagonal} matrix.
+\begin{itemize}
+    \item This matrix appears twice in the global system: once connecting Silicon to TEC (Region 6), and once connecting TEC to Silicon (Region 8).
+\end{itemize}
+
+\subsubsection{$\mathbf{Link_{TEC \to 0}}$ - TEC to Center}
+$$ \mathbf{Link_{TEC \to 0}} = \begin{bmatrix} \frac{1}{R_{\text{TEC}, 0\to 1}} \\ 0 \\ \vdots \\ 0 \end{bmatrix}_{N \times 1} $$
+\textbf{Description:} A column vector of size $N \times 1$. This is the transpose of Region 3.
+
+\subsubsection{$\mathbf{A_{TEC}}$ - Active Pumping Matrix}
+\textbf{Description:} An \textbf{Asymmetric Tridiagonal} matrix.
+\begin{itemize}
+    \item \textbf{Diagonal $(i,i)$:} Negative sum of Vertical Loss + Back conduction IN + Peltier OUT + Back conduction OUT.
+    \item \textbf{Lower Off-Diagonal $(i, i-1)$:} Heat arriving from the previous stage. This contains the Peltier term $S_{i-1}I_{i-1}$ and the back conduction $K_{t,i-1}$.
+    \item \textbf{Upper Off-Diagonal $(i, i+1)$:} Only back conduction $K_{t,i}$ comes from the hotter stage. The Peltier term does not flow "backwards".
+\end{itemize}
+
+\subsubsection{Vector $\mathbf{B}$ - Source Vector}
+
+\textbf{Description:}
+\begin{itemize}
+    \item $\mathbf{B_{0}}$: Heat generation at the center.
+    \item $\mathbf{B_{\text{chip}}}$: Heat generation in the Silicon rings (inverted sign).
+    \item $\mathbf{B_{\text{TEC}}}$: Contains the Joule heating terms.
+    \item Current Node heating: $I_i^2 R_{\text{ic},i}$ (Interconnect) + $0.5 \cdot I_i^2 (R_{\text{TE-p},i}+R_{\text{TE-n},i})$ (Half leg).
+    \item Previous Stage heating: $I_{i-1}^2 R_{\text{oc},i-1}$ (Outerconnect) + $0.5 \cdot I_{i-1}^2 (R_{\text{TE-p},i-1}+R_{\text{TE-n},i-1})$ (Half leg).
+    \item \textbf{Last Row:} Includes the boundary condition term $-K_{t,N} T_{\text{w}}$.
+\end{itemize}
+
+
+\section{Validation}
+
+The developed Compact Thermal Model (CTM) has been validated against a high-fidelity COMSOL Multiphysics simulation. The comparison focuses on the maximum temperature achieved within the radial TEC structure under identical operating conditions.
+
+For all the test cases, a 3 stage radial TEC model was used. The CAD geometry was created in SolidWorks using a parametric model, allowing for easy adjustments of design parameters such as wedge angle, TEC thickness, and leg length. The CAD model was then live linked with COMSOL, and the MATLAB API for COMSOL was used to automate the simulation process and extract results. This workflow is illustrated below:
+
+$$\begin{matrix}\mathrm{Parametric}&& && \mathrm{COMSOL}\\\mathrm{SolidWorks}&&\longleftrightarrow&&\updownarrow\\\mathrm{model}&&&&\mathrm{MATLAB}\end{matrix}$$
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Validation Cases: CTM vs COMSOL Comparison}
+  \label{tab:validation_cases}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
+    \hline
+    \textbf{Case} & \textbf{Name} & \textbf{$\theta$} & \textbf{$t_{\text{TEC}}$} & \textbf{$f_L$} & \textbf{$L_1$} & \textbf{$I$} & \textbf{$q$} & \textbf{MATLAB} & \textbf{COMSOL} & \textbf{Error} & \textbf{Error} \\
+    \textbf{ID} & & \textbf{(°)} & \textbf{($\mu m$)} & & \textbf{($\mu m$)} & \textbf{(mA)} & \textbf{(W/m²)} & \textbf{$T_{\max}$ (°C)} & \textbf{$T_{\max}$ (°C)} & \textbf{(°C)} & \textbf{(\%)} \\
+    \hline
+    1 & Thin TEC Low Current & 30 & 100 & 1.00 & 1957.02 & 50 & 500 & 36.04 & 20.48 & -15.56 & -43.2 \\
+    \hline
+    2 & Moderate Current & 30 & 150 & 1.15 & 1690.73 & 100 & 500 & 31.81 & 20.25 & -11.56 & -36.4 \\
+    \hline
+    3 & Length Ratio Test & 30 & 150 & 1.20 & 1612.93 & 80 & 500 & 30.68 & 20.32 & -10.36 & -33.8 \\
+    \hline
+    4 & High Heat Flux & 30 & 200 & 1.15 & 1690.73 & 120 & 2000 & 58.23 & 22.42 & -35.81 & -61.5 \\
+    \hline
+    5 & Wide Wedge Angle & 45 & 150 & 1.15 & 1690.73 & 80 & 1000 & 44.85 & 21.33 & -23.52 & -52.4 \\
+    \hline
+  \end{tabular}
+\end{table}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{images/verification_comparison.png}
+  \caption{Maximum Temperature between CTM and COMSOL (left) and Prediction Error (right)}
+  \label{fig:comparsion_with_comsol}
+\end{figure}
+
+\begin{customnote}
+  The validation results show systematic overprediction of maximum temperature in the CTM compared to COMSOL. This discrepancy may stem from simplified assumptions in the compact model, particularly regarding heat spreading efficiency and the dimensional reduction approach. Nevertheless, the CTM provides a computationally efficient tool for rapid design iteration and optimization, with simulation times significantly faster than COMSOL.
+\end{customnote}
+
+\section{Summary}
+
+The complete thermal behavior of the radial TEC array is encapsulated in the linear system $\mathbf{A} \cdot \mathbf{T} = \mathbf{B}$. Solving this system yields the temperature distribution vector $\mathbf{T}$, providing a computationally efficient metric for evaluating and optimizing the cooling performance of the radial TEC design. While validation against high-fidelity COMSOL simulations reveals systematic overprediction of maximum temperatures, the Compact Thermal Model (CTM) remains a valuable tool for preliminary optimization due to its significantly reduced computational cost.
+\end{document}

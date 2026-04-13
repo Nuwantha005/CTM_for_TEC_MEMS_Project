@@ -71,12 +71,14 @@ classdef ThermalNetwork
             r_end_leg = r_out;
             R_is = obj.Geometry.calculate_R_thermal_insulator(r_end_leg, w_is, obj.Geometry.Thickness, obj.Geometry.WedgeAngle, k_is);
 
-            R_eff_series = R_is + 1/K_legs;
-            K_eff_series = 1 / R_eff_series;
-
             K_az_val = obj.Geometry.calculate_K_azimuthal(r_in, L, w_az, obj.Geometry.Thickness, k_az, obj.Geometry.WedgeAngle);
 
-            K_N = K_eff_series + 5 * K_az_val;
+            % Paper topology: Azimuthal paths are in parallel with TE legs,
+            % and this combined block is in series with the radial insulator.
+            K_TE_combined = K_legs + 5 * K_az_val;
+            R_eff_series = 1/K_TE_combined + R_is;
+
+            K_N = 1 / R_eff_series;
 
             % Electrical resistance (Region II only)
             Re_leg_p = R_TE_II_p * (k_p * rho_p);
@@ -154,6 +156,37 @@ classdef ThermalNetwork
 
             R_cyl = obj.Geometry.R_cyl;
 
+            if isfield(obj.Params.geometry, 't_ins_um')
+                t_ins = obj.Params.geometry.t_ins_um * 1e-6;
+            else
+                t_ins = 10e-6; 
+            end
+
+            % Pre-compute Control Volume areas for nodes
+            r_in_arr = zeros(N, 1);
+            r_out_arr = zeros(N, 1);
+            for i = 1:N
+                [r_in_st, L_st, ~, ~, ~, ~, ~, ~, ~, ~] = obj.Geometry.get_stage_geometry(i);
+                r_in_arr(i) = r_in_st;
+                r_out_arr(i) = r_in_st + L_st;
+            end
+            
+            A_cv = zeros(N, 1);
+            for i = 1:N
+                if i == 1
+                    r_inner_cv = R_cyl;
+                else
+                    r_inner_cv = (r_in_arr(i-1) + r_in_arr(i)) / 2;
+                end
+                
+                if i == N
+                    r_outer_cv = r_out_arr(N);
+                else
+                    r_outer_cv = (r_in_arr(i) + r_in_arr(i+1)) / 2;
+                end
+                A_cv(i) = 0.5 * theta * (r_outer_cv^2 - r_inner_cv^2);
+            end
+
             K_stages = zeros(N, 1);
             S_stages = zeros(N, 1);
             Re_stages_leg = zeros(N, 1);
@@ -171,7 +204,7 @@ classdef ThermalNetwork
                 if i < N
                     T_hot = T_current(idx_c_start + i);
                 else
-                    T_hot = T_water;
+                    T_hot = T_current(idx_hot_N);
                 end
                 T_avg = (T_cold + T_hot) / 2;
 
@@ -235,20 +268,21 @@ classdef ThermalNetwork
                 r_end_leg = r_out;
                 R_is = obj.Geometry.calculate_R_thermal_insulator(r_end_leg, w_is_stage, t_tec, theta, k_is);
 
-                % Combine with radial insulator (series)
-                R_eff_series = R_is + 1/K_legs;
-                K_eff_series = 1 / R_eff_series;
-
                 % Azimuthal conductance (5 parallel paths)
                 K_az_val = obj.Geometry.calculate_K_azimuthal(r_in, L, w_az, t_tec, k_az, theta);
 
+                % Paper topology: Azimuthal paths in parallel with TE legs, 
+                % then in series with radial insulator.
+                K_TE_combined = K_legs + 5 * K_az_val;
+                
+                % Total stage conductance
+                R_eff_series = 1/K_TE_combined + R_is;
+                K_stages(i) = 1 / R_eff_series;
+
                 if i == N
-                    K_TE_N = K_legs + 5 * K_az_val;
+                    K_TE_N = K_TE_combined; % Conductance of TE chunk before final radial insulator
                     R_is_N = R_is;
                 end
-
-                % Total stage conductance: TE legs + 5 azimuthal paths in parallel
-                K_stages(i) = K_eff_series + 5 * K_az_val;
                 S_stages(i) = S_p - (-abs(S_n));
 
                 k_Si = obj.Materials.get_k('Si', T_current(idx_Si_start + i - 1));
@@ -262,9 +296,8 @@ classdef ThermalNetwork
                     R_lat_Si(i) = inf;
                 end
 
-                R_vert(i) = obj.Geometry.calculate_vertical_resistance(r_in, r_out, k_is);
-
-                A_top = 0.5 * theta * (r_out^2 - r_in^2);
+                A_top = A_cv(i);
+                R_vert(i) = (2 * t_ins) / (k_is * A_top);
                 Q_gen_nodes(i) = q_flux * A_top;
             end
 

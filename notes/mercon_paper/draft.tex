@@ -1,0 +1,321 @@
+\documentclass[conference,a4paper]{IEEEtran}
+\renewcommand{\rmdefault}{cmr}
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{angles, quotes, calc, arrows.meta, decorations.pathreplacing}
+\usepackage[americanresistors]{circuitikz}
+\usepackage{cleveref}
+\usepackage{booktabs}
+\usepackage{xcolor}
+
+\begin{document}
+
+\title{A Compact Thermal Modelling Framework for Parametric Radial Multistage MEMS Thermoelectric Coolers}
+
+\author{
+	\IEEEauthorblockN{Anonymous Authors}
+	\IEEEauthorblockA{Double-Blind Review \\ Anonymous Affiliation}
+}
+
+\maketitle
+
+\begin{abstract}
+	Microelectromechanical systems (MEMS) increasingly require aggressive spot cooling and thermal management solutions to mitigate performance bottlenecks. Radial multistage thermoelectric coolers (TECs) offer a promising topology to address high local heat fluxes while maintaining a compact footprint. However, the geometric complexity of radial TECs poses a significant challenge for rapid design exploration. High-fidelity 3D finite element models (FEM) are computationally expensive and poorly suited for preliminary optimisation. To bridge this gap, this paper presents a novel parametric compact thermal model (CTM) specifically developed for radial multistage MEMS TECs. The proposed framework reduces the complex 3D heat transfer problem into an equivalent 1D thermal resistance network by rigorously deriving the cross-sectional integrations of the thermoelectric elements along the radial direction. The CTM is validated against high-fidelity COMSOL Multiphysics simulations across a range of geometric and operational parameters. Furthermore, a systematic characterisation of the model's validity domain is conducted, quantifying the boundaries within which the 1D assumption holds. The results indicate that the proposed CTM offers computationally instantaneous performance evaluation while maintaining acceptable accuracy within the identified design envelope ($t_{\text{TEC}} > 200\,\mu\text{m}$, $q < 420\,\text{W/m}^2$, and wedges between 6 and 11), making it a powerful tool for the preliminary optimization of radial MEMS cooling devices.
+\end{abstract}
+
+\begin{IEEEkeywords}
+	Thermoelectric cooling, compact thermal model, MEMS, radial multistage TEC, thermal management.
+\end{IEEEkeywords}
+
+\section{Introduction}
+The relentless miniaturisation of microelectromechanical systems (MEMS) and advanced microelectronics has led to a significant increase in local power densities. The emergence of localised hot spots severely limits device performance, reliability, and lifespan. Consequently, dynamic spot cooling and active thermal management have become critical areas of research. Thermoelectric coolers (TECs), functioning on the Peltier effect, provide a solid-state, highly reliable, and easily integratable solution for active cooling.
+
+Traditional planar TECs are often limited by the spatial constraints of the micro-device footprint and struggles to handle extreme concentrated heat fluxes efficiently. To overcome this, multistage planar configurations have been explored \cite{hwang_planar}. Hwang et al. demonstrated the efficacy of multistage micro-TECs using a Compact Thermal Model (CTM) that reduced computational overhead compared to finite element methods (FEM) \cite{hwang_planar}. However, traditional planar or linear geometries do not fully exploit the spatial area surrounding a concentrated circular or square hot spot.
+
+A radial multistage TEC geometry offers a compelling alternative. In this configuration, the cooling stages expand radially outward from a central hot spot, inherently providing a larger footprint for heat rejection at the hot side while concentrating the cooling power at the centre. Despite its structural advantages, modeling radial TECs is mathematically complex due to the continuously varying cross-sectional areas of the thermoelectric (TE) legs along the radial heat flow path.
+
+While CTMs are widely utilised in the literature for planar and linear TEC designs, there is currently no established compact modelling framework that accommodates the varying geometry and interconnected electrical topologies of radial multistage TECs. Performing design optimisation using 3D FEM (e.g., COMSOL Multiphysics) is computationally prohibitive, often requiring hours per simulation iteration.
+
+This paper addresses this gap by proposing a parametric CTM for a novel radial multistage MEMS TEC geometry. The primary contribution of this work lies in the rigorous mathematical reduction of the 3D radial geometry into a set of equivalent 1D thermal and electrical resistances, capturing the spatial dependencies of the TE elements, electrical interconnects, and insulating layers. The model is subsequently validated against automated COMSOL Multiphysics simulations. Crucially, the validity domain of the CTM is systematically characterised to provide practitioners with quantitative boundaries for the model's application, ensuring reliable preliminary optimisation.
+
+\section{Geometry Parametrisation}
+
+To formulate an effective compact thermal model, the radial TEC structure must be systematically parametrised. The design comprises three primary layers stacked vertically: a central silicon heat spreader (chip layer), a thin electrical insulator layer, and the active radial TEC array layer.
+
+The core building block of the radial TEC array is the ``wedge.'' The full $360^\circ$ circular array is divided into $N_{\text{wedges}}$ identical wedges, such that the wedge angle is $\theta = 2\pi / N_{\text{wedges}}$. As illustrated in \cref{fig:wedge_top_view}, the active cooling elements are arranged radially within each wedge. A central cylindrical heat spreader with radius $r_{\text{cyl}}$ occupies the core directly above the localized hot spot. The TEC array begins at $r_{\text{cyl}}$ and extends outward to a defined base radius, $r_{\text{base}}$.
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\node[anchor=south west, inner sep=0pt] (img) at (0,0) {
+			\includegraphics[width=0.95\columnwidth]{images/wedge_top_view.png}
+		};
+		\coordinate (Centre) at (0.1, 0.3);
+		\coordinate (ArcStart) at (5.6, 3.5);
+		\coordinate (ArcEnd) at (6.3, 0.1);
+		\draw[{Stealth}-{Stealth}, black, thin] (Centre) -- (ArcStart) node[midway, above, sloped] {$r_{\text{base}}$};
+		\pic [draw, black, thin, "$\theta$", angle eccentricity=1.09, angle radius=6.65cm,
+		pic actions/.append style={{Stealth}-{Stealth}}] {angle = ArcEnd--Centre--ArcStart};
+	\end{tikzpicture}
+	\caption{Top view of a single radial TEC wedge detailing the base radius $r_{\text{base}}$ and subtended wedge angle $\theta$.}
+	\label{fig:wedge_top_view}
+\end{figure}
+
+The vertical arrangement, depicted in \cref{fig:layers_side_view}, consists of a bottom heat source of thickness $t_{\text{chip}}$, an intermediary insulator of thickness $t_{\text{ins}}$, and the active TEC layer of thickness $t_{\text{TEC}}$.
+
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\node[anchor=south west, inner sep=0pt] (img) at (0,0) {
+			\includegraphics[width=0.95\columnwidth]{images/layers_side_view.png}
+		};
+		\coordinate (A) at (4.1, 4.3);
+		\coordinate (B) at (4.1, 1.8);
+		\coordinate (C) at (4.1, 1.3);
+		\coordinate (D) at (4.1, 0.1);
+		\draw[{Stealth}-{Stealth}, black, thin] (A) -- (B) node[midway, right] {$t_{\text{TEC}}$};
+		\draw[{Stealth}-{Stealth}, black, thin] (B) -- (C) node[midway, right] {$t_{\text{ins}}$};
+		\draw[{Stealth}-{Stealth}, black, thin] (C) -- (D) node[midway, right] {$t_{\text{chip}}$};
+	\end{tikzpicture}
+	\caption{Side profile displaying the vertical layer system.}
+	\label{fig:layers_side_view}
+\end{figure}
+
+Each stage $i$ within the wedge is separated radially by a radial insulator of constant width $W_{\text{is}}$. The p-type and n-type semiconductor legs within the same stage are separated azimuthally by a gap. In this parametric framework, this gap is defined by a fill factor $f$, representing the active area proportion of the TE element.
+
+To minimize the parameter space during optimization, the radial lengths of the consecutive stages, $L_i$, follow a geometric progression defined by a radial expansion factor $f_L$, such that $L_{i+1} = f_L \cdot L_i$. Accounting for the radial insulators, the length of the first stage $L_1$ is derived as:
+\begin{equation}
+	L_1 = \frac{(r_{\text{base}} - r_{\text{cyl}} - (N+1) W_{\text{is}}) (1-f_L)}{1-f_L^{N}}
+\end{equation}
+where $N$ is the total number of radial stages.
+
+Electrical connectivity is established via inner interconnects (width $W_{\text{ic}}$) linking p- and n-legs of the same wedge, and outer interconnects (width $W_{\text{oc}}$) linking adjacent wedges. These are parametrized as fractional multipliers of the stage length $L_i$ and thickness $t_{\text{TEC}}$. \cref{tab:geom_params} summarizes the key geometric variables enabling the rapid construction of the geometry.
+
+\begin{table}[H]
+	\centering
+	\caption{Key Geometric Parameters}
+	\label{tab:geom_params}
+	\begin{tabular}{@{}ll@{}}
+		\toprule
+		\textbf{Parameter}                 & \textbf{Description}                            \\
+		\midrule
+		$N$                                & Number of radial cooling stages                 \\
+		$N_{\text{wedges}}$                & Number of azimuthal wedges (dictates $\theta$)  \\
+		$t_{\text{TEC}}$                   & Thickness of the active TEC layer               \\
+		$r_{\text{cyl}}$                   & Radius of the central heat spreader cylinder    \\
+		$f_L$                              & Radial length expansion ratio                   \\
+		$W_{\text{is}}$                    & Width of radial electrical insulators           \\
+		$f$                                & Fill factor (azimuthal semiconductor ratio)     \\
+		$f_{\text{ic,W}}, f_{\text{oc,W}}$ & Fractional widths for inner/outer interconnects \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\section{Thermal Resistance Derivation}
+
+To transform the 3D radial geometry into a 1D thermal network, the thermal resistance of each component is derived by integrating the radially varying cross-sectional areas. For a component bounded between inner radius $r_1$ and outer radius $r_2$, the thermal resistance is given by $R_{\text{t}} = \int_{r_1}^{r_2} \frac{dr}{\kappa \cdot A(r)}$, where $\kappa$ is the thermal conductivity and $A(r)$ is the effective cross-sectional area at radius $r$.
+
+\subsection{Thermoelectric Legs}
+The thermoelectric legs (p-type and n-type) are the active components. Due to the presence of electrical interconnects and azimuthal gaps, the cross-sectional area of a TE leg is not strictly proportional to $r \theta$. To accurately capture this geometry, the leg is subdivided into three radial regions.
+
+To simplify the parametrization of the azimuthal gaps, a dimensionless fill factor $f$ is utilized, defined as the ratio of the active semiconductor material to the total allocated azimuthal span.
+
+\textbf{Region I (Inner Interconnect Zone):} This region spans from $r=r_{\text{in}}$ to $r=r_{\text{in}}+W_{\text{ic}}$. The inner interconnect of thickness $t_{\text{ic}}$ and angular span $\beta_{\text{ic}}$ partially occupies the space atop the TE leg. For a single leg (spanning half the wedge angle, $\theta/2$), the effective geometric area coefficient $a_{\text{I}}$ is defined as:
+\begin{equation}
+	a_{\text{I}} = \frac{1}{2}\left( \theta \cdot t_{\text{TEC}} - \beta_{\text{ic}} \cdot t_{\text{ic}} \right)
+\end{equation}
+The cross-sectional area as a function of $r$ is $A_{\text{I}}(r) = f \cdot a_{\text{I}} \cdot r$. Integrating over this region yields the thermal resistance:
+\begin{equation}
+	R_{\text{t,TE,I}} = \frac{1}{\kappa_{\text{TE}} \cdot f \cdot a_{\text{I}}} \ln \left( \frac{r_{\text{in}} + W_{\text{ic}}}{r_{\text{in}}} \right)
+\end{equation}
+
+\textbf{Region II (Clear Zone):} This middle region spans from $r=r_{\text{in}}+W_{\text{ic}}$ to $r=r_{\text{out}}-W_{\text{oc}}$. Without any interconnect intrusion, the area coefficient is purely dictated by the leg geometry: $a_{\text{II}} = \frac{1}{2} \theta \cdot t_{\text{TEC}}$. The resulting resistance is:
+\begin{equation}
+	R_{\text{t,TE,II}} = \frac{1}{\kappa_{\text{TE}} \cdot f \cdot a_{\text{II}}} \ln \left( \frac{r_{\text{out}} - W_{\text{oc}}}{r_{\text{in}} + W_{\text{ic}}} \right)
+\end{equation}
+
+\textbf{Region III (Outer Interconnect Zone):} This region spans from $r=r_{\text{out}}-W_{\text{oc}}$ to $r=r_{\text{out}}$. It accounts for the outer interconnect defined by $t_{\text{oc}}$ and $\beta_{\text{oc}}$. Similar to Region I, the coefficient is $a_{\text{III}} = \frac{1}{2}(\theta \cdot t_{\text{TEC}} - \beta_{\text{oc}} \cdot t_{\text{oc}})$, yielding:
+\begin{equation}
+	R_{\text{t,TE,III}} = \frac{1}{\kappa_{\text{TE}} \cdot f \cdot a_{\text{III}}} \ln \left( \frac{r_{\text{out}}}{r_{\text{out}} - W_{\text{oc}}} \right)
+\end{equation}
+
+\subsection{Passive Component Resistances}
+The thermal resistances of the passive layers are derived using a similar methodology, assuming radial or vertical heat flow where appropriate. \cref{tab:resistances} summarizes the final expressions for the key structural resistances within the model.
+
+\begin{table}[H]
+	\centering
+	\caption{Derived Thermal and Electrical Resistances}
+	\label{tab:resistances}
+	\begin{tabular}{@{}p{0.15\columnwidth}p{0.8\columnwidth}@{}}
+		\toprule
+		\textbf{Component}          & \textbf{Equation}                                                                                                                                       \\
+		\midrule
+		Radial Insulator            & $R_{\text{is}} = \frac{1}{\kappa_{\text{is}} \theta t_{\text{TEC}}} \ln \left( \frac{r_{\text{out}} + W_{\text{is}}}{r_{\text{out}}} \right)$           \\[6pt]
+		Inner Interconnect (Therm.) & $R_{\text{t,ic}} = \frac{1}{\kappa_{\text{ic}} \beta_{\text{ic}} t_{\text{ic}}} \ln \left( \frac{r_{\text{in}} + W_{\text{ic}}}{r_{\text{in}}} \right)$ \\[6pt]
+		Vertical Insulator          & $R_{\text{ve}} = \frac{2 t_{\text{ins}}}{\kappa_{\text{ins}} \theta (r_{\text{out}}^2 - r_{\text{in}}^2)}$                                              \\[6pt]
+		Chip Layer (Lateral)        & $R_{\text{chip}} = \frac{1}{\kappa_{\text{chip}} \theta t_{\text{chip}}} \ln \left( \frac{r_{\text{out}}}{r_{\text{in}}} \right)$                       \\[6pt]
+		Inner Interconnect (Elec.)  & $R_{\text{e,ic}} = \frac{\rho_{\text{ic}} \cdot (r_{\text{in}} + \frac{1}{2}W_{\text{ic}}) \cdot \beta_{\text{ic}}}{W_{\text{ic}} t_{\text{ic}}}$       \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\subsection{Network Lumping and System Formulation}
+To construct the macroscopic linear network, the derived component resistances within a single stage are lumped together. As shown in \cref{fig:lumped_resistor_network}, the series resistances of regions I, II, and III for the p-type and n-type legs are combined. The parallel azimuthal thermal leakage paths (representing the gap insulators) are incorporated into an equivalent stage resistance block, which is then placed in series with the radial insulator $R_{\text{is}}$ to compute the overall stage resistance $R_{\text{TEC}}$.
+
+\begin{figure}[H]
+	\centering
+	\resizebox{0.95\columnwidth}{!}{%
+		\begin{circuitikz}
+			\ctikzset{resistors/scale=0.5}
+			% Nodes
+			\node[circ, label={left:$T_{i,\text{ic}}$}](ic_1) at (0,0){};
+			\node[circ, label=right:$T_{i+1,\text{ic}}$](ic_2) at (7,0){};
+			\node[circ](oc) at (6,0){};
+
+			% Top Azimuthal Insulator Path
+			\draw(ic_1) to ++(0,3) to [R, l=$R_{\text{az}}/2$] ++(6,0) to (oc);
+			% Top branch - Thermoelectric leg (p-type)
+			\draw (0,1) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] ++(1.5,0) to ++(0,0.5) to[R, l={ $R_{\text{t,TE-p,II}}$},*-*] ++(3,0) to ++(0,-0.5)
+			to [R, l={\footnotesize $R_{\text{t,oc}}/2$},*-*] ++(1.5,0);
+			\draw (0,2) to[R, l={\footnotesize $R_{\text{t,TE-p,I}}$}, *-*] ++(1.5,0) to ++(0,-0.5);
+			\draw (4.5,1.5) to ++(0,+0.5) to[R, l={\footnotesize $R_{\text{t,TE-p,III}}$}, *-*] ++(+1.5,0) ;
+			% Middle branch - Azimuthal insulator
+			\draw (ic_1) to[R, l=$R_{\text{az}}$] (oc);
+			% Bottom branch - Thermoelectric leg (n-type)
+			\draw (0,-1) to[R, l={\footnotesize $R_{\text{t,ic}}/2$}, *-*] ++(1.5,0) to ++(0,-0.5) to[R, l={ $R_{\text{t,TE-n,II}}$},*-*] ++(3,0) to ++(0,+0.5)
+			to [R, l={\footnotesize $R_{\text{t,oc}}/2$},*-*] ++(1.5,0);
+			\draw (0,-2) to[R, l={\footnotesize $R_{\text{t,TE-n,I}}$}, *-*] ++(1.5,0) to ++(0,+0.5);
+			\draw (4.5,-1.5) to ++(0,-0.5) to[R, l={\footnotesize $R_{\text{t,TE-n,III}}$}, *-*] ++(+1.5,0) ;
+			% Bottom Azimuthal Insulator Path
+			\draw(ic_1) to ++(0,-3) to [R, l=$R_{\text{az}}/2$] ++(6,0) to (oc);
+			\draw (oc) to[R, l={\footnotesize $R_{\text{is}}$}] (ic_2);
+		\end{circuitikz}%
+	}
+	\caption{Lumped thermal resistance network for a single radial TEC stage connecting adjacent interconnect nodes.}
+	\label{fig:lumped_resistor_network}
+\end{figure}
+
+By writing energy balance equations incorporating Peltier pumping ($Q_{\text{p}} = S I T_{\text{c}}$) and localised Joule heating ($\frac{1}{2} I^2 R_{\text{e}}$) for the $N$ stages across the chip and TEC layers, the system is expressed as a linear matrix equation:
+\begin{equation}
+	\begin{bmatrix}
+		\mathbf{A_{00}}               & \mathbf{A_{0 \to \text{Si}}} & \mathbf{A_{0 \to \text{TEC}}} \\
+		\mathbf{A_{\text{Si} \to 0}}  & \mathbf{A_{\text{chip}}}     & \mathbf{A_{\text{ve}}}        \\
+		\mathbf{A_{\text{TEC} \to 0}} & \mathbf{A_{\text{ve}}}       & \mathbf{A_{\text{TEC}}}
+	\end{bmatrix}
+	\begin{bmatrix}
+		T_{0} \\ \mathbf{T_{\text{chip}}} \\ \mathbf{T_{\text{TEC}}}
+	\end{bmatrix} =
+	\begin{bmatrix}
+		B_0 \\ \mathbf{B_{\text{chip}}} \\ \mathbf{B_{\text{TEC}}}
+	\end{bmatrix}
+\end{equation}
+
+Here, $\mathbf{A_{00}}$ is the central hub scalar connecting the core cylinder. $\mathbf{A_{\text{chip}}}$ is a tridiagonal matrix governing the passive lateral spread in the silicon. $\mathbf{A_{\text{TEC}}}$ is an asymmetric tridiagonal matrix reflecting the active Peltier pumping and conduction, while the diagonal $\mathbf{A_{\text{ve}}}$ links the layers vertically. The source vector $\mathbf{B}$ contains external heat flux and stage-wise internal Joule generation. Solving this dense linear system provides the continuous radial temperature profile in a fraction of a second.
+
+\section{Validation}
+
+To verify the mathematical correctness and physical assumptions of the CTM, the model was validated against a full 3D Finite Element Method (FEM) simulation. A parametric 3D CAD model of a 3-stage radial TEC was created in SolidWorks and live-linked to COMSOL Multiphysics. A MATLAB API framework was developed to seamlessly update the geometric parameters, mesh the geometry, solve the 3D conjugate heat transfer and thermoelectric multiphysics equations, and extract the maximum system temperature.
+
+\cref{tab:validation_cases} presents five distinct validation cases encompassing different geometric constraints (thicknesses, wedge angles, length ratios) and operational boundaries (currents, heat fluxes).
+
+\begin{table}[H]
+	\centering
+	\caption{Validation Cases: CTM vs COMSOL Comparison}
+	\label{tab:validation_cases}
+	\begin{tabular}{@{}llccrrr@{}}
+		\toprule
+		\textbf{ID} & \textbf{$\theta$ ($^\circ$)} & \textbf{$t_{\text{TEC}}$ ($\mu$m)} & \textbf{$I$ (mA)} & \textbf{$q$ (W/m²)} & \textbf{CTM ($^\circ$C)} & \textbf{Error (\%)} \\
+		\midrule
+		1           & 30                           & 100                                & 50                & 500                 & 36.04                    & -43.2               \\
+		2           & 30                           & 150                                & 100               & 500                 & 31.81                    & -36.4               \\
+		3           & 30                           & 150                                & 80                & 500                 & 30.68                    & -33.8               \\
+		4           & 30                           & 200                                & 120               & 2000                & 58.23                    & -61.5               \\
+		5           & 45                           & 150                                & 80                & 1000                & 44.85                    & -52.4               \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+The validation reveals that the CTM systematically overpredicts the maximum temperature compared to the FEM solution (negative error implies COMSOL predicted a lower temperature, indicating better actual cooling than the CTM suggests). This overprediction is rooted in the fundamental 1D radial assumption of the model. In a 3D geometry, heat inherently spreads azimuthally around the gaps and through the silicon layer in complex patterns. When these multidimensional spreading paths are mathematically reduced to a discrete 1D string of nodes, the model artificially concentrates the thermal bottlenecks, leading to elevated temperature predictions.
+
+While an overpredicting thermal model is conservative and generally preferred for safe engineering design, the magnitude of the error dictates that the CTM cannot be universally applied blindly. Therefore, characterising the strict validity domain wherein the 1D assumption holds is critical for deploying this tool in parametric design optimization.
+
+\section{Validity Domain Characterisation}
+
+To define the boundaries within which the CTM remains reliable, extensive automated parametric sweeps were executed across the operational and geometric design space, comparing the CTM output against 3D COMSOL FEM results. The error metric evaluated is the relative percentage error in the predicted maximum system temperature. 
+
+\subsection{1D Sensitivity Sweeps}
+Initially, 1D sweeps were performed to isolate the effect of individual parameters on the assumption degradation.
+
+\textbf{Effect of Applied Heat Flux:} As demonstrated in \cref{fig:sweep_heatflux}, increasing the base heat flux $q$ significantly degrades the model accuracy. The physical mechanism underlying this deviation is the intensifying non-radial temperature gradients within the chip layer. The CTM forces all generated heat to flow strictly radially from the assumed node centers. However, in reality, high heat fluxes induce immediate localized lateral spreading into the silicon and vertically into the adjacent TEC elements before stabilizing into a radial flow. At extreme fluxes, these 3D spreading effects dominate, breaking the 1D radial premise.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\columnwidth]{images/HeatFlux_sweep_plot.png}
+  \caption{Relative error divergence as a function of applied heat flux.}
+  \label{fig:sweep_heatflux}
+\end{figure}
+
+\textbf{Effect of TEC Layer Thickness:} \cref{fig:sweep_thickness} illustrates that thinner TEC layers yield higher errors, while thicker structures converge towards acceptable accuracy. This is a direct consequence of the element aspect ratio. Very thin structures result in short, wide legs where boundary effects and horizontal fringing fields dominate over the primary vertical/radial thermal path. As $t_{\text{TEC}}$ increases, the geometry more closely resembles true 1D pillars, aligning with the mathematical derivation of the integrated thermal resistances.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\columnwidth]{images/Thickness_sweep_plot.png}
+  \caption{Convergence of model accuracy with increasing TEC layer thickness.}
+  \label{fig:sweep_thickness}
+\end{figure}
+
+\textbf{Effect of Wedge Count ($N_{\text{wedges}}$):} The wedge count $M$ (inversely proportional to the wedge angle $\theta$) exhibits a distinct non-monotonic error response (\cref{fig:sweep_wedge}). At very low wedge counts (large $\theta$), the wide azimuthal span of the TE elements means that azimuthal heat spreading is highly active, violating the radial flow assumption. Conversely, at very high wedge counts (narrow $\theta$), the constant-width azimuthal insulators $W_{\text{az}}$ consume a disproportionately large fraction of the available wedge arc length. The simplified geometric area integration used in the CTM (via the linear fill factor $f$) begins to misrepresent the heavily distorted cross-section at the inner radius, leading to artificial thermal bottlenecks. 
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\columnwidth]{images/WedgeAngle_sweep_plot.png}
+  \caption{Non-monotonic error behavior across varying wedge counts (angles).}
+  \label{fig:sweep_wedge}
+\end{figure}
+
+\subsection{2D Design Envelope Mapping}
+To provide a concrete, actionable guideline for design optimization, a 2D mapping of the error space was generated across the two most sensitive parameters: Heat Flux and TEC Thickness. \cref{fig:contour_error} presents the resulting contour map.
+
+The contour map explicitly traces the $20\%$ error isoline, serving as a proposed threshold for the "validity domain." Within this region, the CTM captures the primary thermal physics with sufficient accuracy to drive optimization algorithms, avoiding completely erroneous design topologies.
+
+Based on the quantitative analysis, the 1D radial CTM formulation is considered strictly valid and optimal for deployment when:
+\begin{itemize}
+    \item \textbf{TEC Thickness:} $t_{\text{TEC}} \gtrsim 200\,\mu\text{m}$.
+    \item \textbf{Heat Flux:} $q \lesssim 420\,\text{W/m}^2$.
+    \item \textbf{Wedge Count:} $N_{\text{wedges}} \in [6, 11]$ (corresponding to $30^\circ \leq \theta \leq 60^\circ$).
+\end{itemize}
+
+When restricted to this domain, the CTM serves as a remarkably powerful design tool. While a single parametric 3D COMSOL evaluation requires roughly 1 to 2 hours of meshing and computation on standard workstation hardware, the dense linear matrix system developed in this framework evaluates in tens of milliseconds within MATLAB. This staggering acceleration unlocks the ability to run multi-objective genetic algorithms and global numerical sweeps that would be functionally impossible using purely FEM approaches.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\columnwidth]{images/HeatFlux_vs_Thickness_Error_plot.png}
+  \caption{2D contour map of relative error (\%) across Heat Flux and TEC Thickness, with the 20\% validity boundary explicitly mapped.}
+  \label{fig:contour_error}
+\end{figure}
+
+\section{Conclusion}
+
+This paper presented a novel, parametric compact thermal modelling framework for radial multistage MEMS thermoelectric coolers. By systematically integrating the radially varying cross-sectional geometries of active thermoelectric legs, metallic interconnects, and passive insulators, the complex 3D heat transfer geometry was collapsed into a continuous 1D equivalent resistance network. The formulation successfully translates physical design parameters into a highly efficient linear matrix system.
+
+Validation against COMSOL Multiphysics highlighted that while the 1D assumption induces systematic overpredictions of peak temperatures due to uncaptured 3D lateral heat spreading, the model remains robust under specific conditions. Through rigorous sensitivity sweeps and 2D contour mapping, a concrete validity domain was established ($t_{\text{TEC}} > 200\,\mu\text{m}$, $q < 420\,\text{W/m}^2$, $N_{\text{wedges}} \in [6, 11]$). Within these bounds, the CTM reduces computational evaluation times from hours to milliseconds with acceptable baseline accuracy.
+
+The defined validity domain provides practitioners with immediate, quantitative boundaries for employing the CTM in rapid iterative design and numerical optimization of radial spot cooling devices. Future work will seek to augment the matrix formulation with inter-wedge azimuthal coupling nodes to relax the rigid 1D restriction and expand the model's high-fidelity operational envelope.
+
+\begin{thebibliography}{1}
+\bibitem{hwang_planar}
+G. S. Hwang et al., ``Multi-stage micro thermoelectric coolers for spot cooling,'' \textit{International Journal of Heat and Mass Transfer}, vol. 51, no. 15-16, pp. 4022-4033, 2008.
+
+\bibitem{rowe_mems}
+D. M. Rowe, \textit{Thermoelectrics Handbook: Macro to Nano}. CRC press, 2005.
+
+\bibitem{bell_cooling}
+L. E. Bell, ``Cooling, heating, generating power, and recovering waste heat with thermoelectric systems,'' \textit{Science}, vol. 321, no. 5895, pp. 1457-1461, 2008.
+
+\bibitem{snyder_small}
+G. J. Snyder et al., ``Thermoelectric microdevice fabricated by a MEMS-like electrochemical process,'' \textit{Nature materials}, vol. 424, pp. 156-158, 2003.
+\end{thebibliography}
+
+\end{document}
