@@ -1,0 +1,2 @@
+RunID,SweepType,Variable,Value,q_Wm2,M,theta_deg,t_TEC_um,w_is_um,fill_factor,t_chip_um,MATLAB_Tmax,COMSOL_Tmax,Error_Abs,Error_Pct
+1,Test,w_is_um,10,500,12,30,150,10,0.9,50,31.4985381324684,NaN,NaN,NaN

@@ -56,6 +56,7 @@ classdef TECGeometry < handle
                 end
                 obj.R_base = w_chip / sqrt(2);
                 obj.calculate_L1();
+                obj.validate_geometry();
             else
                 error('Config must contain a "geometry" field.');
             end
@@ -65,18 +66,8 @@ classdef TECGeometry < handle
             % Calculate L_1 using Eq. 238 from paper
             % Supports both old and new paper notation
 
-            % Get insulation width ratio: W_is_ratio (new) or insulation_width_ratio (old)
-            if isfield(obj.Params, 'W_is_ratio')
-                L_avg_approx = (obj.R_base - obj.R_cyl) / obj.N_stages;
-                w_is = obj.Params.W_is_ratio * L_avg_approx;
-            elseif isfield(obj.Params, 'insulation_width_ratio')
-                L_avg_approx = (obj.R_base - obj.R_cyl) / obj.N_stages;
-                w_is = obj.Params.insulation_width_ratio * L_avg_approx;
-            elseif isfield(obj.Params, 'insulation_width_um')
-                w_is = obj.Params.insulation_width_um * 1e-6;
-            else
-                w_is = 40e-6;  % Default 40 um
-            end
+            % Use stage-1 value as canonical radial insulator width.
+            w_is = obj.get_insulation_width(1, obj.L_1, true);
 
             % Length ratio: f_L (new) or radial_expansion_factor (old)
             if isfield(obj.Params, 'f_L')
@@ -120,16 +111,7 @@ classdef TECGeometry < handle
 
             L = obj.L_1 * k_r^(i-1);
 
-            % Insulation width: W_is_ratio (new) or insulation_width_ratio (old)
-            if isfield(obj.Params, 'W_is_ratio')
-                w_is = obj.Params.W_is_ratio * L;
-            elseif isfield(obj.Params, 'insulation_width_ratio')
-                w_is = obj.Params.insulation_width_ratio * L;
-            elseif isfield(obj.Params, 'insulation_width_um')
-                w_is = obj.Params.insulation_width_um * 1e-6;
-            else
-                w_is = 40e-6;  % Default 40 um
-            end
+            w_is = obj.get_insulation_width(i, L, false);
 
             if k_r == 1
                 sum_L_prev = (i-1) * obj.L_1;
@@ -227,18 +209,18 @@ classdef TECGeometry < handle
                 f = 1.0;  % No azimuthal correction if not specified
             end
             
-            % Coefficient for A(r) = f*a*r (azimuthal gap scales with r)
-            a = (theta * t - beta_ic * t_ic) / 2;
+            % Coefficient for A(r) = a*r
+            a = (theta * t * (2*f - 1) - beta_ic * t_ic) / 2;
             
             % Integration limits
             r1 = r_in;
             r2 = r_in + w_ic;
             
-            % R = integral(dr/(k*f*a*r)) = (1/(k*f*a)) * ln(r2/r1)
+            % R = integral(dr/(k*a*r)) = (1/(k*a)) * ln(r2/r1)
             if abs(a) < 1e-15 || abs(r2 - r1) < 1e-15
                 R_TE_I = 0;
             else
-                R_TE_I = (1 / (k_TE * f * a)) * log(r2 / r1);
+                R_TE_I = (1 / (k_TE * a)) * log(r2 / r1);
             end
         end
         
@@ -257,18 +239,18 @@ classdef TECGeometry < handle
                 f = 1.0;  % No azimuthal correction if not specified
             end
             
-            % Coefficient for A(r) = f*a*r (azimuthal gap scales with r)
-            a = theta * t / 2;
+            % Coefficient for A(r) = a*r
+            a = theta * t * (2*f - 1) / 2;
             
             % Integration limits
             r1 = r_in + w_ic;
             r2 = r_in + L - w_oc;
             
-            % R = integral(dr/(k*f*a*r)) = (1/(k*f*a)) * ln(r2/r1)
+            % R = integral(dr/(k*a*r)) = (1/(k*a)) * ln(r2/r1)
             if abs(a) < 1e-15 || abs(r2 - r1) < 1e-15
                 R_TE_II = 0;
             else
-                R_TE_II = (1 / (k_TE * f * a)) * log(r2 / r1);
+                R_TE_II = (1 / (k_TE * a)) * log(r2 / r1);
             end
         end
         
@@ -287,42 +269,39 @@ classdef TECGeometry < handle
                 f = 1.0;  % No azimuthal correction if not specified
             end
             
-            % Coefficient for A(r) = f*a*r (azimuthal gap scales with r)
-            a = (theta * t - beta_oc * t_oc) / 2;
+            % Coefficient for A(r) = a*r
+            a = (theta * t * (2*f - 1) - beta_oc * t_oc) / 2;
             
             % Integration limits
             r1 = r_in + L - w_oc;
             r2 = r_in + L;
             
-            % R = integral(dr/(k*f*a*r)) = (1/(k*f*a)) * ln(r2/r1)
+            % R = integral(dr/(k*a*r)) = (1/(k*a)) * ln(r2/r1)
             if abs(a) < 1e-15 || abs(r2 - r1) < 1e-15
                 R_TE_III = 0;
             else
-                R_TE_III = (1 / (k_TE * f * a)) * log(r2 / r1);
+                R_TE_III = (1 / (k_TE * a)) * log(r2 / r1);
             end
         end
 
         function [R_e_ic, R_e_oc] = calculate_R_electrical_interconnects(obj, r1, L, w_ic, t_ic, beta_ic, w_oc, t_oc, beta_oc, rho_c)
             % Electrical resistance of IC and OC
             % Paper: Current flows AZIMUTHALLY (not radially) through IC/OC
-            % R_e,ic = (rho * r_avg * beta) / (W_ic * t_ic)
+            % R_e,ic = (rho * beta) / (t_ic * ln((r_in+W_ic)/r_in))
             
-            % IC: r_avg = r1 + W_ic/2
-            r_avg_ic = r1 + w_ic / 2;
-            if abs(w_ic) < 1e-15 || abs(t_ic) < 1e-15
+            term_ic = log((r1 + w_ic) / r1);
+            if term_ic == 0 || abs(t_ic) < 1e-15
                 R_e_ic = 0;
             else
-                R_e_ic = (rho_c * r_avg_ic * beta_ic) / (w_ic * t_ic);
+                R_e_ic = (rho_c * beta_ic) / (t_ic * term_ic);
             end
             
-            % OC: r_avg = r_out - W_oc/2 = (r1 + L) - W_oc/2
             r_out = r1 + L;
-            r_avg_oc = r_out - w_oc / 2;
-            if abs(w_oc) < 1e-15 || abs(t_oc) < 1e-15
+            term_oc = log(r_out / (r_out - w_oc));
+            if term_oc == 0 || abs(t_oc) < 1e-15
                 R_e_oc = 0;
             else
-                % Note: Two OC at half angle each, so combined resistance = single IC equivalent
-                R_e_oc = (rho_c * r_avg_oc * beta_oc) / (w_oc * t_oc);
+                R_e_oc = (rho_c * beta_oc) / (t_oc * term_oc);
             end
         end
         
@@ -355,7 +334,39 @@ classdef TECGeometry < handle
         end
 
         function K_az = calculate_K_azimuthal(obj, r1, L, w_az, t, k_az, theta)
-            K_az = k_az * (w_az * t) / L;
+            % K_az is the conductance of ALL the azimuthal insulator in one wedge.
+            % Paper Eq: R_az = 1 / (k_az * (1-f) * theta * t) * ln(r_out / r_in)
+            % So K_az = (k_az * (1-f) * theta * t) / ln(r_out / r_in)
+            if isfield(obj.Params, 'fill_factor')
+                f = obj.Params.fill_factor;
+            else
+                f = 1.0;
+            end
+            
+            r_out = r1 + L;
+            if f >= 1.0 || r_out <= r1
+                K_az = 0;
+            else
+                K_az = (k_az * (1 - f) * theta * t) / log(r_out / r1);
+            end
+        end
+
+        function n_paths = get_azimuthal_path_count(obj, r_in, L, w_az)
+            % Derive equivalent number of parallel azimuthal paths.
+            % If explicitly provided, honor configuration value.
+            if isfield(obj.Params, 'n_azimuthal_paths')
+                n_paths = max(1, round(obj.Params.n_azimuthal_paths));
+                return;
+            end
+
+            r_mid = r_in + L / 2;
+            arc_len = r_mid * obj.WedgeAngle;
+
+            if w_az <= 1e-15 || arc_len <= 1e-15
+                n_paths = 1;
+            else
+                n_paths = max(1, round(arc_len / w_az));
+            end
         end
 
         function R_ve = calculate_vertical_resistance(obj, r_in, r_out, k_ins)
@@ -392,6 +403,96 @@ classdef TECGeometry < handle
 
             fclose(fid);
             fprintf('COMSOL parameters exported to %s\n', filename);
+        end
+
+        function validate_geometry(obj, tol)
+            if nargin < 2
+                tol = 1e-9;
+            end
+
+            if ~(obj.R_cyl > 0 && obj.R_cyl < obj.R_base)
+                error('Geometry Error: r_cyl must satisfy 0 < r_cyl < r_base.');
+            end
+
+            N = obj.N_stages;
+            L_sum = 0;
+            Wis_sum = 0;
+
+            for i = 1:N
+                [r_in, L, w_ic, ~, ~, w_oc, ~, ~, w_az, ~] = obj.get_stage_geometry(i);
+
+                if (w_ic + w_oc) >= L
+                    error('Geometry Error: Stage %d violates W_ic + W_oc < L.', i);
+                end
+
+                if (2 * w_az) >= (r_in * obj.WedgeAngle)
+                    error('Geometry Error: Stage %d violates 2*W_az < r_in*theta.', i);
+                end
+
+                L_sum = L_sum + L;
+                Wis_sum = Wis_sum + obj.get_insulation_width(i, L, false);
+            end
+
+            % Outer radial insulator (M+1) uses next-stage length in legacy mode.
+            k_r = 1.15;
+            if isfield(obj.Params, 'f_L')
+                k_r = obj.Params.f_L;
+            elseif isfield(obj.Params, 'radial_expansion_factor')
+                k_r = obj.Params.radial_expansion_factor;
+            end
+            L_next = obj.L_1 * k_r^N;
+            w_is_outer = obj.get_insulation_width(N + 1, L_next, false);
+
+            r_closure = obj.R_cyl + L_sum + Wis_sum + w_is_outer;
+            if abs(r_closure - obj.R_base) > tol * max(obj.R_base, 1)
+                error('Geometry Error: radial closure mismatch. Expected R_base=%g, got %g.', obj.R_base, r_closure);
+            end
+        end
+
+        function w_is = get_insulation_width(obj, ~, L_stage, use_avg_if_needed)
+            % Returns radial insulator width.
+            % Default behavior uses a stage-constant width for consistency
+            % with the updated methodology. Legacy behavior can be enabled
+            % by setting geometry.insulation_width_mode = 'scaled_by_stage'.
+            if nargin < 4
+                use_avg_if_needed = false;
+            end
+
+            mode = 'constant';
+            if isfield(obj.Params, 'insulation_width_mode')
+                mode = obj.Params.insulation_width_mode;
+            end
+
+            if isfield(obj.Params, 'insulation_width_um')
+                w_is_const = obj.Params.insulation_width_um * 1e-6;
+            else
+                % In constant mode, width ratio must map to a single global
+                % reference length, not stage-local L_i.
+                L_ref_const = (obj.R_base - obj.R_cyl) / obj.N_stages;
+                if use_avg_if_needed
+                    L_ref_const = (obj.R_base - obj.R_cyl) / obj.N_stages;
+                end
+
+                if isfield(obj.Params, 'W_is_ratio')
+                    w_is_const = obj.Params.W_is_ratio * L_ref_const;
+                elseif isfield(obj.Params, 'insulation_width_ratio')
+                    w_is_const = obj.Params.insulation_width_ratio * L_ref_const;
+                else
+                    w_is_const = 40e-6;
+                end
+            end
+
+            if strcmpi(char(mode), 'scaled_by_stage')
+                if isfield(obj.Params, 'W_is_ratio')
+                    w_is = obj.Params.W_is_ratio * L_stage;
+                elseif isfield(obj.Params, 'insulation_width_ratio')
+                    w_is = obj.Params.insulation_width_ratio * L_stage;
+                else
+                    w_is = w_is_const;
+                end
+            else
+                w_is = w_is_const;
+            end
         end
     end
 end

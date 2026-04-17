@@ -24,14 +24,20 @@ function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_nam
         M_now = base_cases.base_M;
         t_now = base_cases.base_t_TEC;
         f_now = base_cases.f_L;
+        w_is_now = base_cases.w_is_um;
+        fill_factor_now = base_cases.fill_factor;
+        t_chip_now = base_cases.t_chip_um;
 
         if strcmp(var_name, 'q_Wm2'), q_now = val; end
         if strcmp(var_name, 'M'), M_now = val; end
         if strcmp(var_name, 't_TEC_um'), t_now = val; end
         if strcmp(var_name, 'f_L'), f_now = val; end
+        if strcmp(var_name, 'w_is_um'), w_is_now = val; end
+        if strcmp(var_name, 'fill_factor'), fill_factor_now = val; end
+        if strcmp(var_name, 't_chip_um'), t_chip_now = val; end
 
         theta_deg = 360 / M_now;
-        L1_now = calc_L1(base_cases.R_cyl_um, base_cases.w_is_um, f_now);
+        L1_now = calc_L1(base_cases.R_cyl_um, w_is_now, f_now);
 
         %% Run MATLAB CTM
         try
@@ -42,16 +48,16 @@ function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_nam
             config.geometry.radial_expansion_factor = f_now;
             config.geometry.w_chip_um = 10000;
             config.geometry.R_cyl_um = base_cases.R_cyl_um;
-            config.geometry.t_chip_um = base_cases.t_chip_um;
+            config.geometry.t_chip_um = t_chip_now;
             config.geometry.t_ins_um = base_cases.t_SOI_um;
             config.geometry.interconnect_ratio = base_cases.ic_w_r;
             config.geometry.outerconnect_ratio = base_cases.oc_w_r;
-            config.geometry.insulation_width_um = base_cases.w_is_um;
+            config.geometry.insulation_width_um = w_is_now;
             config.geometry.interconnect_angle_ratio = base_cases.ic_angle_r;
             config.geometry.outerconnect_angle_ratio = base_cases.oc_angle_r;
             config.geometry.interconnect_thickness_ratio = base_cases.ic_t_r;
             config.geometry.outerconnect_thickness_ratio = base_cases.oc_t_r;
-            config.geometry.fill_factor = base_cases.fill_factor;
+            config.geometry.fill_factor = fill_factor_now;
 
             config.operating_conditions.I_current_A = base_cases.I_A;
             config.boundary_conditions.q_flux_W_m2 = q_now;
@@ -69,9 +75,11 @@ function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_nam
             geometry = TECGeometry(config);
             network = ThermalNetwork(geometry, materials, config);
 
-            T = ones(8, 1) * 300;
+            dim = 2 * config.geometry.N_stages + 1;
+            %% For older models this might have been +2, using +1 safely based on solver
+            T = ones(dim, 1) * 300;
             for iter = 1:100
-                T_old = T;
+                T_old = T(1:length(network.solve(T))); 
                 [T, Q_out, Q_in] = network.solve(T);
                 if max(abs(T - T_old)) < 1e-6
                     break;
@@ -81,6 +89,9 @@ function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_nam
             fprintf('  MATLAB T_max = %.2f C\n', matlab_T);
         catch ME
             fprintf('  MATLAB Error: %s\n', ME.message);
+            for k=1:min(3, length(ME.stack))
+                fprintf('    In %s (line %d)\n', ME.stack(k).name, ME.stack(k).line);
+            end
             matlab_T = NaN;
         end
 
@@ -100,14 +111,14 @@ function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_nam
             model.param.set('LL_k_r', sprintf('%g', f_now));
             model.param.set('LL_L_1', sprintf('%g', L1_now));
             model.param.set('LL_R_cyl', sprintf('%g', base_cases.R_cyl_um));
-            model.param.set('LL_t_chip', sprintf('%g', base_cases.t_chip_um));
+            model.param.set('LL_t_chip', sprintf('%g', t_chip_now));
             model.param.set('LL_t_SOI', sprintf('%g', base_cases.t_SOI_um));
             model.param.set('LL_t_TEC', sprintf('%g', t_now));
             model.param.set('LL_theta', sprintf('%g', theta_deg));
-            model.param.set('LL_w_is', sprintf('%g', base_cases.w_is_um));
+            model.param.set('LL_w_is', sprintf('%g', w_is_now));
             model.param.set('q_i', sprintf('%g[W/m^2]', q_now));
             model.param.set('I_0', sprintf('%g[A]', base_cases.I_A));
-            model.param.set('LL_fill_factor', sprintf('%g', base_cases.fill_factor));
+            model.param.set('LL_fill_factor', sprintf('%g', fill_factor_now));
             model.param.set('LL_ic_angle_r', sprintf('%g', base_cases.ic_angle_r));
             model.param.set('LL_ic_t_r', sprintf('%g', base_cases.ic_t_r));
             model.param.set('LL_ic_w_r', sprintf('%g', base_cases.ic_w_r));
@@ -149,10 +160,10 @@ function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_nam
         err_pct = 100 * abs(err_abs) / abs(comsol_T);
 
         new_row = table(run_idx, categorical({sweep_name}), categorical({var_name}), val, ...
-            q_now, M_now, theta_deg, t_now, ...
+            q_now, M_now, theta_deg, t_now, w_is_now, fill_factor_now, t_chip_now, ...
             matlab_T, comsol_T, err_abs, err_pct, ...
             'VariableNames', {'RunID', 'SweepType', 'Variable', 'Value', ...
-            'q_Wm2', 'M', 'theta_deg', 't_TEC_um', ...
+            'q_Wm2', 'M', 'theta_deg', 't_TEC_um', 'w_is_um', 'fill_factor', 't_chip_um', ...
             'MATLAB_Tmax', 'COMSOL_Tmax', 'Error_Abs', 'Error_Pct'});
 
         results = [results; new_row];

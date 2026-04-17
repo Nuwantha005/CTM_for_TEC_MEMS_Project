@@ -23,7 +23,7 @@ OUTPUT_DIR = fullfile('output', 'validity_sweeps', timestamp);
 if ~exist(OUTPUT_DIR, 'dir'), mkdir(OUTPUT_DIR); end
 
 %% ============ BASELINE SETUP (Case 2 Anchor) ============
-base.base_M = 12;
+base.base_M = 8;
 base.base_q = 500;
 base.base_t_TEC = 150;
 
@@ -37,9 +37,8 @@ base.oc_w_r = 0.1; base.oc_t_r = 0.6; base.oc_angle_r = 0.5;
 % Format: {'Sweep Name Label', 'MATLAB_Variable_Name', [array_of_values]}
 % Supported Variables: 'q_Wm2', 'M', 't_TEC_um', 'f_L', etc.
 sweeps_to_run = {
-    {'HeatFlux',   'q_Wm2',    linspace(200, 600, 12)},
-    {'WedgeAngle', 'M',        unique(round(linspace(4, 12, 12)))},
-    {'Thickness',  't_TEC_um', linspace(130, 300, 12)}
+    {'Radial Insulator Width',  'w_is_um', linspace(10, 100 , 10)},
+    {'Fill Factor',  'w_is_um', linspace(10, 100 , 10)},
 };
 
 %% Ensure COMSOL is ready

@@ -85,9 +85,10 @@ function results = run_2d_validity_sweep(sweep_name, var_name1, values1, var_nam
                 geometry = TECGeometry(config);
                 network = ThermalNetwork(geometry, materials, config);
 
-                T = ones(8, 1) * 300;
+                dim = 2 * config.geometry.N_stages + 1;
+                T = ones(dim, 1) * 300;
                 for iter = 1:100
-                    T_old = T;
+                    T_old = T(1:length(network.solve(T)));
                     [T, Q_out, Q_in] = network.solve(T);
                     if max(abs(T - T_old)) < 1e-6
                         break;
