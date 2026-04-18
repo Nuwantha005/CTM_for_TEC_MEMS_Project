@@ -174,45 +174,83 @@ function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_nam
         run_idx = run_idx + 1;
     end
     
-    %% Generate and Save Plot for the Sweep
+    %% Generate and Save Plots for the Sweep
     try
-        fig = figure('Name', sprintf('%s Sweep Error', sweep_name), 'Visible', 'off');
-        
-        % Plot Error on left axis
-        yyaxis left
-        plot(results.Value, results.Error_Pct, '-o', 'LineWidth', 2, 'MarkerSize', 6);
-        ylabel('Relative Error (%)');
-        
-        % Plot Temperatures on right axis
-        yyaxis right
-        plot(results.Value, results.MATLAB_Tmax, '-s', 'LineWidth', 1.5, 'MarkerSize', 6);
-        hold on;
-        plot(results.Value, results.COMSOL_Tmax, '-d', 'LineWidth', 1.5, 'MarkerSize', 6);
-        ylabel('Max Temperature (^\circC)');
-        
-        legend('Error (%)', 'MATLAB T_{max}', 'COMSOL T_{max}', 'Location', 'best');
-        title(sprintf('1D vs 3D Validation: %s', strrep(sweep_name, '_', ' ')));
-        
-        % Clean up the x-axis label for display
-        clean_var_name = strrep(var_name, '_', ' ');
-        if strcmp(var_name, 'q_Wm2'), clean_var_name = 'Heat Flux (W/m^2)'; end
-        if strcmp(var_name, 't_TEC_um'), clean_var_name = 'TEC Thickness (\mum)'; end
-        if strcmp(var_name, 'M'), clean_var_name = 'M (Number of Wedges)'; end
-        xlabel(clean_var_name);
-        
+        x_label_latex = get_latex_x_label(var_name);
+
+        % -------- Error-only plot --------
+        fig_err = figure('Name', sprintf('%s Sweep Error', sweep_name), 'Visible', 'off');
+        plot(results.Value, results.Error_Pct, '-o', 'LineWidth', 2, 'MarkerSize', 6, ...
+            'Color', [0.85 0.33 0.10], 'MarkerFaceColor', [0.85 0.33 0.10]);
+        ylabel('Relative Error (\%)', 'Interpreter', 'latex');
+        xlabel(x_label_latex, 'Interpreter', 'latex');
+        title(sprintf('1D vs 3D Validation Error: %s', strrep(sweep_name, '_', ' ')), ...
+            'Interpreter', 'none');
         grid on;
-        
-        % Save formats
-        plot_path_png = fullfile(output_dir, sprintf('%s_sweep_plot.png', sweep_name));
-        plot_path_fig = fullfile(output_dir, sprintf('%s_sweep_plot.fig', sweep_name));
-        saveas(fig, plot_path_png);
-        savefig(fig, plot_path_fig);
-        close(fig);
-        
-        fprintf('  Saved sweep plot to %s\n', plot_path_png);
+
+        err_plot_path_png = fullfile(output_dir, sprintf('%s_sweep_error_plot.png', sweep_name));
+        err_plot_path_fig = fullfile(output_dir, sprintf('%s_sweep_error_plot.fig', sweep_name));
+        saveas(fig_err, err_plot_path_png);
+        savefig(fig_err, err_plot_path_fig);
+        close(fig_err);
+
+        % -------- Temperature-only plot (left: MATLAB linear, right: COMSOL log) --------
+        fig_temp = figure('Name', sprintf('%s Sweep Temperatures', sweep_name), 'Visible', 'off');
+        ax = gca;
+
+        yyaxis left
+        plot(results.Value, results.MATLAB_Tmax, '-s', 'LineWidth', 1.8, 'MarkerSize', 6, ...
+            'Color', [0.00 0.45 0.74], 'MarkerFaceColor', [0.00 0.45 0.74]);
+        ylabel('MATLAB $T_{\max}$ ($^\circ$C)', 'Interpreter', 'latex', 'Color', [0.00 0.45 0.74]);
+        ax.YAxis(1).Color = [0.00 0.45 0.74];
+        ax.YAxis(1).Scale = 'linear';
+
+        yyaxis right
+        plot(results.Value, results.COMSOL_Tmax, '-d', 'LineWidth', 1.8, 'MarkerSize', 6, ...
+            'Color', [0.85 0.33 0.10], 'MarkerFaceColor', [0.85 0.33 0.10]);
+        ylabel('COMSOL $T_{\max}$ ($^\circ$C, log scale)', 'Interpreter', 'latex', 'Color', [0.85 0.33 0.10]);
+        ax.YAxis(2).Color = [0.85 0.33 0.10];
+        ax.YAxis(2).Scale = 'log';
+
+        xlabel(x_label_latex, 'Interpreter', 'latex');
+        title(sprintf('1D vs 3D Validation Temperatures: %s', strrep(sweep_name, '_', ' ')), ...
+            'Interpreter', 'none');
+        legend({'MATLAB $T_{\max}$', 'COMSOL $T_{\max}$'}, 'Interpreter', 'latex', 'Location', 'best');
+        grid on;
+
+        temp_plot_path_png = fullfile(output_dir, sprintf('%s_sweep_temperature_plot.png', sweep_name));
+        temp_plot_path_fig = fullfile(output_dir, sprintf('%s_sweep_temperature_plot.fig', sweep_name));
+        saveas(fig_temp, temp_plot_path_png);
+        savefig(fig_temp, temp_plot_path_fig);
+        close(fig_temp);
+
+        fprintf('  Saved error plot to %s\n', err_plot_path_png);
+        fprintf('  Saved temperature plot to %s\n', temp_plot_path_png);
     catch ME
-        fprintf('  Warning: Could not save plot: %s\n', ME.message);
+        fprintf('  Warning: Could not save sweep plots: %s\n', ME.message);
     end
     
     next_run_idx = run_idx;
+end
+
+function x_label_latex = get_latex_x_label(var_name)
+% Maps sweep variable names to publication-quality LaTeX axis labels.
+    switch var_name
+        case 'q_Wm2'
+            x_label_latex = '$q_{\mathrm{i}}\;[\mathrm{W/m^2}]$';
+        case 'M'
+            x_label_latex = '$N$';
+        case 't_TEC_um'
+            x_label_latex = '$t_{\mathrm{TEC}}\;[\mu\mathrm{m}]$';
+        case 'f_L'
+            x_label_latex = '$f_L$';
+        case 'w_is_um'
+            x_label_latex = '$W_{\mathrm{is}}\;[\mu\mathrm{m}]$';
+        case 'fill_factor'
+            x_label_latex = '$f_{\mathrm{f}}$';
+        case 't_chip_um'
+            x_label_latex = '$t_{\mathrm{gen}}\;[\mu\mathrm{m}]$';
+        otherwise
+            x_label_latex = strrep(var_name, '_', '\_');
+    end
 end

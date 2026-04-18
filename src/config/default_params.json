@@ -9,7 +9,7 @@
     "geometry": {
         "N_stages": 3,
         "M_wedges": 8,
-        "wedge_angle_deg": 30,
+        "wedge_angle_deg": 45,
         "w_chip_um": 10000,
         "t_chip_um": 50,
         "thickness_um": 150,
@@ -53,9 +53,9 @@
         }
     },
     "boundary_conditions": {
-        "q_flux_W_m2": 200000,
+        "q_flux_W_m2": 500,
         "h_conv_W_m2K": 1.0E+6,
-        "T_water_K": 300
+        "T_water_K": 293.15
     },
     "operating_conditions": {
         "I_current_A": 0.15

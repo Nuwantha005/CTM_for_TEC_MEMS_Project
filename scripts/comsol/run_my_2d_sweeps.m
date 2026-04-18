@@ -31,13 +31,27 @@ base.I_A = 0.10; base.T_water = 293.15;
 base.ic_w_r = 0.1; base.ic_t_r = 0.6; base.ic_angle_r = 0.5;
 base.oc_w_r = 0.1; base.oc_t_r = 0.6; base.oc_angle_r = 0.5;
 
-%% ============ CONFIGURE YOUR 2D SWEEP HERE ============
-sweep_name = 'HeatFlux_vs_Thickness';
-var_name1  = 'q_Wm2';
-values1    = linspace(100, 1000, 10);
+%% ============ CONFIGURE YOUR 2D SWEEP PAIRS HERE ============
+% Add as many pairs as you want; they will run sequentially in one session.
+% Fields: name, var1, values1, var2, values2
+vals_fL = linspace(0.8, 1.2, 10);
+vals_fill = linspace(0.85, 0.99, 10);
+vals_wis = linspace(30, 50, 10);
+vals_q = linspace(200, 600, 10);
+vals_ttec = linspace(100, 300, 10);
 
-var_name2  = 't_TEC_um';
-values2    = linspace(50, 500, 10);
+sweep_pairs = {
+    %struct('name', 'LengthRatio_vs_FillFactor',        'var1', 'f_L',         'values1', vals_fL,   'var2', 'fill_factor', 'values2', vals_fill);
+    %struct('name', 'LengthRatio_vs_RadialInsWidth',    'var1', 'f_L',         'values1', vals_fL,   'var2', 'w_is_um',     'values2', vals_wis);
+    %struct('name', 'LengthRatio_vs_HeatFlux',          'var1', 'f_L',         'values1', vals_fL,   'var2', 'q_Wm2',       'values2', vals_q);
+    struct('name', 'LengthRatio_vs_Thickness',         'var1', 'f_L',         'values1', vals_fL,   'var2', 't_TEC_um',    'values2', vals_ttec);
+    struct('name', 'FillFactor_vs_RadialInsWidth',     'var1', 'fill_factor', 'values1', vals_fill, 'var2', 'w_is_um',     'values2', vals_wis);
+    struct('name', 'FillFactor_vs_HeatFlux',           'var1', 'fill_factor', 'values1', vals_fill, 'var2', 'q_Wm2',       'values2', vals_q);
+    struct('name', 'FillFactor_vs_Thickness',          'var1', 'fill_factor', 'values1', vals_fill, 'var2', 't_TEC_um',    'values2', vals_ttec);
+    struct('name', 'RadialInsWidth_vs_HeatFlux',       'var1', 'w_is_um',     'values1', vals_wis,  'var2', 'q_Wm2',       'values2', vals_q);
+    struct('name', 'RadialInsWidth_vs_Thickness',      'var1', 'w_is_um',     'values1', vals_wis,  'var2', 't_TEC_um',    'values2', vals_ttec);
+    struct('name', 'HeatFlux_vs_Thickness',            'var1', 'q_Wm2',       'values1', vals_q,    'var2', 't_TEC_um',    'values2', vals_ttec);
+};
 
 %% Ensure COMSOL is ready
 fprintf('Killing old COMSOL server...\n');
@@ -55,12 +69,44 @@ catch
     return;
 end
 
-%% ============ EXECUTE 2D SWEEP ============
-fprintf('Starting 2D Sweep: %s\n', sweep_name);
-fprintf('Grid size: %d x %d = %d runs total\n', length(values1), length(values2), length(values1)*length(values2));
+%% ============ EXECUTE ALL 2D SWEEP PAIRS ============
+num_pairs = length(sweep_pairs);
+total_runs_all = 0;
+for k = 1:num_pairs
+    total_runs_all = total_runs_all + length(sweep_pairs{k}.values1) * length(sweep_pairs{k}.values2);
+end
 
-results = run_2d_validity_sweep(sweep_name, var_name1, values1, var_name2, values2, ...
-                                base, OUTPUT_DIR, COMSOL_MODEL_PATH);
+fprintf('Starting batch 2D sweeps (%d pairs, %d total runs)\n', num_pairs, total_runs_all);
 
-fprintf('\n\n=== 2D SWEEP COMPLETE ===\n');
-fprintf('Results and 2D plots saved to %s\n', OUTPUT_DIR);
+summary_rows = table();
+for k = 1:num_pairs
+    pair_cfg = sweep_pairs{k};
+    pair_runs = length(pair_cfg.values1) * length(pair_cfg.values2);
+    pair_output_dir = fullfile(OUTPUT_DIR, pair_cfg.name);
+    if ~exist(pair_output_dir, 'dir'), mkdir(pair_output_dir); end
+
+    fprintf('\n============================================================\n');
+    fprintf('Pair %d/%d: %s\n', k, num_pairs, pair_cfg.name);
+    fprintf('%s (%d pts)  vs  %s (%d pts)  =>  %d runs\n', ...
+        pair_cfg.var1, length(pair_cfg.values1), pair_cfg.var2, length(pair_cfg.values2), pair_runs);
+    fprintf('Output: %s\n', pair_output_dir);
+
+    t_start = tic;
+    results = run_2d_validity_sweep(pair_cfg.name, pair_cfg.var1, pair_cfg.values1, ...
+                                    pair_cfg.var2, pair_cfg.values2, ...
+                                    base, pair_output_dir, COMSOL_MODEL_PATH);
+    elapsed_s = toc(t_start);
+
+    summary_rows = [summary_rows; table(categorical({pair_cfg.name}), ...
+                    categorical({pair_cfg.var1}), categorical({pair_cfg.var2}), ...
+                    length(pair_cfg.values1), length(pair_cfg.values2), pair_runs, ...
+                    height(results), elapsed_s, ...
+                    'VariableNames', {'SweepName', 'Var1', 'Var2', 'N1', 'N2', 'PlannedRuns', 'CompletedRuns', 'Elapsed_s'})];
+
+    writetable(summary_rows, fullfile(OUTPUT_DIR, 'batch_summary.csv'));
+    fprintf('Completed pair %d/%d in %.1f min\n', k, num_pairs, elapsed_s/60);
+end
+
+fprintf('\n\n=== ALL 2D SWEEP PAIRS COMPLETE ===\n');
+fprintf('Batch root output: %s\n', OUTPUT_DIR);
+fprintf('Summary CSV: %s\n', fullfile(OUTPUT_DIR, 'batch_summary.csv'));

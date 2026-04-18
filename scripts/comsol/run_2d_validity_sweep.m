@@ -35,19 +35,25 @@ function results = run_2d_validity_sweep(sweep_name, var_name1, values1, var_nam
             M_now = base_cases.base_M;
             t_now = base_cases.base_t_TEC;
             f_now = base_cases.f_L;
+            w_is_now = base_cases.w_is_um;
+            fill_factor_now = base_cases.fill_factor;
 
             if strcmp(var_name1, 'q_Wm2'), q_now = val1; end
             if strcmp(var_name1, 'M'), M_now = val1; end
             if strcmp(var_name1, 't_TEC_um'), t_now = val1; end
             if strcmp(var_name1, 'f_L'), f_now = val1; end
+            if strcmp(var_name1, 'w_is_um'), w_is_now = val1; end
+            if strcmp(var_name1, 'fill_factor'), fill_factor_now = val1; end
 
             if strcmp(var_name2, 'q_Wm2'), q_now = val2; end
             if strcmp(var_name2, 'M'), M_now = val2; end
             if strcmp(var_name2, 't_TEC_um'), t_now = val2; end
             if strcmp(var_name2, 'f_L'), f_now = val2; end
+            if strcmp(var_name2, 'w_is_um'), w_is_now = val2; end
+            if strcmp(var_name2, 'fill_factor'), fill_factor_now = val2; end
 
             theta_deg = 360 / M_now;
-            L1_now = calc_L1(base_cases.R_cyl_um, base_cases.w_is_um, f_now);
+            L1_now = calc_L1(base_cases.R_cyl_um, w_is_now, f_now);
 
             %% Run MATLAB CTM
             try
@@ -62,12 +68,12 @@ function results = run_2d_validity_sweep(sweep_name, var_name1, values1, var_nam
                 config.geometry.t_ins_um = base_cases.t_SOI_um;
                 config.geometry.interconnect_ratio = base_cases.ic_w_r;
                 config.geometry.outerconnect_ratio = base_cases.oc_w_r;
-                config.geometry.insulation_width_um = base_cases.w_is_um;
+                config.geometry.insulation_width_um = w_is_now;
                 config.geometry.interconnect_angle_ratio = base_cases.ic_angle_r;
                 config.geometry.outerconnect_angle_ratio = base_cases.oc_angle_r;
                 config.geometry.interconnect_thickness_ratio = base_cases.ic_t_r;
                 config.geometry.outerconnect_thickness_ratio = base_cases.oc_t_r;
-                config.geometry.fill_factor = base_cases.fill_factor;
+                config.geometry.fill_factor = fill_factor_now;
 
                 config.operating_conditions.I_current_A = base_cases.I_A;
                 config.boundary_conditions.q_flux_W_m2 = q_now;
@@ -119,10 +125,10 @@ function results = run_2d_validity_sweep(sweep_name, var_name1, values1, var_nam
                 model.param.set('LL_t_SOI', sprintf('%g', base_cases.t_SOI_um));
                 model.param.set('LL_t_TEC', sprintf('%g', t_now));
                 model.param.set('LL_theta', sprintf('%g', theta_deg));
-                model.param.set('LL_w_is', sprintf('%g', base_cases.w_is_um));
+                model.param.set('LL_w_is', sprintf('%g', w_is_now));
                 model.param.set('q_i', sprintf('%g[W/m^2]', q_now));
                 model.param.set('I_0', sprintf('%g[A]', base_cases.I_A));
-                model.param.set('LL_fill_factor', sprintf('%g', base_cases.fill_factor));
+                model.param.set('LL_fill_factor', sprintf('%g', fill_factor_now));
                 model.param.set('LL_ic_angle_r', sprintf('%g', base_cases.ic_angle_r));
                 model.param.set('LL_ic_t_r', sprintf('%g', base_cases.ic_t_r));
                 model.param.set('LL_ic_w_r', sprintf('%g', base_cases.ic_w_r));
@@ -163,10 +169,10 @@ function results = run_2d_validity_sweep(sweep_name, var_name1, values1, var_nam
             error_matrix(v2_idx, v1_idx) = err_pct;
 
             new_row = table(run_idx, categorical({sweep_name}), val1, val2, ...
-                q_now, M_now, theta_deg, t_now, ...
+                q_now, M_now, theta_deg, t_now, w_is_now, fill_factor_now, ...
                 matlab_T, comsol_T, err_abs, err_pct, ...
                 'VariableNames', {'RunID', 'SweepType', ['Var1_', var_name1], ['Var2_', var_name2], ...
-                'q_Wm2', 'M', 'theta_deg', 't_TEC_um', ...
+                'q_Wm2', 'M', 'theta_deg', 't_TEC_um', 'w_is_um', 'fill_factor', ...
                 'MATLAB_Tmax', 'COMSOL_Tmax', 'Error_Abs', 'Error_Pct'});
 
             results = [results; new_row];
@@ -180,44 +186,78 @@ function results = run_2d_validity_sweep(sweep_name, var_name1, values1, var_nam
     end
     
     %% Generate 2D Plots
-    % Label Helper
-    get_label = @(v) strrep(strrep(strrep(v, 'q_Wm2', 'Heat Flux (W/m^2)'), 't_TEC_um', 'TEC Thickness (\mum)'), 'M', 'M (Number of Wedges)');
-    label1 = get_label(var_name1);
-    label2 = get_label(var_name2);
+    label1 = get_latex_param_label(var_name1);
+    label2 = get_latex_param_label(var_name2);
 
     try
         % 1. Error Plot
         fig_err = figure('Name', sprintf('%s 2D Error', sweep_name), 'Visible', 'off');
         contourf(V1, V2, error_matrix, 20, 'LineStyle', 'none'); 
         colorbar; colormap jet;
-        xlabel(label1); ylabel(label2);
-        title(sprintf('Relative Error (%%) : %s', strrep(sweep_name, '_', ' ')));
+        xlabel(label1, 'Interpreter', 'latex');
+        ylabel(label2, 'Interpreter', 'latex');
+        title(sprintf('Relative Error (\\%%): %s', strrep(sweep_name, '_', ' ')), 'Interpreter', 'none');
         saveas(fig_err, fullfile(output_dir, sprintf('%s_Error_plot.png', sweep_name)));
         savefig(fig_err, fullfile(output_dir, sprintf('%s_Error_plot.fig', sweep_name)));
         close(fig_err);
 
-        % 2. COMSOL Plot
-        fig_com = figure('Name', sprintf('%s 2D COMSOL', sweep_name), 'Visible', 'off');
-        contourf(V1, V2, comsol_T_matrix, 20, 'LineStyle', 'none'); 
-        colorbar; colormap hot;
-        xlabel(label1); ylabel(label2);
-        title(sprintf('COMSOL T_{max} (\\circC) : %s', strrep(sweep_name, '_', ' ')));
-        saveas(fig_com, fullfile(output_dir, sprintf('%s_COMSOL_plot.png', sweep_name)));
-        savefig(fig_com, fullfile(output_dir, sprintf('%s_COMSOL_plot.fig', sweep_name)));
-        close(fig_com);
+        % 2. Side-by-side temperature comparison (CTM vs COMSOL)
+        fig_temp = figure('Name', sprintf('%s 2D Temperature Comparison', sweep_name), 'Visible', 'off');
 
-        % 3. MATLAB (CTM) Plot
-        fig_mat = figure('Name', sprintf('%s 2D CTM', sweep_name), 'Visible', 'off');
-        contourf(V1, V2, matlab_T_matrix, 20, 'LineStyle', 'none'); 
-        colorbar; colormap hot;
-        xlabel(label1); ylabel(label2);
-        title(sprintf('CTM T_{max} (\\circC) : %s', strrep( sweep_name, '_', ' ')));
-        saveas(fig_mat, fullfile(output_dir, sprintf('%s_CTM_plot.png', sweep_name)));
-        savefig(fig_mat, fullfile(output_dir, sprintf('%s_CTM_plot.fig', sweep_name)));
-        close(fig_mat);
+        tiledlayout(1, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
+
+        ax1 = nexttile;
+        contourf(ax1, V1, V2, matlab_T_matrix, 20, 'LineStyle', 'none');
+        colormap(ax1, hot);
+        cb1 = colorbar(ax1);
+        cb1.Label.String = 'CTM $T_{\\max}$ ($^\\circ$C)';
+        cb1.Label.Interpreter = 'latex';
+        xlabel(ax1, label1, 'Interpreter', 'latex');
+        ylabel(ax1, label2, 'Interpreter', 'latex');
+        title(ax1, 'CTM $T_{\\max}$', 'Interpreter', 'latex');
+        grid(ax1, 'on');
+
+        ax2 = nexttile;
+        contourf(ax2, V1, V2, comsol_T_matrix, 20, 'LineStyle', 'none');
+        colormap(ax2, hot);
+        cb2 = colorbar(ax2);
+        cb2.Label.String = 'COMSOL $T_{\\max}$ ($^\\circ$C)';
+        cb2.Label.Interpreter = 'latex';
+        xlabel(ax2, label1, 'Interpreter', 'latex');
+        ylabel(ax2, label2, 'Interpreter', 'latex');
+        title(ax2, 'COMSOL $T_{\\max}$', 'Interpreter', 'latex');
+        grid(ax2, 'on');
+
+        sgtitle(sprintf('2D Temperature Comparison: %s', strrep(sweep_name, '_', ' ')), 'Interpreter', 'none');
+
+        saveas(fig_temp, fullfile(output_dir, sprintf('%s_TemperatureComparison_plot.png', sweep_name)));
+        savefig(fig_temp, fullfile(output_dir, sprintf('%s_TemperatureComparison_plot.fig', sweep_name)));
+        close(fig_temp);
 
         fprintf('\n  Saved 2D plots for %s\n', sweep_name);
     catch ME
         fprintf('\n  Warning: Could not save 2D plots: %s\n', ME.message);
+    end
+end
+
+function label = get_latex_param_label(var_name)
+% Returns publication-ready LaTeX axis labels for sweep variables.
+    switch var_name
+        case 'q_Wm2'
+            label = '$q_{\mathrm{i}}\;[\mathrm{W/m^2}]$';
+        case 'M'
+            label = '$N$';
+        case 't_TEC_um'
+            label = '$t_{\mathrm{TEC}}\;[\mu\mathrm{m}]$';
+        case 'f_L'
+            label = '$f_{L}$';
+        case 'fill_factor'
+            label = '$f_{\mathrm{f}}$';
+        case 'w_is_um'
+            label = '$W_{\mathrm{is}}\;[\mu\mathrm{m}]$';
+        case 't_chip_um'
+            label = '$t_{\mathrm{gen}}\;[\mu\mathrm{m}]$';
+        otherwise
+            label = strrep(var_name, '_', '\_');
     end
 end
