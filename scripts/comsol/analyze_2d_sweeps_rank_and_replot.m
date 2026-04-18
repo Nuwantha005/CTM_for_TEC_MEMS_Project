@@ -4,7 +4,7 @@
 % square plots without modifying existing result files.
 
 clear; clc; close all;
-fprintf('Running analyze_2d_sweeps_rank_and_replot v2\n');
+fprintf('Running analyze_2d_sweeps_rank_and_replot v3\n');
 
 %% ============ PATH SETUP ============
 root_dir = fullfile(fileparts(mfilename('fullpath')), '..', '..');
@@ -87,7 +87,8 @@ for b = 1:numel(BATCH_DIRS)
                                   'VariableNames', {'DesignSpace_2D_Sweep', 'Spearman_rho', 'Kendall_tau', ...
                                                     'Spearman_p', 'Kendall_p', 'N_valid', 'Trend_Quality'})];
 
-        fprintf('  %-40s rho=% .4f  tau=% .4f  N=%d\n', pair_name, rho, tau, n_valid);
+        fprintf('  %-40s rho=% .4f  tau=% .4f  p_s=% .3e  p_k=% .3e  N=%d\n', ...
+            pair_name, rho, tau, p_s, p_k, n_valid);
 
         if REGENERATE_PLOTS
             try
@@ -117,7 +118,7 @@ for b = 1:numel(BATCH_DIRS)
     writetable(summary, out_csv);
 
     fprintf('\nSaved rank summary: %s\n', out_csv);
-    disp(summary(:, {'DesignSpace_2D_Sweep', 'Spearman_rho', 'Kendall_tau', 'Trend_Quality'}));
+    disp(summary(:, {'DesignSpace_2D_Sweep', 'Spearman_rho', 'Kendall_tau', 'Spearman_p', 'Kendall_p', 'Trend_Quality'}));
 
     try
         make_rank_barplot(summary, batch_dir);
@@ -175,7 +176,7 @@ end
 function make_publication_plots(out_dir, pair_name, V1, V2, ctm_grid, comsol_grid, err_grid, var1_name, var2_name, n_contours)
     xlab = get_latex_param_label(var1_name);
     ylab = get_latex_param_label(var2_name);
-    pair_title = strrep(pair_name, '_', ' vs ');
+    pair_title = prettify_pair_name(pair_name);
 
     % Side-by-side CTM vs COMSOL (both square with separate colorbars)
     fig_temp = figure('Visible', 'off', 'Color', 'w', 'Position', [80, 80, 1300, 640]);
