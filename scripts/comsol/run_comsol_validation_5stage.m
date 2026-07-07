@@ -12,7 +12,8 @@
 clear; clc; close all;
 
 %% Setup paths
-project_root = fileparts(mfilename('fullpath'));
+script_dir = fileparts(mfilename('fullpath'));
+project_root = fileparts(fileparts(script_dir));
 addpath(genpath(fullfile(project_root, 'src')));
 
 % COMSOL model path

@@ -70,10 +70,38 @@ The cleaned directory structure is organized logically as follows:
 
 ### Prerequisites
 * **MATLAB** (R2021a or newer recommended).
-* **Required Toolboxes**:
-  * Optimization Toolbox (for `fmincon`)
-  * Global Optimization Toolbox (for `ga`, `particleswarm`, and `gamultiobj`)
-  * Parallel Computing Toolbox (optional; required only for parallel sweep scripts)
+* **Required MATLAB Toolboxes**:
+  * Optimization Toolbox (for local gradient-based optimization via `fmincon`)
+  * Global Optimization Toolbox (for `ga`, `particleswarm`, and `gamultiobj` global search)
+  * Parallel Computing Toolbox (optional; used for parallel grid searches)
+* **COMSOL Multiphysics** (Optional; version 6.3 or compatible, required for high-fidelity finite-element validation):
+  * COMSOL Multiphysics license with LiveLink™ for MATLAB®
+  * COMSOL Multiphysics server running (default port `2036`)
+
+### Path Configuration & Absolute Paths
+Since the COMSOL and SolidWorks models are typically large binary files kept outside the main Git repository, several COMSOL validation scripts in `scripts/comsol/` contain **machine-specific absolute paths** that must be updated before executing them in your local environment.
+
+#### 1. COMSOL LiveLink Installation Path
+In scripts that establish a connection to COMSOL, the path to the COMSOL Multiphysics `mli` folder must be added to the MATLAB search path. Locate the line `addpath('...')` and modify it to match your local COMSOL installation path:
+* **[run_comsol_validation_5stage.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/run_comsol_validation_5stage.m)** (Line 121)
+* **[test_load_model.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/test_load_model.m)** (Line 12)
+
+#### 2. COMSOL Model Templates (.mph)
+Locate the variable definition `COMSOL_MODEL_PATH`, `comsol_model_path`, or `COMSOL_MODEL` and update it to the absolute path of your local `.mph` files:
+* **For `template_3_stage.mph`** (used in 3-stage validation, tests, and overnight sweeps):
+  * **[run_comsol_validation_5stage.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/run_comsol_validation_5stage.m)** (Line 19)
+  * **[extract_comsol_data.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/extract_comsol_data.m)** (Line 20)
+  * **[run_comsol_test.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/run_comsol_test.m)** (Line 25)
+  * **[run_overnight_comsol.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/run_overnight_comsol.m)** (Line 27)
+  * **[run_single_comsol.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/run_single_comsol.m)** (Line 16)
+  * **[verify_model_comsol.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/verify_model_comsol.m)** (Line 33)
+* **For `asym2.mph`** (used in 1D vs 3D verification and parametric sweeps):
+  * **[investigate_thermal_resistance.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/investigate_thermal_resistance.m)** (Line 35)
+  * **[run_automated_verification.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/run_automated_verification.m)** (Line 22)
+  * **[run_my_2d_sweeps.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/run_my_2d_sweeps.m)** (Line 16)
+  * **[run_my_sweeps.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/run_my_sweeps.m)** (Line 18)
+  * **[run_verification_case.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/run_verification_case.m)** (Line 35)
+  * **[test_load_model.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/scripts/comsol/test_load_model.m)** (Line 15)
 
 ### Installation & Path Setup
 Always launch the project by running `main.m` in the root folder to properly initialize the MATLAB paths:
