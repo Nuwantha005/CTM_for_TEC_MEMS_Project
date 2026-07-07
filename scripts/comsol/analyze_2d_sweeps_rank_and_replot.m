@@ -4,7 +4,7 @@
 % square plots without modifying existing result files.
 
 clear; clc; close all;
-fprintf('Running analyze_2d_sweeps_rank_and_replot v3\n');
+fprintf('Running analyze_2d_sweeps_rank_and_replot v4\n');
 
 %% ============ PATH SETUP ============
 root_dir = fullfile(fileparts(mfilename('fullpath')), '..', '..');
@@ -78,17 +78,26 @@ for b = 1:numel(BATCH_DIRS)
         x = T.MATLAB_Tmax(valid);
         y = T.COMSOL_Tmax(valid);
 
-        [rho, p_s] = corr(x, y, 'Type', 'Spearman', 'Rows', 'complete');
+        rho = corr(x, y, 'Type', 'Spearman', 'Rows', 'complete');
+        % Manual Spearman p-value (t-approximation) to inspect tiny-tail values.
+        % Guard edge cases where approximation is not reliable.
+        nu = n_valid - 2;
+        if nu > 0 && abs(rho) < 1 - 1e-12
+            t_stat = rho * sqrt(nu / max(1 - rho^2, eps));
+            p_s_manual = 2 * tcdf(abs(t_stat), nu, 'upper');
+        else
+            p_s_manual = NaN;
+        end
         [tau, p_k] = corr(x, y, 'Type', 'Kendall',  'Rows', 'complete');
         trend_label = classify_trend_quality(rho, tau);
 
         summary = [summary; table(categorical({prettify_pair_name(pair_name)}), ...
-                                  rho, tau, p_s, p_k, n_valid, categorical({trend_label}), ...
+                                  rho, tau, p_s_manual, p_k, n_valid, categorical({trend_label}), ...
                                   'VariableNames', {'DesignSpace_2D_Sweep', 'Spearman_rho', 'Kendall_tau', ...
                                                     'Spearman_p', 'Kendall_p', 'N_valid', 'Trend_Quality'})];
 
         fprintf('  %-40s rho=% .4f  tau=% .4f  p_s=% .3e  p_k=% .3e  N=%d\n', ...
-            pair_name, rho, tau, p_s, p_k, n_valid);
+            pair_name, rho, tau, p_s_manual, p_k, n_valid);
 
         if REGENERATE_PLOTS
             try

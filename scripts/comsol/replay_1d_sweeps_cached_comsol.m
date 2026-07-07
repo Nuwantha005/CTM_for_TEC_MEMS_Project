@@ -12,7 +12,7 @@ addpath(genpath('scripts'));
 
 %% ============ INPUT/OUTPUT ============
 % Folder containing old 1D sweep CSVs.
-INPUT_DIR = fullfile('output', 'validity_sweeps', '2026-04-14_11-17-44');
+INPUT_DIR = fullfile('output', 'validity_sweeps', '2026-03-28_14-17-50');
 
 timestamp = datestr(now, 'yyyy-mm-dd_HH-MM-SS');
 OUTPUT_DIR = fullfile(INPUT_DIR, ['replay_new_ctm_', timestamp]);
@@ -188,9 +188,9 @@ function plot_1d_replay(T, source_name, out_dir)
         fig2 = figure('Visible', 'off');
         plot(x_sorted, T.Error_Pct_New(idx), 'b-d', 'LineWidth', 1.2, 'MarkerSize', 5);
         grid on;
-        xlabel('Sweep value');
-        ylabel('Error (%)');
-        title(sprintf('Replay Error (%%): New CTM vs COMSOL (%s)', label_name));
+        xlabel('\textsf{Number of Wedges} ($N$)', 'Interpreter', 'latex');
+        ylabel('Relative Error (%)');
+        title(sprintf('Relative Error (%%):  CTM vs COMSOL'));
         saveas(fig2, fullfile(out_dir, [strrep(source_name, '.csv', ''), '_error.png']));
         savefig(fig2, fullfile(out_dir, [strrep(source_name, '.csv', ''), '_error.fig']));
         close(fig2);

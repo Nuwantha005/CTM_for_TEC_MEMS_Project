@@ -1,2 +1,11 @@
-output
-outputs
+# Data / output directories
+output/
+outputs/
+
+# Ignore the entire notes folder
+notes/
+
+# MATLAB temporary files & logs
+*.asv
+*.log
+solver_log.txt

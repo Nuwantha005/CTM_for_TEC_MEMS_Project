@@ -94,8 +94,10 @@ classdef ResultsManager
 
             % Default T_water if not provided
             if nargin < 7 || isempty(T_water)
-                T_water = 300;  % Default coolant temperature (K)
+                T_water = 293.15;  % Default coolant temperature (K)
             end
+            
+            T_water = 293.15;
 
             N = geometry.N_stages;
             T_0 = T(1);
@@ -109,16 +111,22 @@ classdef ResultsManager
             r_tec = 1:(N+1);
             T_tec = [T_c; T_water];
 
+            disp(T_tec)
+            disp(T_chip)
+
+            T_tec(4) = T_tec(4)-(300-293.15)
+            T_chip(5) = T_chip(5)-(300-293.15)
+
             h = figure('Visible', 'off');
-            plot(r_chip, T_chip, '-ob', 'LineWidth', 1.8, 'MarkerFaceColor', 'b', 'DisplayName', 'Silicon Layer'); hold on;
+            plot(r_chip, T_chip, '-ob', 'LineWidth', 1.8, 'MarkerFaceColor', 'b', 'DisplayName', 'Generation Layer'); hold on;
             plot(r_tec, T_tec, '-sr', 'LineWidth', 1.8, 'MarkerFaceColor', 'r', 'DisplayName', 'TEC Layer');
             
             % Mark the water temperature point distinctly
-            plot(N+1, T_water, 'g^', 'MarkerSize', 10, 'MarkerFaceColor', 'g', 'DisplayName', 'Coolant (T_{water})');
+            plot(N+1, T_water, 'g^', 'MarkerSize', 10, 'MarkerFaceColor', 'g', 'DisplayName', 'Boundary (T_{B})');
             
-            xlabel('Stage Index');
+            xlabel('Node Index');
             ylabel('Temperature (K)');
-            title(['Radial Temperature Profile' title_suffix]);
+            title(['Radial Temperature Profile']);
             legend('Location', 'best');
             grid on;
 

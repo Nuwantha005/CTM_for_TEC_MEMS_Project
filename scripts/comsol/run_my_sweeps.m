@@ -37,12 +37,7 @@ base.oc_w_r = 0.1; base.oc_t_r = 0.6; base.oc_angle_r = 0.5;
 % Format: {'Sweep Name Label', 'MATLAB_Variable_Name', [array_of_values]}
 % Supported Variables: 'q_Wm2', 'M', 't_TEC_um', 'f_L', etc.
 sweeps_to_run = {
-    {'Interconnection width Ratio',  'ic_w_r', linspace(0.05, 0.25, 10)},
-    {'Outerconnection width Ratio',  'oc_w_r', linspace(0.05, 0.25, 10)},
-    {'Interconnection thickness Ratio',  'ic_t_r', linspace(0.2, 0.8, 10)},
-    {'Outerconnection thickness Ratio',  'oc_t_r', linspace(0.2, 0.8, 10)},
-    {'Interconnection angle Ratio',  'ic_angle_r', linspace(0.2, 0.8, 10)},
-    {'Outerconnection angle Ratio',  'oc_angle_r', linspace(0.2, 0.8, 10)},
+    {'Current',  'I_A', linspace(0,1.0,11)},
 };
 
 %% Ensure COMSOL is ready

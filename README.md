@@ -1,177 +1,152 @@
-# Radial TEC Preliminary Optimization (MATLAB + COMSOL)
+# Radial Thermoelectric Cooler (TEC) Preliminary Optimization
 
-This repository contains a compact thermal-network model, optimization workflows, and COMSOL integration scripts for a **radial multi-stage thermoelectric cooler (TEC)** used in MEMS/chip cooling studies.
+This repository contains the Compact Thermal Model (CTM), optimization workflows, and COMSOL Multiphysics validation scripts for a **radial multi-stage thermoelectric cooler (TEC)** designed for MEMS and microchip cooling applications.
 
-The project is organized around:
-- A MATLAB solver for the radial TEC resistor network.
-- Multiple optimization strategies (local, global, multi-objective, physics-constrained).
-- Parameter sweeps and diagnostic studies.
-- Optional high-fidelity validation with COMSOL LiveLink.
+The project is structured around:
+* **Analytical Thermal Solver**: A fast, iterative MATLAB-based solver for a radial multi-stage TEC thermal resistor network.
+* **Optimization Framework**: Multiple optimization strategies (gradient-based local, global genetic algorithms, multi-objective Pareto optimization, and physics-constrained solvers).
+* **High-Fidelity Validation**: Scripts to automate COMSOL Multiphysics simulations via LiveLink for MATLAB to validate compact model predictions.
+* **SolidWorks CAD Integration**: Automated SolidWorks design tables and equations for parameter-driven geometry generation.
 
-## What This Project Solves
+---
 
-Given chip geometry, heat flux, coolant temperature, material properties, and TEC geometry parameters, the code estimates:
-- Node temperatures across silicon and TEC stages.
-- Heat flow in/out (`Q_in`, `Q_out`).
-- Feasible design regions and optimized parameter sets.
+## Technical Overview
 
-A summary of historical optimization outcomes is documented in:
-- `OPTIMIZATION_RESULTS_SUMMARY.md`
+Given the chip size, target cooling heat flux, sink/coolant temperature, thermoelectric material properties (Seebeck coefficient, electrical resistivity, thermal conductivity), and TEC geometry parameters, this solver computes:
+1. **Node Temperatures**: Complete temperature profile across the silicon chip and all TEC stages (junctions).
+2. **Heat Flows**: Active heat pump rates ($Q_{\text{in}}$, $Q_{\text{out}}$) and cooling performance.
+3. **Optimized Designs**: Parameters minimizing chip junction temperature or minimizing thickness/power while keeping the chip within safe limits.
+
+Historical optimization runs and designs are summarized in:
+* [OPTIMIZATION_RESULTS_SUMMARY.md](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/OPTIMIZATION_RESULTS_SUMMARY.md)
+
+---
 
 ## Repository Structure
 
-- `main.m`: top-level entry script that adds paths and lists available workflows.
-- `src/`: core implementation.
-  - `src/core/`: solver, geometry, material model, and optimizer classes.
-  - `src/config/`: JSON defaults + centralized optimization variable configuration.
-  - `src/comsol/`: COMSOL LiveLink wrapper and high-fidelity batch runner.
-  - `src/utils/`: result logging/plotting helpers and config path utility.
-  - `src/tests/`: MATLAB verification script.
-- `scripts/`: runnable workflows.
-  - `scripts/sweeps/`: parameter/stage/wedge sweep runners.
-  - `scripts/optimization/`: optimization pipelines and post-analysis.
-  - `scripts/comsol/`: COMSOL connection, validation, and verification scripts.
-  - `scripts/analysis/`, `scripts/diagnosis/`: model analysis/debug studies.
-  - `scripts/solidworks/`: SolidWorks parameter/design table assets.
-- `data/`: material-property files and COMSOL/SolidWorks parameter artifacts.
-- `notes/`: research notes, markdown/latex papers, and references.
-- `output/`: generated run outputs (solver logs, plots, optimization results, COMSOL data).
+The cleaned directory structure is organized logically as follows:
 
-## Core Model Components
+```
+├── main.m                      # Root setup script; initializes paths and lists workflows
+├── README.md                   # Project documentation
+├── OPTIMIZATION_RESULTS_SUMMARY.md # Summary of optimization results and target designs
+├── data/                       # Reference datasets
+│   ├── SW_equations.txt        # SolidWorks geometry equation exports
+│   └── *.xlsx, *.csv           # SolidWorks design tables and template files
+├── docs/                       # Technical paper & documentation
+│   ├── Thermal_Network_For_Radial_TEC.tex # LaTeX documentation source
+│   ├── Thermal_Network_For_Radial_TEC.pdf # Compiled paper PDF
+│   └── images/                 # Image assets for the LaTeX document
+├── src/                        # Core library implementation
+│   ├── core/                   # Solver, optimizer, geometry, and material classes
+│   ├── config/                 # Default parameters and optimization bounds (JSON/MATLAB)
+│   ├── comsol/                 # COMSOL LiveLink wrapper and helper classes
+│   ├── utils/                  # Result logging, file paths, and plotting helpers
+│   └── tests/                  # Automated verification and regression test suite
+└── scripts/                    # Runnable user workflows
+    ├── sweeps/                 # Parametric and stage sweeps
+    ├── optimization/           # Local, global, and multi-objective optimization pipelines
+    ├── comsol/                 # COMSOL validation run automation (3-stage & 5-stage)
+    ├── analysis/               # Diagnostic scripts for solver behaviors and physical limits
+    ├── diagnosis/              # Thermal resistance breakdown and mismatch diagnostics
+    └── solidworks/             # SolidWorks design table setup guides
+```
 
-Main classes in `src/core/`:
-- `RadialTECSolver.m`: iterative solve loop, convergence tracking, result export.
-- `ThermalNetwork.m`: system assembly/solve for the compact thermal network.
-- `TECGeometry.m`: stage geometry and resistance/conductance helper calculations.
-- `MaterialProperties.m`: temperature-dependent property interpolation from `data/material_props/*`.
-- `TECOptimizer.m`: local optimization (`fmincon`/fallback) around solver objective.
-- `DesignOptimizer.m`: staged design sweep + current optimization + ranking/plotting.
-- `PhysicsConstrainedOptimizer.m`: optimization with feasibility/physics constraints.
-- `StageSweeper.m`, `ParametricSweeper.m`: scripted sweep frameworks.
+---
 
-## Requirements
+## Core Classes (`src/core/`)
 
-### MATLAB
+* **`RadialTECSolver.m`**: Handles the main iterative solve loop, convergence checks, and data management.
+* **`ThermalNetwork.m`**: Assembles the system matrix representing the radial TEC equations and solves for junction temperatures.
+* **`TECGeometry.m`**: Computes the geometry of each stage (inner/outer radii, volumes, cross-sectional areas) and thermoelectric leg resistances.
+* **`MaterialProperties.m`**: Handles temperature-dependent thermoelectric properties (interpolated from reference data).
+* **`TECOptimizer.m`**: Encapsulates optimization routines (gradient-based local optimization using `fmincon`).
+* **`DesignOptimizer.m`**: Orchestrates design searches, current optimizations, and designs ranking.
+* **`PhysicsConstrainedOptimizer.m`**: Runs optimizations constrained to physically realistic limits (e.g. non-negative temperatures, valid coefficient of performance).
 
-Tested design expects MATLAB with:
-- Base MATLAB (classdef, plotting, json functions)
-- Optimization Toolbox (`fmincon`)
-- Global Optimization Toolbox (`ga`, `particleswarm`, `gamultiobj`) for global/multi-objective scripts
-- Parallel Computing Toolbox for `run_thickness_temp_optimization_parallel.m`
+---
 
-If some toolboxes are unavailable, many scripts still run in reduced mode (for example local fallbacks), but global/multi-objective workflows require their toolboxes.
+## Getting Started
 
-### COMSOL (optional)
+### Prerequisites
+* **MATLAB** (R2021a or newer recommended).
+* **Required Toolboxes**:
+  * Optimization Toolbox (for `fmincon`)
+  * Global Optimization Toolbox (for `ga`, `particleswarm`, and `gamultiobj`)
+  * Parallel Computing Toolbox (optional; required only for parallel sweep scripts)
 
-For COMSOL workflows:
-- COMSOL Multiphysics with LiveLink for MATLAB
-- COMSOL server reachable (commonly port `2036`)
-- `.mph` model file matching the expected parameter names (see `src/comsol/COMSOLInterface.m` mapping)
-
-## Quick Start
-
-From MATLAB in the project root:
-
+### Installation & Path Setup
+Always launch the project by running `main.m` in the root folder to properly initialize the MATLAB paths:
 ```matlab
 run('main.m')
 ```
 
-Then run one of the common scripts:
+This will set up all required paths and display a menu of available workflows.
 
-```matlab
-run('scripts/sweeps/run_solver.m')
-run('scripts/sweeps/run_stage_sweep.m')
-run('scripts/optimization/run_optimization.m')
-run('scripts/optimization/run_global_optimization.m')
-```
-
-A light validation run:
-
-```matlab
-run('scripts/sweeps/run_quick_test.m')
-```
-
-## Configuration
-
-Primary config files:
-- `src/config/default_params.json`: default solver geometry/material/boundary values.
-- `src/config/test_params.json`: lighter test configuration.
-- `src/config/optimization_variables.m`: central control for optimization variables, bounds, fixed integers (`N`, `M`), and boundary conditions.
-
-Helper:
-- `src/utils/get_config_path.m` resolves config paths robustly from any working directory.
+---
 
 ## Typical Workflows
 
-### 1) Run the thermal solver
-
+### 1. Run a Simple Simulation
+To run the thermal network solver with the default design parameters:
 ```matlab
 run('scripts/sweeps/run_solver.m')
 ```
+*Results will be saved in a timestamped folder under `output/solverRuns/`.*
 
-Outputs are saved under timestamped folders in `output/solverRuns/`.
-
-### 2) Sweep stage count / parameters
-
+### 2. Run Parameter Sweeps
+Explore the influence of individual geometric variables:
 ```matlab
-run('scripts/sweeps/run_stage_sweep.m')
-run('scripts/sweeps/run_sweep.m')
-run('scripts/sweeps/run_wedge_sweep.m')
+run('scripts/sweeps/run_sweep.m')        % General geometry sweeps
+run('scripts/sweeps/run_stage_sweep.m')  % Sweep number of stages (N)
+run('scripts/sweeps/run_wedge_sweep.m')  % Sweep number of wedges (M)
 ```
 
-### 3) Run design/optimization studies
-
+### 3. Run Optimization Pipelines
+Find the best design candidate for a target heat flux:
 ```matlab
-run('scripts/optimization/run_design_optimization.m')
-run('scripts/optimization/run_global_optimization.m')
-run('scripts/optimization/run_multiobjective_optimization.m')
-run('scripts/optimization/run_physics_constrained.m')
+run('scripts/optimization/run_optimization.m')             % Local gradient-based
+run('scripts/optimization/run_global_optimization.m')      % Global genetic algorithm
+run('scripts/optimization/run_multiobjective_optimization.m') % Multi-objective (Pareto)
 ```
 
-### 4) Validate with COMSOL (optional)
+### 4. High-Fidelity COMSOL Validation
+To validate compact model predictions against 3D finite element simulations in COMSOL:
+1. Open a terminal and start the COMSOL server:
+   ```bash
+   comsolmphserver -port 2036
+   ```
+2. Verify connection from MATLAB:
+   ```matlab
+   run('scripts/comsol/test_comsol_connection.m')
+   ```
+3. Run validation scripts:
+   ```matlab
+   run('scripts/comsol/run_comsol_validation.m')         % 3-stage validation
+   run('scripts/comsol/run_comsol_validation_5stage.m')  % 5-stage validation
+   ```
 
-First ensure COMSOL server + model path are valid in your script/config.
-Common entry points:
+---
 
-```matlab
-run('scripts/comsol/test_comsol_connection.m')
-run('scripts/comsol/run_comsol_test.m')
-run('scripts/comsol/run_comsol_validation.m')
-```
+## Central Configuration
 
-Or use the root-level scenario script:
+* **[default_params.json](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/src/config/default_params.json)**: Contains base dimensions, default boundary conditions, material characteristics, and solver tolerances.
+* **[optimization_variables.m](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/src/config/optimization_variables.m)**: Configures optimization parameters, upper/lower bounds, integer constraints, and fixed bounds (e.g. stage bounds).
 
-```matlab
-run('run_comsol_validation.m')
-```
+---
 
-## Outputs
-
-Generated artifacts are written to timestamped folders under `output/`, including:
-- temperature profiles and convergence plots
-- optimization logs/CSV summaries
-- Pareto fronts and design ranking plots
-- COMSOL candidate files and validation comparisons
-
-## Known Caveats
-
-- The repository is research-oriented and includes experimental scripts; not all scripts are equally maintained.
-- Several analysis/diagnosis scripts reference legacy helper methods (for example `calculate_G`) that are not present in the current `TECGeometry` class; treat those scripts as investigational and update them before production use.
-- Some COMSOL scripts include machine-specific absolute Windows paths; adjust model/server/LiveLink paths for your environment.
-- The `output/` directory is large and historical; most workflows create new timestamped subfolders rather than overwriting older results.
-
-## Verification
-
-Basic solver verification script:
-
+## Code Verification
+Before committing or publishing changes, run the automated test suite to verify solver correctness:
 ```matlab
 run('src/tests/verify_solver.m')
 ```
+This script checks the solver initialization, executes a full test run, verifies vector dimensions, exports COMSOL properties, and performs a general energy balance sanity check.
 
-## Notes and Documentation
+---
 
-Supporting theory and derivations are in:
-- `notes/paper/Thermal_Network_For_Radial_TEC.tex`
-- `notes/markdown/`
+## Documentation
+The mathematical modeling, compact thermal network derivations, and notation details are fully documented in:
+* **[Thermal_Network_For_Radial_TEC.tex](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/docs/Thermal_Network_For_Radial_TEC.tex)**: LaTeX document source with full derivations.
+* **[Thermal_Network_For_Radial_TEC.pdf](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/docs/Thermal_Network_For_Radial_TEC.pdf)**: Compiled PDF of the paper.
+* **[docs/images/](file:///run/media/nuwa/Work/Semester%207/ME4311%20-%20MicroNano%20Electro%20Mechanical%20Systems%20and%20Nanotechnology/Project/Preliminary%20Optimization/Algorithm/docs/images/)**: Diagnostic figures and geometry schematics used by the paper.
 
-These notes describe the notation and modeling assumptions used by the codebase.

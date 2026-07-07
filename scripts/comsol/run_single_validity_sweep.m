@@ -27,6 +27,7 @@ function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_nam
         w_is_now = base_cases.w_is_um;
         fill_factor_now = base_cases.fill_factor;
         t_chip_now = base_cases.t_chip_um;
+        I_A_now = base_cases.I_A;
 
         if strcmp(var_name, 'q_Wm2'), q_now = val; end
         if strcmp(var_name, 'M'), M_now = val; end
@@ -35,6 +36,7 @@ function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_nam
         if strcmp(var_name, 'w_is_um'), w_is_now = val; end
         if strcmp(var_name, 'fill_factor'), fill_factor_now = val; end
         if strcmp(var_name, 't_chip_um'), t_chip_now = val; end
+        if strcmp(var_name, 'I_A'), I_A_now = val; end
 
         theta_deg = 360 / M_now;
         L1_now = calc_L1(base_cases.R_cyl_um, w_is_now, f_now);
@@ -59,7 +61,7 @@ function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_nam
             config.geometry.outerconnect_thickness_ratio = base_cases.oc_t_r;
             config.geometry.fill_factor = fill_factor_now;
 
-            config.operating_conditions.I_current_A = base_cases.I_A;
+            config.operating_conditions.I_current_A = I_A_now;
             config.boundary_conditions.q_flux_W_m2 = q_now;
             config.boundary_conditions.T_water_K = base_cases.T_water;
             config.boundary_conditions.h_conv_W_m2K = 1e6;
@@ -117,7 +119,7 @@ function [results, next_run_idx] = run_single_validity_sweep(sweep_name, var_nam
             model.param.set('LL_theta', sprintf('%g', theta_deg));
             model.param.set('LL_w_is', sprintf('%g', w_is_now));
             model.param.set('q_i', sprintf('%g[W/m^2]', q_now));
-            model.param.set('I_0', sprintf('%g[A]', base_cases.I_A));
+            model.param.set('I_0', sprintf('%g[A]', I_A_now));
             model.param.set('LL_fill_factor', sprintf('%g', fill_factor_now));
             model.param.set('LL_ic_angle_r', sprintf('%g', base_cases.ic_angle_r));
             model.param.set('LL_ic_t_r', sprintf('%g', base_cases.ic_t_r));

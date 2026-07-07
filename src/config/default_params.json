@@ -23,7 +23,8 @@
         "interconnect_angle_ratio": 0.16,
         "outerconnect_ratio": 0.2,
         "outerconnect_thickness_ratio": 1.0,
-        "outerconnect_angle_ratio": 0.16
+        "outerconnect_angle_ratio": 0.16,
+        "fill_facor": 0.9
     },
     "materials": {
         "Bi2Te3": {
@@ -53,7 +54,7 @@
         }
     },
     "boundary_conditions": {
-        "q_flux_W_m2": 500,
+        "q_flux_W_m2": 5000,
         "h_conv_W_m2K": 1.0E+6,
         "T_water_K": 293.15
     },
